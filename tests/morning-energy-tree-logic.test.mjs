@@ -683,6 +683,8 @@ runTest('watering and fertilizer rewards spawn visible tree animations', () => {
 
   api.resetGame();
   assert.equal(api.getRewardEffectCount(), 0);
+  assert.match(script, /class RewardWateringCan/);
+  assert.match(script, /new RewardWateringCan/);
   assert.match(script, /class RewardWaterDrop/);
   assert.match(script, /class RewardFertilizerNutrient/);
   assert.match(script, /class RewardSoilPulse/);

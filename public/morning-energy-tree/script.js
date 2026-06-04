@@ -3831,6 +3831,208 @@ class SoilTransfer {
     }
 }
 
+class RewardWateringCan {
+    constructor(targetX, targetY, side = -1, strength = 1) {
+        const safeSide = side === 1 ? 1 : -1;
+        const safeStrength = Number.isFinite(strength) ? strength : 1;
+        this.type = 'water';
+        this.side = safeSide;
+        this.target = { x: targetX, y: targetY };
+        this.start = {
+            x: targetX + safeSide * Math.min(360, Math.max(220, canvas.width * 0.22)),
+            y: Math.max(82, targetY - Math.min(220, Math.max(145, canvas.height * 0.22)))
+        };
+        this.end = {
+            x: targetX + safeSide * Math.min(190, Math.max(126, canvas.width * 0.1)),
+            y: Math.max(78, targetY - Math.min(172, Math.max(116, canvas.height * 0.18)))
+        };
+        this.t = 0;
+        this.speed = 0.0068 + safeStrength * 0.0012;
+        this.life = 1;
+        this.strength = safeStrength;
+        this.phase = Math.random() * Math.PI * 2;
+        this.x = this.start.x;
+        this.y = this.start.y;
+    }
+
+    getPourAmount() {
+        if (this.t < 0.22 || this.t > 0.82) return 0;
+        const local = (this.t - 0.22) / 0.6;
+        return Math.sin(local * Math.PI);
+    }
+
+    update() {
+        this.t += this.speed;
+        const travel = easeInOutSine(Math.min(1, this.t / 0.28));
+        const hover = Math.sin((STATE.frameNow || Date.now()) / 180 + this.phase) * 3;
+        this.x = this.start.x + (this.end.x - this.start.x) * travel;
+        this.y = this.start.y + (this.end.y - this.start.y) * travel + hover;
+        this.life = this.t > 0.82 ? Math.max(0, 1 - ((this.t - 0.82) / 0.24)) : 1;
+
+        if (this.getPourAmount() > 0.72 && Math.random() < 0.28) {
+            spawnSparkle(
+                this.target.x + ((Math.random() - 0.5) * 30),
+                this.target.y + ((Math.random() - 0.5) * 18),
+                '#c9f8ff'
+            );
+        }
+
+        return this.t < 1.08;
+    }
+
+    drawWaterStream(spout, pourAmount) {
+        if (pourAmount <= 0) return;
+
+        const lineCount = 3;
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        ctx.lineCap = 'round';
+
+        for (let i = 0; i < lineCount; i++) {
+            const offset = (i - 1) * 7;
+            const control = {
+                x: spout.x + (this.target.x - spout.x) * (0.42 + i * 0.04) + this.side * (14 - i * 6),
+                y: spout.y + (this.target.y - spout.y) * 0.44 + 20 + i * 3
+            };
+            ctx.globalAlpha = this.life * pourAmount * (0.38 + i * 0.16);
+            ctx.strokeStyle = i === 1 ? '#c9f8ff' : '#5bd6ff';
+            ctx.lineWidth = i === 1 ? 4.2 : 2.4;
+            ctx.beginPath();
+            ctx.moveTo(spout.x, spout.y + offset * 0.16);
+            ctx.quadraticCurveTo(
+                control.x,
+                control.y + offset,
+                this.target.x + offset * 0.7,
+                this.target.y + Math.abs(offset) * 0.3
+            );
+            ctx.stroke();
+        }
+
+        const dropCount = 12;
+        for (let i = 0; i < dropCount; i++) {
+            const seed = i * 0.137 + this.phase;
+            const travel = (this.t * 2.6 + seed) % 1;
+            const control = {
+                x: spout.x + (this.target.x - spout.x) * 0.48 + this.side * 8,
+                y: spout.y + (this.target.y - spout.y) * 0.44 + 26
+            };
+            const point = pointOnQuadratic(spout, control, this.target, travel);
+            const size = 2.1 + seededUnit(seed + 2) * 2.4;
+            ctx.globalAlpha = this.life * pourAmount * (0.42 + travel * 0.54);
+            ctx.fillStyle = seededUnit(seed + 4) > 0.44 ? '#8deeff' : '#ffffff';
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        ctx.globalAlpha = this.life * pourAmount * 0.26;
+        const splash = ctx.createRadialGradient(this.target.x, this.target.y, 0, this.target.x, this.target.y, 50);
+        splash.addColorStop(0, 'rgba(201, 248, 255, 0.8)');
+        splash.addColorStop(0.48, 'rgba(91, 214, 255, 0.22)');
+        splash.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = splash;
+        ctx.beginPath();
+        ctx.ellipse(this.target.x, this.target.y + 4, 46, 16, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+
+    drawCanBody(pourAmount) {
+        const facing = this.side === -1 ? 1 : -1;
+        const tilt = 0.42 * pourAmount;
+
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.scale(facing, 1);
+        ctx.rotate(tilt);
+        ctx.globalAlpha = this.life;
+
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        ctx.globalAlpha = this.life * 0.24;
+        const glow = ctx.createRadialGradient(0, 0, 0, 0, 0, 84);
+        glow.addColorStop(0, 'rgba(201, 248, 255, 0.72)');
+        glow.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(0, 0, 84, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        ctx.fillStyle = '#46c5e8';
+        ctx.strokeStyle = '#1a6e93';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(-36, -24);
+        ctx.quadraticCurveTo(-44, -10, -38, 20);
+        ctx.quadraticCurveTo(-12, 36, 36, 22);
+        ctx.quadraticCurveTo(44, -8, 30, -26);
+        ctx.quadraticCurveTo(0, -34, -36, -24);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        const bodyShine = ctx.createLinearGradient(-30, -28, 28, 24);
+        bodyShine.addColorStop(0, 'rgba(255,255,255,0.42)');
+        bodyShine.addColorStop(0.5, 'rgba(255,255,255,0.08)');
+        bodyShine.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = bodyShine;
+        ctx.beginPath();
+        ctx.ellipse(-8, -8, 30, 14, 0.08, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = '#1a6e93';
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.arc(-37, 0, 24, Math.PI * 0.68, Math.PI * 1.42);
+        ctx.stroke();
+
+        ctx.fillStyle = '#67dafa';
+        ctx.strokeStyle = '#1a6e93';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(31, -16);
+        ctx.quadraticCurveTo(55, -22, 76, -9);
+        ctx.lineTo(72, 4);
+        ctx.quadraticCurveTo(52, -2, 33, 2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#d8fbff';
+        ctx.strokeStyle = '#1a6e93';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.ellipse(4, -31, 24, 8, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#24506a';
+        ctx.beginPath();
+        ctx.arc(14, -32, 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(2, -33, 2.4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(25, -29, 2.4, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+    }
+
+    draw() {
+        const pourAmount = this.getPourAmount();
+        const spout = {
+            x: this.x - this.side * (72 + pourAmount * 8),
+            y: this.y - 8 + pourAmount * 18
+        };
+
+        this.drawWaterStream(spout, pourAmount);
+        this.drawCanBody(pourAmount);
+    }
+}
+
 class RewardWaterDrop {
     constructor(startX, startY, targetX, targetY, strength = 1) {
         this.type = 'water';
@@ -4081,6 +4283,16 @@ function spawnRewardAnimation(type, triggerCount = 1) {
         const canopySpread = Math.max(92, treeSize * 0.68);
         const targetMinY = anchors.canopy.y + Math.max(12, treeSize * 0.08);
         const targetMaxY = Math.min(canvas.height - 32, anchors.trunkBase.y - 8);
+        const pourTarget = {
+            x: anchors.trunkBase.x,
+            y: anchors.trunkBase.y - Math.min(96, Math.max(34, treeSize * 0.48))
+        };
+        pushLimitedEffect(
+            rewardEffects,
+            new RewardWateringCan(pourTarget.x, pourTarget.y, Math.random() < 0.5 ? -1 : 1, burstScale),
+            effectLimit
+        );
+        spawned += 1;
 
         for (let i = 0; i < spawnCount; i++) {
             const targetX = anchors.canopy.x + ((Math.random() - 0.5) * canopySpread);

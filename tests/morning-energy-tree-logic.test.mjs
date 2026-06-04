@@ -914,7 +914,7 @@ runTest('meadow starts grassy then grows flowers from reading energy without cov
 
   assert.equal(summary.frogCount, 1);
   assert.equal(summary.dragonflyCount, 4);
-  assert.equal(summary.beetleCount, 5);
+  assert.equal(summary.beetleCount, 1);
   assert.equal('beeCount' in summary, false);
   assert.match(script, /protectSapling/);
   assert.match(script, /updateRenderPerformance\(rawDeltaSeconds\)/);
@@ -933,6 +933,7 @@ runTest('meadow starts grassy then grows flowers from reading energy without cov
   assert.match(script, /wingBeat/);
   assert.match(script, /rgba\(220, 252, 255, 0\.3\)/);
   assert.match(script, /class Ladybug/);
+  assert.match(script, /meadowCritters\.push\(new Ladybug\(0\)\)/);
   assert.match(script, /shellColor/);
   assert.match(script, /spotCount/);
   assert.doesNotMatch(script, /class Bee/);

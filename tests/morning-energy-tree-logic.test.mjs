@@ -181,10 +181,13 @@ function loadMorningTree() {
       initEnvironment: typeof initEnvironment === 'function' ? initEnvironment : undefined,
       getMeadowEnvironmentSummary: typeof getMeadowEnvironmentSummary === 'function' ? getMeadowEnvironmentSummary : undefined,
       drawMeadowCritters: typeof drawMeadowCritters === 'function' ? drawMeadowCritters : undefined,
+      drawMeadowPlants: typeof drawMeadowPlants === 'function' ? drawMeadowPlants : undefined,
       feedMeadowGrowth: typeof feedMeadowGrowth === 'function' ? feedMeadowGrowth : undefined,
       spreadMeadowSunlight: typeof spreadMeadowSunlight === 'function' ? spreadMeadowSunlight : undefined,
       Frog: typeof Frog === 'function' ? Frog : undefined,
       Dragonfly: typeof Dragonfly === 'function' ? Dragonfly : undefined,
+      Ladybug: typeof Ladybug === 'function' ? Ladybug : undefined,
+      Bee: typeof Bee === 'function' ? Bee : undefined,
       resetGame: typeof resetGame === 'function' ? resetGame : undefined,
       openForestModal: typeof openForestModal === 'function' ? openForestModal : undefined,
       APP_MODES: typeof APP_MODES !== 'undefined' ? APP_MODES : undefined,
@@ -873,10 +876,13 @@ runTest('meadow starts grassy then grows flowers from reading energy without cov
   assert.equal(typeof api.initEnvironment, 'function');
   assert.equal(typeof api.getMeadowEnvironmentSummary, 'function');
   assert.equal(typeof api.drawMeadowCritters, 'function');
+  assert.equal(typeof api.drawMeadowPlants, 'function');
   assert.equal(typeof api.feedMeadowGrowth, 'function');
   assert.equal(typeof api.spreadMeadowSunlight, 'function');
   assert.equal(typeof api.Frog, 'function');
   assert.equal(typeof api.Dragonfly, 'function');
+  assert.equal(typeof api.Ladybug, 'function');
+  assert.equal(typeof api.Bee, 'function');
 
   api.initEnvironment();
   const summary = api.getMeadowEnvironmentSummary();
@@ -901,24 +907,35 @@ runTest('meadow starts grassy then grows flowers from reading energy without cov
   assert.ok(sunlitSummary.flowerCount >= energizedSummary.flowerCount);
   assert.equal(sunlitSummary.saplingProtectedFlowerCount, 0);
 
-  assert.equal(summary.frogCount, 2);
+  assert.equal(summary.frogCount, 5);
   assert.equal(summary.dragonflyCount, 4);
+  assert.equal(summary.beetleCount, 5);
+  assert.equal(summary.beeCount, 6);
   assert.match(script, /protectSapling/);
   assert.match(script, /drawMeadowPlants\(\);\s+if \(lifecycleStage\.index >= 2/s);
   assert.match(script, /class Frog/);
   assert.match(script, /jumpState/);
   assert.match(script, /startJump\(\)/);
   assert.match(script, /Math\.sin\(Math\.PI \* t\) \* this\.jumpHeight/);
+  assert.match(script, /this\.jumpHeight = 56 \+ Math\.random\(\) \* 48/);
   assert.match(script, /class Dragonfly/);
   assert.match(script, /drawDragonflyWing/);
   assert.match(script, /wingBeat/);
   assert.match(script, /rgba\(220, 252, 255, 0\.3\)/);
+  assert.match(script, /class Ladybug/);
+  assert.match(script, /shellColor/);
+  assert.match(script, /spotCount/);
+  assert.match(script, /class Bee/);
+  assert.match(script, /chooseFlower\(\)/);
+  assert.match(script, /nectarFrames/);
+  assert.match(script, /pollenLoad/);
   assert.match(script, /drawMeadowCritters\(\)/);
 
   const frog = new api.Frog(0);
   frog.jumpCooldown = 0;
   frog.update();
   assert.equal(frog.jumpState, 'jump');
+  assert.ok(frog.jumpHeight >= 56);
   const jumpStartY = frog.y;
   for (let i = 0; i < 12; i += 1) frog.update();
   assert.ok(frog.jumpProgress > 0);
@@ -930,6 +947,24 @@ runTest('meadow starts grassy then grows flowers from reading energy without cov
   dragonfly.update();
   assert.ok(dragonfly.wingBeat > startingWingBeat);
   assert.equal(typeof dragonfly.drawDragonflyWing, 'function');
+
+  const beetle = new api.Ladybug(0);
+  const beetleStartX = beetle.x;
+  beetle.update();
+  assert.notEqual(beetle.x, beetleStartX);
+  assert.ok(beetle.spotCount >= 5);
+
+  const bee = new api.Bee(0);
+  for (let i = 0; i < 80; i += 1) api.drawMeadowPlants();
+  const beeTarget = bee.chooseFlower();
+  assert.ok(beeTarget);
+  assert.equal(bee.mode, 'forage');
+  bee.x = bee.getFlowerPoint(beeTarget).x;
+  bee.y = bee.getFlowerPoint(beeTarget).y - 16;
+  for (let i = 0; i < 4; i += 1) bee.update();
+  assert.equal(bee.mode, 'nectar');
+  assert.ok(bee.nectarFrames > 0);
+  assert.ok(bee.pollenLoad > 0);
 });
 
 runTest('watering and fertilizer rewards spawn visible tree animations', () => {

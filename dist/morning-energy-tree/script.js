@@ -29,20 +29,23 @@ const REPORT_WEEKDAYS = [
     { key: 'sat', offset: 5 },
     { key: 'sun', offset: 6 }
 ];
-const DEFAULT_GROWTH_PER_SECOND = 100 / 90;
-const WATER_STABLE_SECONDS = 12;
-const FERTILIZER_READING_SECONDS = 60;
-const WATER_ENERGY_BONUS = 2;
-const FERTILIZER_ENERGY_BONUS = 5;
+const DEFAULT_GROWTH_PER_SECOND = 100 / 240;
+const WATER_STABLE_SECONDS = 8;
+const FERTILIZER_READING_SECONDS = 24;
+const WATER_REWARD_MAX_COUNT = 4;
+const FERTILIZER_REWARD_MAX_COUNT = 3;
+const WATER_ENERGY_BONUS = 1;
+const FERTILIZER_ENERGY_BONUS = 2;
+const FINAL_TREE_HOLD_MS = 30_000;
 const HEALTHY_READING_DB_MAX = 96;
 const OVER_LOUD_DB = 100;
 const TREE_LIFECYCLE_STAGES = [
     { key: 'seed', minEnergy: 0 },
-    { key: 'sprout', minEnergy: 12 },
-    { key: 'branches', minEnergy: 28 },
-    { key: 'leaves', minEnergy: 48 },
-    { key: 'flowers', minEnergy: 68 },
-    { key: 'fruit', minEnergy: 86 },
+    { key: 'sprout', minEnergy: 14 },
+    { key: 'branches', minEnergy: 32 },
+    { key: 'leaves', minEnergy: 52 },
+    { key: 'flowers', minEnergy: 72 },
+    { key: 'fruit', minEnergy: 88 },
     { key: 'final', minEnergy: 100 }
 ];
 const APP_MODES = {
@@ -69,13 +72,14 @@ const STATE = {
     isSuperMode: false,
     hasManifested: false,
     superModeTimer: null,
+    finalHoldUntil: null,
 
     // Timer System
     sessionDuration: 30, // minutes
     remainingTime: 30 * 60,
     timerInterval: null,
 
-    // Growth calibration: default reading fills the tree in about 70-90 seconds.
+    // Growth calibration: default reading fills the tree in about 3-4 minutes.
     baseGrowthRate: DEFAULT_GROWTH_PER_SECOND,
 
     // Localization context
@@ -409,6 +413,11 @@ function createSessionRewardState() {
     };
 }
 
+function getNextRewardTarget(count, intervalSeconds, maxCount) {
+    const safeCount = Math.max(0, Math.round(Number(count) || 0));
+    return Math.min(maxCount, safeCount + 1) * intervalSeconds;
+}
+
 function updateSessionRewards(rewardState, options = {}) {
     const state = rewardState || createSessionRewardState();
     const deltaSeconds = normalizeDeltaSeconds(options.deltaSeconds);
@@ -431,17 +440,29 @@ function updateSessionRewards(rewardState, options = {}) {
 
     if (isHealthyStableReading) {
         state.stableReadingSeconds = (state.stableReadingSeconds || 0) + deltaSeconds;
-        if ((state.waterCount || 0) < 1 && state.stableReadingSeconds >= WATER_STABLE_SECONDS) {
-            state.waterCount = 1;
-            state.nextWaterAt = Number.POSITIVE_INFINITY;
+        while (
+            (state.waterCount || 0) < WATER_REWARD_MAX_COUNT &&
+            state.stableReadingSeconds >= (state.nextWaterAt || WATER_STABLE_SECONDS)
+        ) {
+            state.waterCount = (state.waterCount || 0) + 1;
+            state.nextWaterAt = state.waterCount >= WATER_REWARD_MAX_COUNT
+                ? Number.POSITIVE_INFINITY
+                : getNextRewardTarget(state.waterCount, WATER_STABLE_SECONDS, WATER_REWARD_MAX_COUNT);
         }
     } else if (!isReadingLoudly) {
         state.stableReadingSeconds = Math.max(0, (state.stableReadingSeconds || 0) - (deltaSeconds * 0.5));
     }
 
-    if (!isOverLoud && isReadingLoudly && (state.fertilizerCount || 0) < 1 && effectiveReadingSeconds >= FERTILIZER_READING_SECONDS) {
-        state.fertilizerCount = 1;
-        state.nextFertilizerAt = Number.POSITIVE_INFINITY;
+    if (!isOverLoud && isReadingLoudly) {
+        while (
+            (state.fertilizerCount || 0) < FERTILIZER_REWARD_MAX_COUNT &&
+            effectiveReadingSeconds >= (state.nextFertilizerAt || FERTILIZER_READING_SECONDS)
+        ) {
+            state.fertilizerCount = (state.fertilizerCount || 0) + 1;
+            state.nextFertilizerAt = state.fertilizerCount >= FERTILIZER_REWARD_MAX_COUNT
+                ? Number.POSITIVE_INFINITY
+                : getNextRewardTarget(state.fertilizerCount, FERTILIZER_READING_SECONDS, FERTILIZER_REWARD_MAX_COUNT);
+        }
     }
 
     return state;
@@ -452,8 +473,8 @@ function getRewardEnergyBonus(previousCounts = {}, nextState = {}) {
     const previousFertilizerCount = Math.max(0, Math.round(Number(previousCounts.fertilizerCount) || 0));
     const nextWaterCount = Math.max(0, Math.round(Number(nextState.waterCount) || 0));
     const nextFertilizerCount = Math.max(0, Math.round(Number(nextState.fertilizerCount) || 0));
-    const waterBonus = nextWaterCount > previousWaterCount ? WATER_ENERGY_BONUS : 0;
-    const fertilizerBonus = nextFertilizerCount > previousFertilizerCount ? FERTILIZER_ENERGY_BONUS : 0;
+    const waterBonus = Math.max(0, nextWaterCount - previousWaterCount) * WATER_ENERGY_BONUS;
+    const fertilizerBonus = Math.max(0, nextFertilizerCount - previousFertilizerCount) * FERTILIZER_ENERGY_BONUS;
 
     return {
         waterBonus,
@@ -489,7 +510,7 @@ function flashRewardEnergyBonus(rewardBonus = {}) {
     // Restart the short flash even if water and fertilizer trigger close together.
     void energyFill.offsetWidth;
     energyFill.classList.add('reward-boost');
-    setTimeout(() => energyFill.classList.remove('reward-boost'), 900);
+    setTimeout(() => energyFill.classList.remove('reward-boost'), 1300);
 
     if (rewardEnergyFloat) {
         const label = getRewardBonusLabel(rewardBonus);
@@ -497,7 +518,7 @@ function flashRewardEnergyBonus(rewardBonus = {}) {
         rewardEnergyFloat.classList.remove('show');
         void rewardEnergyFloat.offsetWidth;
         rewardEnergyFloat.classList.add('show');
-        setTimeout(() => rewardEnergyFloat.classList.remove('show'), 1400);
+        setTimeout(() => rewardEnergyFloat.classList.remove('show'), 2400);
     }
 }
 
@@ -508,8 +529,26 @@ function getRewardProgress(rewardState = createSessionRewardState(), effectiveRe
     const waterCount = Math.max(0, Math.round(Number(state.waterCount) || 0));
     const fertilizerCount = Math.max(0, Math.round(Number(state.fertilizerCount) || 0));
     const overLoudCount = Math.max(0, Math.round(Number(state.overLoudCount) || 0));
-    const waterComplete = waterCount > 0;
-    const fertilizerComplete = fertilizerCount > 0;
+    const waterComplete = waterCount >= WATER_REWARD_MAX_COUNT;
+    const fertilizerComplete = fertilizerCount >= FERTILIZER_REWARD_MAX_COUNT;
+    const waterTargetSeconds = waterComplete
+        ? WATER_REWARD_MAX_COUNT * WATER_STABLE_SECONDS
+        : Math.max(
+            WATER_STABLE_SECONDS,
+            Number.isFinite(state.nextWaterAt)
+                ? state.nextWaterAt
+                : getNextRewardTarget(waterCount, WATER_STABLE_SECONDS, WATER_REWARD_MAX_COUNT)
+        );
+    const fertilizerTargetSeconds = fertilizerComplete
+        ? FERTILIZER_REWARD_MAX_COUNT * FERTILIZER_READING_SECONDS
+        : Math.max(
+            FERTILIZER_READING_SECONDS,
+            Number.isFinite(state.nextFertilizerAt)
+                ? state.nextFertilizerAt
+                : getNextRewardTarget(fertilizerCount, FERTILIZER_READING_SECONDS, FERTILIZER_REWARD_MAX_COUNT)
+        );
+    const waterBaseSeconds = Math.max(0, waterCount * WATER_STABLE_SECONDS);
+    const fertilizerBaseSeconds = Math.max(0, fertilizerCount * FERTILIZER_READING_SECONDS);
 
     return {
         waterCount,
@@ -517,12 +556,16 @@ function getRewardProgress(rewardState = createSessionRewardState(), effectiveRe
         overLoudCount,
         stableReadingSeconds,
         effectiveReadingSeconds: readingSeconds,
-        waterTargetSeconds: WATER_STABLE_SECONDS,
-        fertilizerTargetSeconds: FERTILIZER_READING_SECONDS,
-        waterRemainingSeconds: waterComplete ? 0 : Math.ceil(Math.max(0, WATER_STABLE_SECONDS - stableReadingSeconds)),
-        fertilizerRemainingSeconds: fertilizerComplete ? 0 : Math.ceil(Math.max(0, FERTILIZER_READING_SECONDS - readingSeconds)),
-        waterProgressRatio: waterComplete ? 1 : clamp(stableReadingSeconds / WATER_STABLE_SECONDS, 0, 1),
-        fertilizerProgressRatio: fertilizerComplete ? 1 : clamp(readingSeconds / FERTILIZER_READING_SECONDS, 0, 1),
+        waterTargetSeconds,
+        fertilizerTargetSeconds,
+        waterRemainingSeconds: waterComplete ? 0 : Math.ceil(Math.max(0, waterTargetSeconds - stableReadingSeconds)),
+        fertilizerRemainingSeconds: fertilizerComplete ? 0 : Math.ceil(Math.max(0, fertilizerTargetSeconds - readingSeconds)),
+        waterProgressRatio: waterComplete
+            ? 1
+            : clamp((stableReadingSeconds - waterBaseSeconds) / Math.max(1, waterTargetSeconds - waterBaseSeconds), 0, 1),
+        fertilizerProgressRatio: fertilizerComplete
+            ? 1
+            : clamp((readingSeconds - fertilizerBaseSeconds) / Math.max(1, fertilizerTargetSeconds - fertilizerBaseSeconds), 0, 1),
         waterComplete,
         fertilizerComplete
     };
@@ -545,14 +588,14 @@ function getRewardHelpContent(type) {
     const fallback = {
         water: {
             title: '浇水触发条件',
-            condition: `声音进入稳定朗读区后连续保持 ${WATER_STABLE_SECONDS} 秒。`,
-            effect: `自动浇水一次，并让成长进度 +${WATER_ENERGY_BONUS}%。`,
+            condition: `声音进入稳定朗读区后每连续保持 ${WATER_STABLE_SECONDS} 秒触发一次，最多 ${WATER_REWARD_MAX_COUNT} 次。`,
+            effect: `每次自动浇水，并让成长进度 +${WATER_ENERGY_BONUS}%。`,
             blocker: '如果没有触发，多半是声音断续、不够稳定，或刚才超过 100dB。'
         },
         fertilizer: {
             title: '施肥触发条件',
-            condition: `本场有效朗读累计 ${FERTILIZER_READING_SECONDS} 秒，触发时低于 ${OVER_LOUD_DB}dB。`,
-            effect: `自动施肥一次，并让成长进度 +${FERTILIZER_ENERGY_BONUS}%。`,
+            condition: `本场有效朗读每累计 ${FERTILIZER_READING_SECONDS} 秒触发一次，最多 ${FERTILIZER_REWARD_MAX_COUNT} 次，触发时低于 ${OVER_LOUD_DB}dB。`,
+            effect: `每次自动施肥，并让成长进度 +${FERTILIZER_ENERGY_BONUS}%。`,
             blocker: '如果已经很响但没有触发，请看是否超过 100dB，过响不会奖励。'
         },
         overLoud: {
@@ -636,10 +679,10 @@ function renderRewardPanel() {
 
     const progress = getRewardProgress(STATE.rewardState || createSessionRewardState(), STATE.reportEffectiveReadingSeconds);
     const waterStatus = progress.waterComplete
-        ? (t('morningTree.rewards.done') || '已触发')
+        ? (t('morningTree.rewards.allDone') || '已全部触发')
         : `${formatRewardSeconds(progress.stableReadingSeconds)} / ${formatRewardSeconds(progress.waterTargetSeconds)}`;
     const fertilizerStatus = progress.fertilizerComplete
-        ? (t('morningTree.rewards.done') || '已触发')
+        ? (t('morningTree.rewards.allDone') || '已全部触发')
         : `${formatRewardSeconds(progress.effectiveReadingSeconds)} / ${formatRewardSeconds(progress.fertilizerTargetSeconds)}`;
     const overLoudStatus = progress.overLoudCount
         ? `${progress.overLoudCount}${t('morningTree.rewards.timesSuffix') || '次'}`
@@ -650,21 +693,21 @@ function renderRewardPanel() {
             symbol: '水',
             title: t('morningTree.rewards.water') || '浇水',
             countId: 'reward-water-count',
-            countText: `${progress.waterCount}/1`,
+            countText: `${progress.waterCount}/${WATER_REWARD_MAX_COUNT}`,
             status: waterStatus,
             progressRatio: progress.waterProgressRatio,
             complete: progress.waterComplete,
-            bonusText: `${t('morningTree.rewards.bonusLabel') || '奖励'} +${WATER_ENERGY_BONUS}%`
+            bonusText: `${t('morningTree.rewards.bonusLabel') || '奖励'} +${WATER_ENERGY_BONUS}%/${t('morningTree.rewards.eachSuffix') || '次'}`
         }),
         renderRewardCard('fertilizer', {
             symbol: '肥',
             title: t('morningTree.rewards.fertilizer') || '施肥',
             countId: 'reward-fertilizer-count',
-            countText: `${progress.fertilizerCount}/1`,
+            countText: `${progress.fertilizerCount}/${FERTILIZER_REWARD_MAX_COUNT}`,
             status: fertilizerStatus,
             progressRatio: progress.fertilizerProgressRatio,
             complete: progress.fertilizerComplete,
-            bonusText: `${t('morningTree.rewards.bonusLabel') || '奖励'} +${FERTILIZER_ENERGY_BONUS}%`
+            bonusText: `${t('morningTree.rewards.bonusLabel') || '奖励'} +${FERTILIZER_ENERGY_BONUS}%/${t('morningTree.rewards.eachSuffix') || '次'}`
         }),
         renderRewardCard('overLoud', {
             symbol: '!',
@@ -681,10 +724,16 @@ function announceRewardChanges(previousCounts, nextState) {
     if (!previousCounts || !nextState || !STATE.isListening) return;
 
     if ((nextState.waterCount || 0) > (previousCounts.waterCount || 0)) {
-        showToast(t('morningTree.rewards.waterToast') || '浇水完成：稳定朗读满 12 秒');
+        const template = t('morningTree.rewards.waterToast') || '第 {count} 次浇水：稳定朗读奖励 +{bonus}%';
+        showToast(template
+            .replace('{count}', String(nextState.waterCount || 0))
+            .replace('{bonus}', String(WATER_ENERGY_BONUS)));
     }
     if ((nextState.fertilizerCount || 0) > (previousCounts.fertilizerCount || 0)) {
-        showToast(t('morningTree.rewards.fertilizerToast') || '施肥完成：有效朗读满 60 秒');
+        const template = t('morningTree.rewards.fertilizerToast') || '第 {count} 次施肥：有效朗读奖励 +{bonus}%';
+        showToast(template
+            .replace('{count}', String(nextState.fertilizerCount || 0))
+            .replace('{bonus}', String(FERTILIZER_ENERGY_BONUS)));
     }
 }
 
@@ -1574,6 +1623,7 @@ function startReportSession(options = {}) {
     STATE.reportEffectiveReadingSeconds = 0;
     STATE.reportPeakEnergy = Math.round(clampEnergy(STATE.energy));
     STATE.rewardState = createSessionRewardState();
+    STATE.finalHoldUntil = null;
     STATE.competitionRoundActive = Boolean(options.competitionRound || STATE.activeMode === APP_MODES.COMPETITION);
     if (STATE.competitionRoundActive) {
         const session = getOrCreateCompetitionSession();
@@ -1651,6 +1701,7 @@ function finalizeReportSession() {
     STATE.manifestedAt = null;
     STATE.manifestedElapsedSeconds = null;
     STATE.rewardState = createSessionRewardState();
+    STATE.finalHoldUntil = null;
     if (wasCompetitionRound) {
         STATE.competitionLastResult = competition;
     }
@@ -3117,6 +3168,7 @@ function resetGame() {
     STATE.isSuperMode = false;
     STATE.hasManifested = false;
     STATE.treeColor = '#4caf50';
+    STATE.finalHoldUntil = null;
     if (STATE.superModeTimer) {
         clearTimeout(STATE.superModeTimer);
         STATE.superModeTimer = null;
@@ -3225,11 +3277,19 @@ function updateState(deltaSeconds = FRAME_DELTA_FALLBACK_SECONDS) {
         if (dbStatus) { dbStatus.textContent = '等待中'; dbStatus.style.color = 'rgba(255,255,255,0.5)'; }
     }
 
-    STATE.energy = getNextEnergy(STATE.energy, STATE.currentDB, STATE.baseGrowthRate, {
-        sensitivity: STATE.sensitivity,
-        deltaSeconds: frameSeconds,
-        readingHoldSeconds: STATE.readingHoldSeconds
-    });
+    const finalHoldActive = STATE.hasManifested &&
+        Number.isFinite(STATE.finalHoldUntil) &&
+        Date.now() < STATE.finalHoldUntil;
+
+    if (finalHoldActive) {
+        STATE.energy = 100;
+    } else {
+        STATE.energy = getNextEnergy(STATE.energy, STATE.currentDB, STATE.baseGrowthRate, {
+            sensitivity: STATE.sensitivity,
+            deltaSeconds: frameSeconds,
+            readingHoldSeconds: STATE.readingHoldSeconds
+        });
+    }
     if (rewardEnergyBonus.totalBonus > 0) {
         STATE.energy = applyRewardEnergyBonus(STATE.energy, rewardEnergyBonus);
         flashRewardEnergyBonus(rewardEnergyBonus);
@@ -3251,6 +3311,7 @@ function triggerSuperMode() {
     }
     STATE.isSuperMode = true;
     STATE.hasManifested = true;
+    STATE.finalHoldUntil = Date.now() + FINAL_TREE_HOLD_MS;
     if (STATE.sessionStartedAt && !STATE.manifestedAt) {
         const now = new Date();
         const startedAt = new Date(STATE.sessionStartedAt).getTime();
@@ -3267,7 +3328,7 @@ function triggerSuperMode() {
         STATE.isSuperMode = false;
         STATE.treeColor = '#4caf50';
         STATE.superModeTimer = null;
-    }, 5000);
+    }, FINAL_TREE_HOLD_MS);
 }
 
 // FIX: Renamed to shakeCanvas and targeting canvas only
@@ -4164,7 +4225,7 @@ function drawEnhancedTree(startX, startY, len, angle, branchWidth, depth, render
             const leafPulse = renderMode.lowPower ? 1 : 1.5;
             const size = baseSize + Math.sin(frameTime + depth) * leafPulse;
 
-            const colorSet = STATE.isSuperMode ? GOLDEN_COLORS : FOLIAGE_COLORS;
+            const colorSet = (STATE.isSuperMode || lifecycleStage.key === 'final') ? GOLDEN_COLORS : FOLIAGE_COLORS;
             const colorIndex = (depth * 3) % colorSet.length;
             const color = colorSet[colorIndex];
 

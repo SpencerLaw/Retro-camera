@@ -2712,7 +2712,7 @@ canvas {
 }
 
 #energy-fill.reward-boost {
-    animation: rewardEnergyBoost 0.85s ease-out;
+    animation: rewardEnergyBoost 1.2s ease-out;
 }
 
 .reward-energy-float {
@@ -2720,14 +2720,14 @@ canvas {
     top: 64px;
     right: 4px;
     z-index: 2;
-    min-height: 26px;
-    padding: 5px 10px;
+    min-height: 34px;
+    padding: 7px 14px;
     border-radius: 999px;
     border: 1px solid rgba(255, 224, 130, 0.42);
     background:
         linear-gradient(135deg, rgba(255, 247, 201, 0.96), rgba(125, 249, 255, 0.92));
     color: #18515f;
-    font-size: 0.72rem;
+    font-size: 0.86rem;
     font-weight: 900;
     opacity: 0;
     transform: translateY(7px) scale(0.96);
@@ -2737,7 +2737,7 @@ canvas {
 }
 
 .reward-energy-float.show {
-    animation: rewardFloatPop 1.35s ease-out forwards;
+    animation: rewardFloatPop 2.25s ease-out forwards;
 }
 
 @keyframes rewardFloatPop {
@@ -2751,14 +2751,14 @@ canvas {
         transform: translateY(-2px) scale(1);
     }
 
-    78% {
+    82% {
         opacity: 1;
-        transform: translateY(-8px) scale(1);
+        transform: translateY(-10px) scale(1);
     }
 
     100% {
         opacity: 0;
-        transform: translateY(-18px) scale(0.98);
+        transform: translateY(-22px) scale(0.98);
     }
 }
 

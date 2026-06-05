@@ -13,20 +13,6 @@ import { TugOfWarApp } from './components/TugOfWarApp';
 import JuzimiApp from './components/JuzimiApp';
 import PromptGalleryApp from './components/PromptGalleryApp';
 import CourseSchedulerApp from './components/course-scheduler/CourseSchedulerApp';
-import { VanglamHome } from './components/vanglam/VanglamHome';
-import { VanglamBackendPlanPage } from './components/vanglam/VanglamBackendPlan';
-import { VanglamColorDeck } from './components/vanglam/VanglamColorDeck';
-import {
-  VanglamApplicationsPage,
-  VanglamArtcardLabPage,
-  VanglamAtelierPage,
-  VanglamCollectionsPage,
-  VanglamColorSystemPage,
-  VanglamLibraryToolsPage,
-  VanglamRequestSampleKitPage,
-  VanglamSurfacesPage,
-} from './components/vanglam/VanglamPages';
-import { VanglamLanguageProvider } from './components/vanglam/VanglamLanguage';
 
 const TslSkinApp = React.lazy(() => import('./components/TslSkinApp'));
 
@@ -40,10 +26,6 @@ const TslSkinRoute: React.FC = () => (
   >
     <TslSkinApp />
   </React.Suspense>
-);
-
-const withVanglamLanguage = (element: React.ReactElement) => (
-  <VanglamLanguageProvider>{element}</VanglamLanguageProvider>
 );
 
 const App: React.FC = () => {
@@ -65,17 +47,6 @@ const App: React.FC = () => {
           <Route path="/prompts" element={<PromptGalleryApp />} />
           <Route path="/tsl-skin" element={<TslSkinRoute />} />
           <Route path="/course-scheduler" element={<CourseSchedulerApp />} />
-          <Route path="/vanglam" element={withVanglamLanguage(<VanglamHome />)} />
-          <Route path="/vanglam/backend-plan" element={withVanglamLanguage(<VanglamBackendPlanPage />)} />
-          <Route path="/vanglam/color-system" element={withVanglamLanguage(<VanglamColorSystemPage />)} />
-          <Route path="/vanglam/collections" element={withVanglamLanguage(<VanglamCollectionsPage />)} />
-          <Route path="/vanglam/surfaces" element={withVanglamLanguage(<VanglamSurfacesPage />)} />
-          <Route path="/vanglam/applications" element={withVanglamLanguage(<VanglamApplicationsPage />)} />
-          <Route path="/vanglam/artcard-lab" element={withVanglamLanguage(<VanglamArtcardLabPage />)} />
-          <Route path="/vanglam/atelier" element={withVanglamLanguage(<VanglamAtelierPage />)} />
-          <Route path="/vanglam/library-tools" element={withVanglamLanguage(<VanglamLibraryToolsPage />)} />
-          <Route path="/vanglam/request-sample-kit" element={withVanglamLanguage(<VanglamRequestSampleKitPage />)} />
-          <Route path="/vanglam-42" element={<VanglamColorDeck />} />
 
         </Routes>
       </BrowserRouter>

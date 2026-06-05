@@ -757,40 +757,6 @@ export const HomePage: React.FC = () => {
             </div>
           </Link>
 
-          {/* QiLi Paper | VANGLAM Card */}
-          <Link
-            to="/vanglam"
-            className="group relative bg-gradient-to-br from-[#0F241F] via-[#1C3D35] to-[#0A1A14] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(15,36,31,0.4)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(15,36,31,0.6)] hover:rotate-2 block overflow-hidden"
-            style={{ transformStyle: 'preserve-3d' }}
-          >
-            <div className="absolute -top-4 -right-4 text-3xl animate-bounce opacity-0 group-hover:opacity-100 transition-opacity" style={{ animationDuration: '1.5s' }}>🍃</div>
-            <div className="absolute -inset-3 bg-gradient-to-r from-[#B0883E] to-[#E5DFD5] rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
-
-            <div className="relative z-10 flex justify-center mb-6">
-              <div
-                className="w-36 h-36 bg-[#E5DFD5] rounded-full flex items-center justify-center shadow-[0_12px_24px_rgba(15,36,31,0.3)] transform group-hover:rotate-12 group-hover:scale-125 transition-all duration-500 border-[6px] border-white"
-                style={{ transformStyle: 'preserve-3d' }}
-              >
-                <Sparkles size={72} className="text-[#0F241F] drop-shadow-lg" />
-              </div>
-            </div>
-
-            <div className="relative z-10 text-center text-white">
-              <h2 className="font-bold text-4xl text-[#E5DFD5] mb-3 drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]">齐力纸业官网</h2>
-              <p className="text-base text-gray-300 mb-4 font-semibold drop-shadow-[0_1px_4px_rgba(0,0,0,0.4)]">
-                VANGLAM 梵澜
-              </p>
-              <p className="text-sm text-gray-400 leading-relaxed font-medium drop-shadow-[0_1px_4px_rgba(0,0,0,0.3)]">
-                特种纸高端包装与色彩表面工艺系统官网，包含 42 色族分类与精密细节网格。
-              </p>
-              <div className="mt-6 pt-6 border-t-[3px] border-white/10">
-                <div className="inline-block px-6 py-3 bg-[#E5DFD5] text-[#0F241F] rounded-full text-base font-bold transform group-hover:scale-125 transition-transform duration-300 shadow-md border-[3px] border-white hover:bg-white">
-                  Enter → 🎨
-                </div>
-              </div>
-            </div>
-          </Link>
-
         </div>
 
         {/* Footer Note - Kawaii Style */}

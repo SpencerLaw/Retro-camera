@@ -56,6 +56,14 @@ runTest('backend plan page contains the confirmed customer-facing scope', () => 
     '下载资料前填写联系方式',
     '按颜色、工艺、克重、用途等多个条件筛选产品',
     '根据场景自动推荐纸张、自动生成报价等功能',
+    '四、开发日志与备注',
+    'README 风格记录区',
+    '项目成交与开发准备',
+    '部署目标为客户阿里云 VPS',
+    '部署前检查清单',
+    '正式改动前备份网站文件、数据库和关键配置',
+    '密码和服务器访问资料只用于部署，不写入页面、不写入代码、不提交 Git',
+    '开发日志只记录阶段进度、开发事项、部署备注和交付状态',
   ]) {
     assert.match(planSource, new RegExp(text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
@@ -77,6 +85,10 @@ runTest('backend plan uses a development document layout, not a decorative flow 
     '.vanglam-doc-mindmap',
     '.vanglam-doc-mindmap-grid',
     '.vanglam-doc-workload-grid',
+    '.vanglam-readme-panel',
+    '.vanglam-readme-timeline',
+    '.vanglam-readme-checklist',
+    '.vanglam-readme-note-grid',
     '.vanglam-doc-table',
   ]) {
     assert.match(cssSource, new RegExp(className.replace('.', '\\.')));
@@ -95,4 +107,8 @@ runTest('backend plan avoids internal uncertainty language', () => {
 
 runTest('backend plan avoids vague customer-facing scope words', () => {
   assert.doesNotMatch(planSource, /复杂业务系统|复杂筛选推荐|复杂客户关系系统|复杂销售分配流程|资料下载留资|资料留资|复杂筛选、推荐、报价流程/);
+});
+
+runTest('backend plan does not expose customer credentials in the page source', () => {
+  assert.doesNotMatch(planSource, /super@admin\.com|12345678abc|40845193|ed0533d8459c|47\.254\.37\.236/);
 });

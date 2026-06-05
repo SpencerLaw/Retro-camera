@@ -247,6 +247,77 @@ const acceptanceRows = [
   '操作日志是否能记录关键操作。',
 ];
 
+const developmentLogRows = [
+  {
+    date: '2026-06-05',
+    status: '已确认',
+    title: '项目成交与开发准备',
+    items: [
+      '客户已确认第一期后台开发方向，项目进入正式开发准备阶段。',
+      '后续部署目标为客户阿里云 VPS，正式部署前先检查服务器环境。',
+      '开发记录以 Git 提交、页面开发日志和阶段备注三种方式保留。',
+    ],
+  },
+  {
+    date: '第 1 周',
+    status: '准备中',
+    title: '服务器与现有项目检查',
+    items: [
+      '检查服务器系统、宝塔面板、Nginx、数据库、Node 或其他运行环境。',
+      '确认当前网站目录、后台入口、数据库连接方式和部署方式。',
+      '正式改动前备份网站文件、数据库和关键配置，保留可回退版本。',
+    ],
+  },
+  {
+    date: '第 1-2 周',
+    status: '待开发',
+    title: '后台基础框架与权限',
+    items: [
+      '搭建后台基础结构、登录权限、管理员角色、菜单入口和操作日志。',
+      '先完成媒体资源、页面模块、按钮链接等公共基础能力。',
+      '所有密码和服务器访问资料只用于部署，不写入页面、不写入代码、不提交 Git。',
+    ],
+  },
+  {
+    date: '第 2-6 周',
+    status: '待开发',
+    title: '七大主题内容管理',
+    items: [
+      '按七大主题逐步建立内容录入、图片上传、视频上传、资料上传和排序开关。',
+      '把官网页面从静态展示改为读取后台数据，客户后续可自行维护内容。',
+      '同步预留小程序读取字段，避免后续小程序再单独建设一套后台。',
+    ],
+  },
+  {
+    date: '第 6-8 周',
+    status: '待验收',
+    title: '联调、部署与交付',
+    items: [
+      '完成前台读取、后台保存、文件上传、样品申请和客户线索联调。',
+      '部署到客户 VPS 后检查域名、SSL、后台登录、图片视频显示和表单提交。',
+      '交付后台使用说明，客户开始录入正式文字、图片、视频和资料文件。',
+    ],
+  },
+];
+
+const deploymentChecklist = [
+  ['环境检查', '确认服务器系统、宝塔面板、Nginx、数据库、运行环境和端口开放情况。'],
+  ['代码准备', '确认当前项目代码、构建方式、环境变量、接口地址和部署目录。'],
+  ['数据备份', '部署前备份网站文件、数据库、Nginx 配置和 SSL 证书。'],
+  ['灰度验证', '先在测试目录或临时端口验证，再切换到正式域名。'],
+  ['上线检查', '检查首页、七大主题、后台登录、上传入口、表单提交和资料下载。'],
+  ['交付记录', '记录上线时间、部署版本、备份位置和后续维护方式。'],
+];
+
+const projectNotes = [
+  ['服务器备注', '本项目后续部署到客户阿里云 VPS。正式部署前先做环境检查、文件备份、数据库备份和回滚方案。'],
+  ['账号安全', '客户提供的后台、宝塔、SSH 等账号密码只用于登录和部署，不展示在页面里，不写入代码，不提交到 Git。'],
+  ['客户配合', '客户负责正式文字、图片、视频、PDF、样册和资料文件的整理、上传、录入和维护。'],
+  ['开发记录', '开发日志只记录阶段进度、开发事项、部署备注和交付状态，不记录任何敏感密码。'],
+  ['上线方式', '正式上线前先完成备份和测试，确认无误后再切换到正式域名。'],
+  ['后续维护', '交付后的维护按“按月维护”或“按功能维护”执行，新增功能另行记录需求和报价。'],
+];
+
 const renderList = (items: string[]) => (
   <ul className="vanglam-doc-list">
     {items.map((item) => (
@@ -293,6 +364,64 @@ const renderMindMap = () => (
   </section>
 );
 
+const renderDevelopmentLog = () => (
+  <section id="dev-log" className="vanglam-doc-section">
+    <h2>四、开发日志与备注</h2>
+    <p>
+      这里作为 README 风格记录区，用来记录项目进入开发后的阶段进度、部署备注、服务器注意事项和客户配合事项。客户可以直接看这一块了解项目当前做到哪一步。
+    </p>
+    <div className="vanglam-readme-panel" aria-label="开发日志与项目备注">
+      <div className="vanglam-readme-header">
+        <div>
+          <span>README / DEVELOPMENT LOG</span>
+          <strong>齐力纸业梵澜后台开发记录</strong>
+        </div>
+        <div className="vanglam-readme-badges" aria-label="项目状态">
+          <span>状态：开发准备中</span>
+          <span>部署：客户 VPS</span>
+          <span>记录：Git + 页面日志</span>
+        </div>
+      </div>
+
+      <div className="vanglam-readme-timeline">
+        {developmentLogRows.map((log) => (
+          <article key={log.title}>
+            <div>
+              <span>{log.date}</span>
+              <strong>{log.status}</strong>
+            </div>
+            <section>
+              <h3>{log.title}</h3>
+              {renderList(log.items)}
+            </section>
+          </article>
+        ))}
+      </div>
+
+      <h3>部署前检查清单</h3>
+      <div className="vanglam-readme-checklist">
+        {deploymentChecklist.map(([title, detail]) => (
+          <div key={title}>
+            <span>[ ]</span>
+            <strong>{title}</strong>
+            <p>{detail}</p>
+          </div>
+        ))}
+      </div>
+
+      <h3>项目备注</h3>
+      <div className="vanglam-readme-note-grid">
+        {projectNotes.map(([title, detail]) => (
+          <article key={title}>
+            <strong>{title}</strong>
+            <p>{detail}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
 export const VanglamBackendPlanPage: React.FC = () => {
   return (
     <div className="vanglam-v1-page vanglam-backend-doc-page">
@@ -319,12 +448,13 @@ export const VanglamBackendPlanPage: React.FC = () => {
             <a href="#goal">一、建设目标</a>
             <a href="#scope">二、开发边界</a>
             <a href="#workload">三、工作量拆解</a>
-            <a href="#topics">四、七大主题</a>
-            <a href="#database">五、数据库</a>
-            <a href="#mini-program">六、小程序关联</a>
-            <a href="#price">七、费用周期</a>
-            <a href="#maintenance">八、后续维护</a>
-            <a href="#acceptance">九、验收标准</a>
+            <a href="#dev-log">四、开发日志</a>
+            <a href="#topics">五、七大主题</a>
+            <a href="#database">六、数据库</a>
+            <a href="#mini-program">七、小程序关联</a>
+            <a href="#price">八、费用周期</a>
+            <a href="#maintenance">九、后续维护</a>
+            <a href="#acceptance">十、验收标准</a>
           </aside>
 
           <div className="vanglam-doc-content">
@@ -411,8 +541,10 @@ export const VanglamBackendPlanPage: React.FC = () => {
               </table>
             </section>
 
+            {renderDevelopmentLog()}
+
             <section id="topics" className="vanglam-doc-section">
-              <h2>四、七大主题与后台模块</h2>
+              <h2>五、七大主题与后台模块</h2>
               <table className="vanglam-doc-table">
                 <thead>
                   <tr>
@@ -436,7 +568,7 @@ export const VanglamBackendPlanPage: React.FC = () => {
             </section>
 
             <section id="database" className="vanglam-doc-section">
-              <h2>五、数据库建设清单</h2>
+              <h2>六、数据库建设清单</h2>
               <p>第一期按一个主业务数据库建设，核心结构按三十二张核心表规划，官网和后续小程序共用同一套内容数据。</p>
               <table className="vanglam-doc-table">
                 <thead>
@@ -459,7 +591,7 @@ export const VanglamBackendPlanPage: React.FC = () => {
             </section>
 
             <section id="mini-program" className="vanglam-doc-section">
-              <h2>六、小程序关联方式</h2>
+              <h2>七、小程序关联方式</h2>
               <p>
                 后续小程序直接复用官网后台、服务端、数据库、媒体资源库和客户线索库，不再单独开发一套小程序后台。
               </p>
@@ -472,7 +604,7 @@ export const VanglamBackendPlanPage: React.FC = () => {
             </section>
 
             <section id="price" className="vanglam-doc-section">
-              <h2>七、费用与开发周期</h2>
+              <h2>八、费用与开发周期</h2>
               <table className="vanglam-doc-table">
                 <tbody>
                   <tr>
@@ -500,7 +632,7 @@ export const VanglamBackendPlanPage: React.FC = () => {
             </section>
 
             <section id="maintenance" className="vanglam-doc-section">
-              <h2>八、后续维护方式</h2>
+              <h2>九、后续维护方式</h2>
               <p>后续维护费用不包含在本期开发费用内。项目交付后维护分为按月维护和按功能维护两种方式。</p>
               <table className="vanglam-doc-table">
                 <thead>
@@ -523,7 +655,7 @@ export const VanglamBackendPlanPage: React.FC = () => {
             </section>
 
             <section id="acceptance" className="vanglam-doc-section">
-              <h2>九、验收标准</h2>
+              <h2>十、验收标准</h2>
               <p>
                 技术验收看服务端框架、后台入口、上传能力、保存能力和前台读取是否完成，不以客户是否已经完成正式内容整理、上传和录入作为验收前提。
               </p>

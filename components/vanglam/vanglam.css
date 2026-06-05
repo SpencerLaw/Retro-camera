@@ -1475,6 +1475,147 @@
   background: #fff;
 }
 
+.vanglam-readme-panel {
+  border: 1px solid rgba(40, 40, 40, 0.14);
+  background: #fff;
+}
+
+.vanglam-readme-header {
+  padding: 20px 22px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: start;
+  border-bottom: 1px solid rgba(40, 40, 40, 0.14);
+  background: #f6f8fa;
+}
+
+.vanglam-readme-header span,
+.vanglam-readme-timeline > article > div span {
+  color: #6b6258;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.vanglam-readme-header strong {
+  display: block;
+  margin-top: 7px;
+  color: var(--vanglam-ink);
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.vanglam-readme-badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.vanglam-readme-badges span {
+  min-height: 28px;
+  padding: 6px 10px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(23, 63, 53, 0.16);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--vanglam-green);
+}
+
+.vanglam-readme-timeline {
+  display: grid;
+}
+
+.vanglam-readme-timeline > article {
+  display: grid;
+  grid-template-columns: 130px minmax(0, 1fr);
+  border-bottom: 1px solid rgba(40, 40, 40, 0.12);
+}
+
+.vanglam-readme-timeline > article > div {
+  padding: 20px;
+  display: grid;
+  align-content: start;
+  gap: 7px;
+  border-right: 1px solid rgba(40, 40, 40, 0.12);
+  background: #fbfaf7;
+}
+
+.vanglam-readme-timeline > article > div strong {
+  color: var(--vanglam-green);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.vanglam-readme-timeline > article > section {
+  padding: 20px 22px;
+}
+
+.vanglam-readme-timeline h3 {
+  margin-bottom: 12px;
+}
+
+.vanglam-readme-panel > h3 {
+  margin: 0;
+  padding: 20px 22px 0;
+}
+
+.vanglam-readme-checklist {
+  padding: 18px 22px 24px;
+  display: grid;
+  gap: 1px;
+}
+
+.vanglam-readme-checklist div {
+  min-width: 0;
+  padding: 14px 16px;
+  display: grid;
+  grid-template-columns: 34px minmax(120px, 160px) minmax(0, 1fr);
+  gap: 10px;
+  border: 1px solid rgba(40, 40, 40, 0.12);
+  background: #fffdf8;
+}
+
+.vanglam-readme-checklist span {
+  color: var(--vanglam-green);
+  font-family: Consolas, "SFMono-Regular", monospace;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.vanglam-readme-checklist strong,
+.vanglam-readme-note-grid strong {
+  color: var(--vanglam-ink);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.vanglam-readme-checklist p,
+.vanglam-readme-note-grid p {
+  max-width: none;
+  margin: 0;
+  font-size: 13px;
+}
+
+.vanglam-readme-note-grid {
+  padding: 18px 22px 24px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+}
+
+.vanglam-readme-note-grid article {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid rgba(40, 40, 40, 0.12);
+  background: #fbfaf7;
+}
+
+.vanglam-readme-note-grid p {
+  margin-top: 8px;
+}
+
 .vanglam-doc-list {
   margin: 0;
   padding-left: 18px;
@@ -1715,8 +1856,14 @@
 
   .vanglam-doc-scope-grid,
   .vanglam-doc-workload-grid,
+  .vanglam-readme-header,
+  .vanglam-readme-note-grid,
   .vanglam-doc-mindmap-grid {
     grid-template-columns: 1fr;
+  }
+
+  .vanglam-readme-badges {
+    justify-content: flex-start;
   }
 
   .vanglam-feature-grid article {
@@ -1909,10 +2056,28 @@
     font-size: 12px;
   }
 
+  .vanglam-readme-timeline > article,
+  .vanglam-readme-checklist div {
+    grid-template-columns: 1fr;
+  }
+
+  .vanglam-readme-timeline > article > div {
+    border-right: 0;
+    border-bottom: 1px solid rgba(40, 40, 40, 0.12);
+  }
+
   .vanglam-doc-mindmap-root,
+  .vanglam-readme-header,
+  .vanglam-readme-timeline > article > div,
+  .vanglam-readme-timeline > article > section,
   .vanglam-doc-mindmap-grid article,
   .vanglam-doc-mindmap-footer {
     padding: 16px;
+  }
+
+  .vanglam-readme-checklist,
+  .vanglam-readme-note-grid {
+    padding: 14px 16px 18px;
   }
 
   .vanglam-doc-table th,

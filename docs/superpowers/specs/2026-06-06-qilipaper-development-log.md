@@ -151,6 +151,28 @@ https://qilipaper.com/vanglam/request-sample-kit
 客户今天要求的目标已完成
 ```
 
+### 文档归档
+
+今日形成三份运维与开发记录：
+
+1. 当前 VPS 状态与部署说明：
+
+```text
+docs/superpowers/specs/2026-06-06-qilipaper-vps-deployment-notes.md
+```
+
+2. VPS 操作审计记录：
+
+```text
+docs/superpowers/specs/2026-06-06-qilipaper-vps-operation-audit.md
+```
+
+3. 每日开发日志：
+
+```text
+docs/superpowers/specs/2026-06-06-qilipaper-development-log.md
+```
+
 ### 备注
 
 当前客户要求是：新网页前端可以在当前域名跑起来即可。旧网站源码备份一份即可，不要求旧后台继续在线运行。

@@ -620,6 +620,303 @@ https://qilipaper.com/vanglam/color-system 返回 200
 
 ---
 
+### 18. 清理 VPS 垃圾文件和无效数据
+
+**目的**：按照项目负责人要求，让 VPS 保持简洁，只保留旧网站数据、新网站数据、备份和必要运行环境。
+
+**处理原则**：
+
+1. 保留旧网站源码目录。
+2. 保留旧网站上传数据。
+3. 保留旧网站源码备份。
+4. 保留新前端静态站目录。
+5. 保留 Nginx、MySQL、SSL 和站点配置。
+6. 删除或移动可再生、无效、临时、空白和缓存类文件。
+
+**清理前主要占用**：
+
+```text
+/www/wwwroot/paper-main/node_modules 约 1.1G
+/www/wwwroot/paper-main/.next 约 610M
+/root/.cache 约 47M
+/www/wwwlogs/paper_main.log 约 167M
+/www/wwwroot/paper-main.zip 约 89M
+```
+
+**第一次清理命令状态**：
+
+```text
+/www/backup/qilipaper/cleanup-20260606-221920.log
+```
+
+第一次清理在停止宝塔面板进程时中断。原因是停止命令使用了进程匹配，SSH 执行脚本本身也被匹配到，导致当前 SSH 命令提前结束。
+
+第一次清理已完成的动作：
+
+1. 检查磁盘状态。
+2. 检查旧站目录大小。
+3. 停止空 PM2 守护进程。
+4. 尝试停止 FTP。
+5. 尝试停止宝塔面板。
+
+第一次清理未执行的动作：
+
+1. 旧 `node_modules` 删除。
+2. 旧 `.next` 删除。
+3. 缓存清理。
+4. 日志轮转。
+
+**第二次继续清理记录**：
+
+```text
+/www/backup/qilipaper/cleanup-continue-20260606-222026.log
+```
+
+第二次清理执行动作：
+
+```bash
+rm -rf /www/wwwroot/paper-main/node_modules
+rm -rf /www/wwwroot/paper-main/.next
+rm -rf /root/.cache/*
+rm -rf /root/.npm/_cacache
+rm -rf /www/.Recycle_bin/*
+gzip -c /www/wwwlogs/paper_main.log > /www/backup/qilipaper/paper_main.log.20260606-222026.gz
+: > /www/wwwlogs/paper_main.log
+rm -f /www/wwwroot/paper-main/5.sh
+```
+
+**删除说明**：
+
+| 路径 | 处理 | 原因 |
+| --- | --- | --- |
+| `/www/wwwroot/paper-main/node_modules` | 删除 | 可通过 `npm install` 重新生成 |
+| `/www/wwwroot/paper-main/.next` | 删除 | 可通过 `npm run build` 重新生成 |
+| `/root/.cache/*` | 删除 | root 用户缓存 |
+| `/root/.npm/_cacache` | 删除 | npm 下载缓存 |
+| `/www/.Recycle_bin/*` | 清空 | 宝塔回收站内容 |
+| `/www/wwwlogs/paper_main.log` | 压缩备份后截断 | 旧访问日志过大 |
+| `/www/wwwroot/paper-main/5.sh` | 删除 | 0 字节空文件 |
+
+**日志备份**：
+
+```text
+/www/backup/qilipaper/paper_main.log.20260606-222026.gz
+```
+
+**清理结果**：
+
+```text
+根磁盘已用：18G -> 16G
+/www/wwwroot/paper-main：约 1.8G -> 106M
+/www/wwwroot：约 1.9G -> 195M
+```
+
+---
+
+### 19. 停用不需要的服务并收紧本机监听
+
+**目的**：减少海外 VPS 被扫描和攻击的暴露面。
+
+**处理内容**：
+
+1. 停止并禁用宝塔面板服务。
+2. 停止并禁用 FTP 服务。
+3. 将 MySQL 从公网监听改为仅本机监听。
+4. 保留 Nginx 80 / 443。
+5. 保留 SSH 22，后续建议在阿里云安全组限制来源 IP。
+
+**命令日志**：
+
+```text
+/www/backup/qilipaper/security-tighten-20260606-222158.log
+```
+
+**MySQL 配置备份**：
+
+```text
+/www/backup/qilipaper/my.cnf.before-local-bind-20260606-222158.bak
+```
+
+**MySQL 修改内容**：
+
+```text
+bind-address = 127.0.0.1
+```
+
+**服务处理结果**：
+
+| 服务 / 端口 | 处理前 | 处理后 |
+| --- | --- | --- |
+| 宝塔面板 8888 | 公网监听 | 已停止，已禁用自启 |
+| FTP 21 | 曾运行 | 已停止，已禁用自启 |
+| MySQL 3306 | 公网监听 | 仅监听 `127.0.0.1:3306` |
+| Nginx 80 | 运行 | 保留 |
+| Nginx 443 | 运行 | 保留 |
+| SSH 22 | 运行 | 保留 |
+
+**复查结果**：
+
+```text
+80  继续监听
+443 继续监听
+22  继续监听
+3306 仅监听 127.0.0.1
+8888 不再监听
+21 不再监听
+```
+
+**备注**：
+
+云厂商安全组不在 VPS 系统内部，后续仍建议在阿里云控制台继续限制：
+
+```text
+22 只允许开发者固定 IP
+80 允许公网
+443 允许公网
+8888 不开放
+3306 不开放
+21 不开放
+```
+
+---
+
+### 20. 整理 `/www/wwwroot` 目录
+
+**目的**：让网站根目录保持简洁，只保留旧站目录和新站目录。
+
+**命令日志**：
+
+```text
+/www/backup/qilipaper/wwwroot-tidy-20260606-222903.log
+```
+
+**执行动作**：
+
+1. 将旧上传压缩包从网站根目录移动到备份区。
+2. 删除空的默认站点目录。
+
+**移动文件**：
+
+```text
+/www/wwwroot/paper-main.zip
+```
+
+移动到：
+
+```text
+/www/backup/qilipaper/paper-main-original-upload-20250811.zip
+```
+
+**删除目录**：
+
+```text
+/www/wwwroot/default
+```
+
+删除原因：
+
+```text
+该目录为空，且不是当前业务站点目录。
+```
+
+**整理后 `/www/wwwroot` 内容**：
+
+```text
+/www/wwwroot/paper-main
+/www/wwwroot/qilipaper-vanglam-static
+```
+
+---
+
+### 21. 清理后最终复查
+
+**目的**：确认清理后网站正常、可疑文件不存在、端口暴露减少。
+
+**最终磁盘状态**：
+
+```text
+根磁盘：40G
+已用：16G
+可用：22G
+使用率：43%
+```
+
+**最终 `/www/wwwroot` 状态**：
+
+```text
+/www/wwwroot/paper-main                  约 106M
+/www/wwwroot/qilipaper-vanglam-static   约 1.4M
+/www/wwwroot 总计                       约 107M
+```
+
+**最终监听状态**：
+
+```text
+80    Nginx 公网监听
+443   Nginx 公网监听
+22    SSH 公网监听
+3306  MySQL 仅监听 127.0.0.1
+21    不监听
+8888  不监听
+3000  不监听
+```
+
+**最终进程状态**：
+
+```text
+Nginx 运行中
+MySQL 运行中
+宝塔面板未运行
+FTP 未运行
+PM2 未运行
+旧 Next.js 未运行
+```
+
+**新站验证**：
+
+```text
+200 https://qilipaper.com/
+200 https://qilipaper.com/vanglam
+200 https://qilipaper.com/vanglam/color-system
+```
+
+**可疑文件复查**：
+
+```text
+/www/wwwroot/paper-main/.pwned 不存在
+/www/wwwroot/paper-main/sshddm 不存在
+未发现 sshddm 相关运行进程
+```
+
+---
+
+### 22. 清理 SSH 中断后遗留的审计进程
+
+**目的**：前一次远程安全收紧命令因 SSH 会话超时，在服务器上留下了一个只负责写日志的审计脚本进程。该进程不属于网站运行所需服务，因此进行清理。
+
+**处理内容**：
+
+```text
+发现遗留进程：security-tighten 审计脚本 bash 进程
+发现遗留子进程：tee 日志写入进程
+执行处理：终止该遗留 bash 进程和 tee 子进程
+保留日志：/www/backup/qilipaper/cleanup-finish-20260606-223407.log
+```
+
+**复查结果**：
+
+```text
+遗留 bash 进程已不存在
+遗留 tee 子进程已不存在
+80、443、22、3306 监听状态正常
+8888、3000、21 未监听
+https://qilipaper.com/ 返回 200
+https://qilipaper.com/vanglam 返回 200
+https://qilipaper.com/vanglam/color-system 返回 200
+```
+
+---
+
 ## 四、当前服务器上线后状态
 
 当前线上状态：
@@ -630,6 +927,11 @@ qilipaper.com 已运行新前端静态站
 旧网站源码已备份
 异常文件已从旧目录删除
 异常文件隔离副本已保留且不可执行
+旧站 node_modules 已删除
+旧站 .next 构建产物已删除
+宝塔面板已停止并禁用自启
+FTP 已停止并禁用自启
+MySQL 已限制为本机监听
 ```
 
 当前 Nginx 关键配置：
@@ -649,6 +951,14 @@ location / {
 /www/wwwroot/qilipaper-vanglam-static
 ```
 
+当前旧站目录：
+
+```text
+/www/wwwroot/paper-main
+```
+
+旧站目录目前只保留源码、配置和上传数据，不再保留 `node_modules` 和 `.next` 构建产物。
+
 当前旧站备份：
 
 ```text
@@ -659,6 +969,16 @@ location / {
 
 ```text
 /www/backup/qilipaper/security-20260606-220341
+```
+
+当前清理日志：
+
+```text
+/www/backup/qilipaper/cleanup-20260606-221920.log
+/www/backup/qilipaper/cleanup-continue-20260606-222026.log
+/www/backup/qilipaper/security-tighten-20260606-222158.log
+/www/backup/qilipaper/wwwroot-tidy-20260606-222903.log
+/www/backup/qilipaper/cleanup-finish-20260606-223407.log
 ```
 
 ---

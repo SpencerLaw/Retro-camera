@@ -994,3 +994,71 @@ https://qilipaper.com/assets/index-BIY00_Wd.js
 未发现 sshddm 相关运行进程
 隔离文件权限为 600，不可执行
 ```
+
+### 清理后最终状态
+
+二零二六年六月六日已执行 VPS 清理和本机端口收紧。
+
+已清理内容：
+
+1. 删除旧站可再生依赖目录 `node_modules`。
+2. 删除旧站可再生构建目录 `.next`。
+3. 清理 root 缓存、npm 缓存、临时目录和宝塔回收站。
+4. 旧访问日志已压缩备份并截断。
+5. 删除旧站目录中的 0 字节空文件。
+6. 旧 `paper-main.zip` 已从 `/www/wwwroot` 移动到备份区。
+7. 空的默认站点目录 `/www/wwwroot/default` 已删除。
+
+清理后目录：
+
+```text
+/www/wwwroot/paper-main
+/www/wwwroot/qilipaper-vanglam-static
+```
+
+清理后磁盘：
+
+```text
+根磁盘已用：约 16G
+根磁盘可用：约 22G
+/www/wwwroot 总大小：约 107M
+旧站目录：约 106M
+新站目录：约 1.4M
+```
+
+服务收紧结果：
+
+```text
+80    Nginx 公网监听
+443   Nginx 公网监听
+22    SSH 仍开放，建议后续在阿里云安全组限制来源 IP
+3306  MySQL 仅监听 127.0.0.1
+8888  宝塔面板不再监听
+21    FTP 不再监听
+3000  旧 Next.js 不再监听
+```
+
+额外复查：
+
+```text
+已清理 SSH 超时后遗留的安全审计脚本进程
+已清理对应的日志写入子进程
+对应日志：/www/backup/qilipaper/cleanup-finish-20260606-223407.log
+```
+
+保留内容：
+
+1. 旧网站源码目录。
+2. 旧网站上传数据。
+3. 新网站静态目录。
+4. 旧网站源码备份。
+5. Nginx 配置备份。
+6. MySQL 配置备份。
+7. 异常文件隔离副本。
+8. 本次清理操作日志。
+
+操作审计详情请查看：
+
+```text
+docs/superpowers/specs/2026-06-06-qilipaper-vps-operation-audit.md
+```

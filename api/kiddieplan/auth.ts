@@ -43,7 +43,8 @@ export default async function handler(
                         licenseCode: cleanCode,
                         deviceId: request.body.deviceId || 'legacy-web',
                         deviceInfo: request.body.deviceInfo || 'Parent Device',
-                        action: 'verify'
+                        action: 'verify',
+                        product: 'kiddieplan'
                     })
                 });
                 const result = await res.json();

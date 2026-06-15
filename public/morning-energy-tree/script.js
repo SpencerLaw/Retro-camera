@@ -3170,6 +3170,7 @@ function initGatekeeper() {
     const savedAuth = localStorage.getItem(AUTH_KEY);
     bindLicenseForm();
     if (savedAuth && savedAuth.startsWith(LICENSE_PREFIX)) {
+        recordLicenseUsage(savedAuth);
         showApp();
     }
 }
@@ -3209,10 +3210,30 @@ async function verifyLicenseWithBackend(input) {
         body: JSON.stringify({
             licenseCode: input,
             deviceId: getLicenseDeviceId(),
-            deviceInfo: getLicenseDeviceInfo()
+            deviceInfo: getLicenseDeviceInfo(),
+            product: 'morning-energy-tree'
         })
     });
     return response.json();
+}
+
+async function recordLicenseUsage(code) {
+    if (!code) return;
+    try {
+        await fetch('/api/verify-license', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'usage',
+                licenseCode: code,
+                deviceId: getLicenseDeviceId(),
+                deviceInfo: getLicenseDeviceInfo(),
+                product: 'morning-energy-tree'
+            })
+        });
+    } catch (error) {
+        console.debug('[License Usage] skipped', error);
+    }
 }
 
 async function verifyLicense() {

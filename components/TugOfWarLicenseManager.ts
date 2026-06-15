@@ -5,6 +5,7 @@ type TugLicenseProductConfig = {
     licensePrefix: string;
     storagePrefix: string;
     deviceInfo?: string;
+    productId?: string;
 };
 
 const normalizePrefix = (prefix: string) => prefix.toLowerCase();
@@ -77,6 +78,27 @@ export const clearTugLicense = (config: TugLicenseProductConfig) => {
     localStorage.removeItem(getVerifiedKey(storagePrefix));
 };
 
+export const recordTugLicenseUsage = async (config: TugLicenseProductConfig) => {
+    const code = getTugLicense(config);
+    if (!code) return;
+
+    try {
+        await fetch('/api/verify-license', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'usage',
+                licenseCode: code,
+                deviceId: getTugLicenseDeviceId(config),
+                deviceInfo: getTugLicenseDeviceInfo(config.deviceInfo),
+                product: config.productId || config.storagePrefix || config.licensePrefix
+            }),
+        });
+    } catch (error) {
+        console.debug('[License Usage] skipped', error);
+    }
+};
+
 export const verifyTugLicense = async (config: TugLicenseProductConfig, code: string): Promise<{ success: boolean; message?: string }> => {
     const cleanCode = code.replace(/[-\s]/g, '').toUpperCase();
     const licensePrefix = config.licensePrefix.toUpperCase();
@@ -92,7 +114,8 @@ export const verifyTugLicense = async (config: TugLicenseProductConfig, code: st
             body: JSON.stringify({
                 licenseCode: cleanCode,
                 deviceId: getTugLicenseDeviceId(config),
-                deviceInfo: getTugLicenseDeviceInfo(config.deviceInfo)
+                deviceInfo: getTugLicenseDeviceInfo(config.deviceInfo),
+                product: config.productId || config.storagePrefix || config.licensePrefix
             }),
         });
         const data = await response.json();

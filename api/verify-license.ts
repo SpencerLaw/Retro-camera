@@ -25,6 +25,11 @@ interface DeviceInfo {
   ua: string;
 }
 
+interface ProductUsageInfo {
+  count: number;
+  lastUsedTime: string;
+}
+
 export interface LicenseMetadata {
   code: string;
   totalDevices: number;
@@ -34,6 +39,7 @@ export interface LicenseMetadata {
   firstActivatedAt?: string;
   lastUsedTime: string;
   devices: DeviceInfo[];
+  usageByProduct?: Record<string, ProductUsageInfo>;
   brc?: any[]; // broadcast channels
   fu?: number; // fish usage
   a?: string;  // active room
@@ -47,11 +53,17 @@ interface CompressedDevice {
   u: string; // ua
 }
 
+interface CompressedProductUsage {
+  c: number; // count
+  l: number; // lastUsedTime (timestamp)
+}
+
 export interface CompressedMetadata {
   m: number; // maxDevices
   f: number; // firstActivatedAt (timestamp)
   l: number; // lastUsedTime (timestamp)
   d: CompressedDevice[]; // devices
+  up?: Record<string, CompressedProductUsage>; // usageByProduct
   brc?: any[]; // broadcast channels (legacy/sync)
   fu?: number; // fish usage
   a?: string;  // active room
@@ -136,6 +148,58 @@ function getActivationExpiryDate(firstActivatedAt?: string | number | Date): Dat
   return expiryDate;
 }
 
+function normalizeProductName(product?: string): string {
+  const normalized = String(product || 'unknown')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+  return normalized || 'unknown';
+}
+
+function compressProductUsage(
+  usageByProduct?: Record<string, ProductUsageInfo>
+): Record<string, CompressedProductUsage> | undefined {
+  if (!usageByProduct) return undefined;
+  const compressed: Record<string, CompressedProductUsage> = {};
+  Object.entries(usageByProduct).forEach(([product, usage]) => {
+    if (!usage) return;
+    compressed[normalizeProductName(product)] = {
+      c: Math.max(0, Number(usage.count) || 0),
+      l: new Date(usage.lastUsedTime || Date.now()).getTime()
+    };
+  });
+  return Object.keys(compressed).length > 0 ? compressed : undefined;
+}
+
+function decompressProductUsage(
+  usageByProduct?: Record<string, CompressedProductUsage>
+): Record<string, ProductUsageInfo> | undefined {
+  if (!usageByProduct) return undefined;
+  const full: Record<string, ProductUsageInfo> = {};
+  Object.entries(usageByProduct).forEach(([product, usage]) => {
+    if (!usage) return;
+    full[normalizeProductName(product)] = {
+      count: Math.max(0, Number(usage.c) || 0),
+      lastUsedTime: usage.l ? new Date(usage.l).toISOString() : new Date().toISOString()
+    };
+  });
+  return Object.keys(full).length > 0 ? full : undefined;
+}
+
+function recordProductUsage(metadata: LicenseMetadata, product: string | undefined, dateNowISO: string) {
+  const productKey = normalizeProductName(product);
+  const usageByProduct = metadata.usageByProduct || {};
+  const current = usageByProduct[productKey];
+  usageByProduct[productKey] = {
+    count: (Number(current?.count) || 0) + 1,
+    lastUsedTime: dateNowISO
+  };
+  metadata.usageByProduct = usageByProduct;
+  metadata.lastUsedTime = dateNowISO;
+}
+
 // === 压缩与解压逻辑 ===
 
 export function compressMetadata(full: LicenseMetadata): CompressedMetadata {
@@ -149,6 +213,7 @@ export function compressMetadata(full: LicenseMetadata): CompressedMetadata {
       l: new Date(dev.lastSeen).getTime(),
       u: dev.ua
     })),
+    up: compressProductUsage(full.usageByProduct),
     brc: full.brc,
     fu: full.fu,
     a: full.a
@@ -163,7 +228,8 @@ export function decompressMetadata(compressed: CompressedMetadata | LicenseMetad
       ...compressed,
       totalDevices: compressed.devices.length,
       maxDevices: getEffectiveMaxDevices(code),
-      expiryDate: getActivationExpiryDate(firstActivatedAt).toISOString()
+      expiryDate: getActivationExpiryDate(firstActivatedAt).toISOString(),
+      usageByProduct: compressed.usageByProduct || {}
     } as LicenseMetadata;
   }
 
@@ -179,7 +245,8 @@ export function decompressMetadata(compressed: CompressedMetadata | LicenseMetad
       expiryDate: new Date().toISOString(),
       firstActivatedAt: new Date().toISOString(),
       lastUsedTime: new Date().toISOString(),
-      devices: []
+      devices: [],
+      usageByProduct: {}
     };
   }
 
@@ -202,6 +269,7 @@ export function decompressMetadata(compressed: CompressedMetadata | LicenseMetad
       lastSeen: new Date(dev.l).toISOString(),
       ua: dev.u
     })),
+    usageByProduct: decompressProductUsage(c.up) || {},
     brc: c.brc,
     fu: c.fu,
     a: c.a
@@ -224,7 +292,7 @@ export default async function handler(
 
   try {
     const action = req.body.action || req.query.action;
-    const { adminKey, licenseCode, deviceId, deviceInfo: rawDeviceInfo, skipRegistration } = req.body;
+    const { adminKey, licenseCode, deviceId, deviceInfo: rawDeviceInfo, skipRegistration, product } = req.body;
     const ua = req.headers['user-agent'] || 'unknown';
 
     // === 管理员查询 ===
@@ -528,6 +596,64 @@ export default async function handler(
       if (finalData) console.log(`[License] Found legacy data with original key: ${backupKey}`);
     }
 
+    if (action === 'usage') {
+      let metadata: LicenseMetadata;
+
+      if (!finalData) {
+        const newExpiryDate = getActivationExpiryDate(dateNowISO);
+        console.log(`[License] Usage Activation: ${cleanCode} Device: ${deviceId} Product: ${product || 'unknown'}`);
+        metadata = {
+          code: cleanCode,
+          totalDevices: 1,
+          maxDevices: getEffectiveMaxDevices(cleanCode),
+          generatedDate: generatedDate.toISOString(),
+          expiryDate: newExpiryDate.toISOString(),
+          firstActivatedAt: dateNowISO,
+          lastUsedTime: dateNowISO,
+          devices: [{
+            deviceId,
+            firstSeen: dateNowISO,
+            lastSeen: dateNowISO,
+            ua: rawDeviceInfo || getDeviceType(ua)
+          }],
+          usageByProduct: {}
+        };
+      } else {
+        metadata = decompressMetadata(finalData, cleanCode);
+        const existingExpiryDate = getActivationExpiryDate(metadata.firstActivatedAt || metadata.generatedDate);
+        metadata.expiryDate = existingExpiryDate.toISOString();
+        if (dateNow > existingExpiryDate.getTime()) {
+          return res.status(401).json({ success: false, message: `授权码已于 ${existingExpiryDate.toLocaleDateString()} 过期，请购买新码` });
+        }
+
+        const deviceIndex = metadata.devices.findIndex(d => d.deviceId === deviceId);
+        if (deviceIndex > -1) {
+          metadata.devices[deviceIndex].lastSeen = dateNowISO;
+          metadata.devices[deviceIndex].ua = rawDeviceInfo || getDeviceType(ua);
+        } else if (metadata.devices.length < getEffectiveMaxDevices(cleanCode)) {
+          metadata.devices.push({
+            deviceId,
+            firstSeen: dateNowISO,
+            lastSeen: dateNowISO,
+            ua: rawDeviceInfo || getDeviceType(ua)
+          });
+          metadata.totalDevices = metadata.devices.length;
+        }
+      }
+
+      recordProductUsage(metadata, product, dateNowISO);
+      await kv.set(redisKey, compressMetadata(metadata));
+
+      return res.status(200).json({
+        success: true,
+        message: '使用记录已更新',
+        data: {
+          lastUsedTime: metadata.lastUsedTime,
+          usageByProduct: metadata.usageByProduct
+        }
+      });
+    }
+
     console.log(`[License] Logged in: ${cleanCode} action: verify`);
 
     let metadata: LicenseMetadata;
@@ -552,7 +678,8 @@ export default async function handler(
           firstSeen: dateNowISO,
           lastSeen: dateNowISO,
           ua: rawDeviceInfo || getDeviceType(ua)
-        }]
+        }],
+        usageByProduct: {}
       };
     } else {
       // 解压旧数据
@@ -610,6 +737,10 @@ export default async function handler(
         metadata.totalDevices = metadata.devices.length;
         metadata.lastUsedTime = dateNowISO;
       }
+    }
+
+    if (product) {
+      recordProductUsage(metadata, product, dateNowISO);
     }
 
     // 3. 压缩并保存

@@ -5,7 +5,7 @@ import { ArrowLeft, Maximize, Minimize, Settings as SettingsIcon, Play, RotateCc
 import { useTranslations } from '../hooks/useTranslations';
 import confetti from 'canvas-confetti';
 import * as mammoth from 'mammoth';
-import { isTugLicenseVerified, verifyTugLicense } from './TugOfWarLicenseManager';
+import { isTugLicenseVerified, recordTugLicenseUsage, verifyTugLicense } from './TugOfWarLicenseManager';
 import { getTugOfWarProductConfig } from './tugOfWarProductConfig.js';
 import {
   buildWordAnswerAttempt,
@@ -1606,7 +1606,11 @@ export const TugOfWarApp = ({ variant = 'math' }: { variant?: TugOfWarVariant })
 
   // 初始化检查授权
   useEffect(() => {
-    setIsVerified(isTugLicenseVerified(productConfig));
+    const verified = isTugLicenseVerified(productConfig);
+    if (verified) {
+      void recordTugLicenseUsage(productConfig);
+    }
+    setIsVerified(verified);
   }, [productConfig]);
 
   const handleVerify = async () => {

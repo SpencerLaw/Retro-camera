@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import './styles.css';
 import { UserRole } from './types';
 import ParentPortal from './views/ParentPortal';
 import ChildPortal from './views/ChildPortal';
-import { getDeviceId, getDeviceInfo } from './utils/licenseManager';
+import { getDeviceId, getDeviceInfo, getLicenseFromParentToken, recordKiddiePlanUsage } from './utils/licenseManager';
 import { User, Lock, ArrowLeft, Sparkles, Home } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -40,12 +40,20 @@ const KiddiePlanApp: React.FC = () => {
   const [authCode, setAuthCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const skipNextUsageReportRef = useRef(false);
 
   // 自动登录逻辑
   useEffect(() => {
     // Parent auto-restore is handled when clicking the 'Parent Zone' button
     // for immediate redirect if token exists.
     if (token && role) {
+      if (role === 'parent') {
+        if (skipNextUsageReportRef.current) {
+          skipNextUsageReportRef.current = false;
+        } else {
+          void recordKiddiePlanUsage(getLicenseFromParentToken(token));
+        }
+      }
       setPortal(role);
       setIsAuthenticated(true);
     }
@@ -103,6 +111,7 @@ const KiddiePlanApp: React.FC = () => {
         if (portal === 'parent') {
           localStorage.setItem('kp_parent_token', result.token);
           localStorage.setItem('kp_parent_auth_time', Date.now().toString()); // Set auth timestamp
+          skipNextUsageReportRef.current = true;
         } else {
           localStorage.setItem('kp_child_token', result.token);
         }

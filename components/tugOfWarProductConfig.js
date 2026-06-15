@@ -5,6 +5,7 @@ const PRODUCT_CONFIGS = {
     licensePrefix: 'SX',
     storagePrefix: 'sx',
     deviceInfo: 'Tug of War Math',
+    productId: 'tug-of-war-math',
   },
   word: {
     subjectMode: 'word',
@@ -12,6 +13,7 @@ const PRODUCT_CONFIGS = {
     licensePrefix: 'YW',
     storagePrefix: 'yw',
     deviceInfo: 'Tug of War Words',
+    productId: 'tug-of-war-words',
   },
 };
 

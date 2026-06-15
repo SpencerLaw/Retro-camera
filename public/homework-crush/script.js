@@ -48,9 +48,27 @@
             body: JSON.stringify({
                 licenseCode: code,
                 deviceId: getHCDeviceId(),
-                deviceInfo: navigator.userAgent || 'Homework Crush'
+                deviceInfo: navigator.userAgent || 'Homework Crush',
+                product: 'homework-crush'
             })
         }).then(function(r) { return r.json(); });
+    };
+
+    var recordLicenseUsage = function(code) {
+        if (!code) return;
+        fetch('/api/verify-license', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'usage',
+                licenseCode: code,
+                deviceId: getHCDeviceId(),
+                deviceInfo: navigator.userAgent || 'Homework Crush',
+                product: 'homework-crush'
+            })
+        }).catch(function(error) {
+            console.debug('[License Usage] skipped', error);
+        });
     };
 
     var clearAuth = function() {
@@ -317,6 +335,7 @@
         sanitizeData(); // 加载时立即体检数据
 
         if (STATE.isVerified && STATE.licenseCode) {
+            recordLicenseUsage(STATE.licenseCode);
             initApp();
         } else {
             showAuthScreen();

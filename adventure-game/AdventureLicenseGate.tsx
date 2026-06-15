@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { ArrowLeft, Loader2, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { isTugLicenseVerified, verifyTugLicense } from '../components/TugOfWarLicenseManager';
+import { isTugLicenseVerified, recordTugLicenseUsage, verifyTugLicense } from '../components/TugOfWarLicenseManager';
 import './AdventureGameStyles.css';
 
 const ADVENTURE_LICENSE_CONFIG = {
   licensePrefix: 'DMX',
   storagePrefix: 'dmx',
   deviceInfo: 'Adventure Game',
+  productId: 'adventure-game',
 };
 
 type AdventureLicenseGateProps = {
@@ -22,7 +23,11 @@ const AdventureLicenseGate: React.FC<AdventureLicenseGateProps> = ({ children })
   const [isChecking, setIsChecking] = useState(false);
 
   useEffect(() => {
-    setIsVerified(isTugLicenseVerified(ADVENTURE_LICENSE_CONFIG));
+    const verified = isTugLicenseVerified(ADVENTURE_LICENSE_CONFIG);
+    if (verified) {
+      void recordTugLicenseUsage(ADVENTURE_LICENSE_CONFIG);
+    }
+    setIsVerified(verified);
   }, []);
 
   const handleVerify = async () => {

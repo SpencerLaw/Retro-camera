@@ -66,6 +66,34 @@ function applyTranslations() {
     }
 }
 
+function getMagicDeviceId() {
+    let deviceId = localStorage.getItem('magic_rc_device_id');
+    if (!deviceId) {
+        deviceId = 'rc-' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('magic_rc_device_id', deviceId);
+    }
+    return deviceId;
+}
+
+async function recordLicenseUsage(code) {
+    if (!code) return;
+    try {
+        await fetch('/api/verify-license', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'usage',
+                licenseCode: code,
+                deviceId: getMagicDeviceId(),
+                deviceInfo: navigator.userAgent,
+                product: 'magic-roll-call'
+            })
+        });
+    } catch (error) {
+        console.debug('[License Usage] skipped', error);
+    }
+}
+
 const initCosmos = () => {
     const canvas = document.getElementById('canvas');
     if (!canvas) return;
@@ -171,11 +199,7 @@ const forceExit = (msg) => {
 };
 
 async function validateLicense() {
-    let deviceId = localStorage.getItem('magic_rc_device_id');
-    if (!deviceId) {
-        deviceId = 'rc-' + Math.random().toString(36).substr(2, 9);
-        localStorage.setItem('magic_rc_device_id', deviceId);
-    }
+    const deviceId = getMagicDeviceId();
 
     if (!STATE.licenseCode) {
         forceExit(t('authError'));
@@ -189,7 +213,8 @@ async function validateLicense() {
             body: JSON.stringify({
                 licenseCode: STATE.licenseCode,
                 deviceId: deviceId,
-                deviceInfo: navigator.userAgent
+                deviceInfo: navigator.userAgent,
+                product: 'magic-roll-call'
             })
         });
         const data = await res.json();
@@ -268,11 +293,7 @@ function bindAllEvents() {
 
             if (!code) { alert(t('authError')); return; }
 
-            let deviceId = localStorage.getItem('magic_rc_device_id');
-            if (!deviceId) {
-                deviceId = 'rc-' + Math.random().toString(36).substr(2, 9);
-                localStorage.setItem('magic_rc_device_id', deviceId);
-            }
+            const deviceId = getMagicDeviceId();
 
             verifyBtn.disabled = true;
             try {
@@ -282,7 +303,8 @@ function bindAllEvents() {
                     body: JSON.stringify({
                         licenseCode: code,
                         deviceId: deviceId,
-                        deviceInfo: navigator.userAgent
+                        deviceInfo: navigator.userAgent,
+                        product: 'magic-roll-call'
                     })
                 });
                 const data = await res.json();
@@ -452,6 +474,8 @@ window.addEventListener('DOMContentLoaded', () => {
     setInterval(updateClock, 1000);
     initCosmos();
     bindAllEvents();
-    if (STATE.authorized) showApp();
-    else showAuth();
+    if (STATE.authorized) {
+        recordLicenseUsage(STATE.licenseCode);
+        showApp();
+    } else showAuth();
 });

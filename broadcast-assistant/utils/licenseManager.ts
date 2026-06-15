@@ -90,6 +90,27 @@ export const getLicensePrefix = (license: string): string => {
     return '';
 };
 
+export const recordBCUsage = async () => {
+    const license = getBCLicense();
+    if (!license) return;
+
+    try {
+        await fetch('/api/verify-license', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'usage',
+                licenseCode: license,
+                deviceId: getBCDeviceId(),
+                deviceInfo: getBCDeviceInfo(),
+                product: 'broadcast-assistant'
+            })
+        });
+    } catch (error) {
+        console.debug('[License Usage] skipped', error);
+    }
+};
+
 export const verifyLicense = async (code: string, skipRegistration: boolean = false): Promise<{ success: boolean; message?: string }> => {
     const cleanCode = code.replace(/[-\s]/g, '').toUpperCase();
 
@@ -106,7 +127,8 @@ export const verifyLicense = async (code: string, skipRegistration: boolean = fa
                 licenseCode: cleanCode,
                 deviceId: getBCDeviceId(),
                 deviceInfo: getBCDeviceInfo(),
-                skipRegistration: skipRegistration
+                skipRegistration: skipRegistration,
+                product: 'broadcast-assistant'
             }),
         });
         const data = await response.json();

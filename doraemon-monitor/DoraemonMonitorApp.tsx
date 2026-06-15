@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Maximize, RotateCcw, HelpCircle, X, Volume2, VolumeX, ChevronUp, ChevronDown, CalendarDays, Lock } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
-import { isVerified, getSavedLicenseCode } from './utils/licenseManager';
+import { isVerified, getSavedLicenseCode, recordDoraemonUsage } from './utils/licenseManager';
 import { shouldStopModalMouseDown } from './utils/modalPointerGuards.js';
 import {
   clearWarningResetPasswordRecord,
@@ -288,6 +288,7 @@ const DoraemonMonitorApp: React.FC = () => {
   useEffect(() => {
     const code = getSavedLicenseCode();
     if (isVerified() && code) {
+      void recordDoraemonUsage();
       setIsLicensed(true);
     } else setIsLicensed(false);
   }, []);

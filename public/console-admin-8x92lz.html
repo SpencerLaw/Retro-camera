@@ -711,6 +711,35 @@
       return date.toLocaleDateString();
     }
 
+    function formatUsageByProduct(usageByProduct) {
+      if (!usageByProduct || typeof usageByProduct !== 'object') return '暂无功能使用记录';
+      const PRODUCT_LABELS = {
+        'morning-energy-tree': '早读能量树',
+        'broadcast-assistant': '班级广播器',
+        'homework-crush': '作业消消乐',
+        'adventure-game': '奖惩大冒险',
+        'magic-roll-call': '炫酷点名器',
+        'doraemon-monitor': '分贝仪',
+        'tug-of-war-math': '数学拔河',
+        'tug-of-war-words': '英语单词拔河',
+        'prompt-gallery': '提示词图库',
+        'kiddieplan': '星梦奇旅',
+        'sx': '数学拔河',
+        'yw': '英语单词拔河',
+        'dmx': '奖惩大冒险',
+        'prompt_gallery': '提示词图库'
+      };
+      const rows = Object.entries(usageByProduct)
+        .filter(([, usage]) => usage && Number(usage.count) > 0)
+        .sort(([, a], [, b]) => Number(b.count || 0) - Number(a.count || 0))
+        .map(([product, usage]) => {
+          const label = PRODUCT_LABELS[product] || product;
+          const lastUsed = usage.lastUsedTime ? timeAgo(new Date(usage.lastUsedTime)) : '未知时间';
+          return `${label} ${Number(usage.count || 0)} 次 (${lastUsed})`;
+        });
+      return rows.length > 0 ? rows.join(' · ') : '暂无功能使用记录';
+    }
+
     // === 渲染监控列表 ===
     function renderMonitorList() {
       const container = document.getElementById('monitorContent');
@@ -796,6 +825,7 @@
                   <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
                     <div style="font-size:12px; color:var(--text-light);">
                       ${isUnauthorized ? '<b style="color:var(--danger)">此授权码从未在 Vercel 环境中配置，但有设备尝试登录。</b>' : `<span>有效期至: ${new Date(item.expiryDate).toLocaleDateString()}</span> <span style="margin-left:15px;">首次激活: ${new Date(item.firstActivatedAt || item.devices[0]?.firstSeen || item.generatedDate).toLocaleString()}</span>`}
+                      ${!isUnauthorized ? `<div style="margin-top:8px;"><b>功能使用:</b> ${formatUsageByProduct(item.usageByProduct)}</div>` : ''}
                     </div>
                     ${!isUnauthorized ? `<button onclick="deleteLicense('${item.code}')" class="btn-primary" style="background: var(--danger); padding: 5px 10px; font-size: 11px;">🗑️ 删除所有数据</button>` : ''}
                   </div>

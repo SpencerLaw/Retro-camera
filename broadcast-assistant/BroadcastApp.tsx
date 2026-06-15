@@ -7,7 +7,7 @@ import {
 import Sender from './Sender';
 import Receiver from './Receiver';
 import FishAudioDebug from './components/FishAudioDebug';
-import { isBCVerified, verifyLicense, clearBCLicense, getBCLicense } from './utils/licenseManager';
+import { isBCVerified, verifyLicense, clearBCLicense, getBCLicense, recordBCUsage } from './utils/licenseManager';
 import { useTranslations } from '../hooks/useTranslations';
 import CustomDialog, { DialogType } from './components/CustomDialog';
 
@@ -82,6 +82,12 @@ const BroadcastApp: React.FC<{ forceReceiver?: boolean }> = ({ forceReceiver = f
         localStorage.setItem('bc_theme', theme);
     }, [theme]);
 
+    useEffect(() => {
+        if (mode === 'sender' && isBCVerified()) {
+            void recordBCUsage();
+        }
+    }, []);
+
     const handleVerify = async () => {
         if (!licenseInput.trim()) return;
         setVerifying(true);
@@ -117,6 +123,7 @@ const BroadcastApp: React.FC<{ forceReceiver?: boolean }> = ({ forceReceiver = f
 
     const handleTeacherMode = async () => {
         if (isBCVerified()) {
+            void recordBCUsage();
             setMode('sender');
         } else {
             setMode('license');

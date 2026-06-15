@@ -105,6 +105,29 @@ export const clearLicense = (): void => {
   } catch (e) {}
 };
 
+export const recordDoraemonUsage = async (): Promise<void> => {
+  const code = getSavedLicenseCode();
+  if (!code) return;
+
+  try {
+    await fetch('/api/verify-license', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        action: 'usage',
+        licenseCode: code,
+        deviceId: getDeviceId(),
+        deviceInfo: getDeviceInfo(),
+        product: 'doraemon-monitor',
+      }),
+    });
+  } catch (error) {
+    console.debug('[License Usage] skipped', error);
+  }
+};
+
 // 格式化授权码（添加连字符）
 export const formatLicenseCode = (code: string): string => {
   const cleaned = code.replace(/[^A-Z0-9]/gi, '').toUpperCase();
@@ -151,6 +174,7 @@ export const verifyLicenseCode = async (code: string): Promise<{
         licenseCode: code,
         deviceId: deviceId,
         deviceInfo: deviceInfo,
+        product: 'doraemon-monitor',
       }),
     });
 

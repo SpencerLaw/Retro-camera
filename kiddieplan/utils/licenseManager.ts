@@ -41,6 +41,38 @@ export const saveLicense = (code: string) => {
 export const getSavedLicense = () => localStorage.getItem(LICENSE_KEY);
 export const isVerified = () => localStorage.getItem(VERIFIED_KEY) === 'true';
 
+export const getLicenseFromParentToken = (token?: string | null): string | null => {
+    if (!token) return null;
+    try {
+        const decoded = atob(token);
+        const [role, code] = decoded.split(':');
+        return role === 'parent' && code ? code : null;
+    } catch (e) {
+        return null;
+    }
+};
+
+export const recordKiddiePlanUsage = async (code?: string | null) => {
+    const licenseCode = code || getSavedLicense() || getLicenseFromParentToken(localStorage.getItem('kp_parent_token'));
+    if (!licenseCode) return;
+
+    try {
+        await fetch('/api/verify-license', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'usage',
+                licenseCode,
+                deviceId: getDeviceId(),
+                deviceInfo: getDeviceInfo(),
+                product: 'kiddieplan'
+            })
+        });
+    } catch (error) {
+        console.debug('[License Usage] skipped', error);
+    }
+};
+
 export const verifyLicense = async (code: string) => {
     const deviceId = getDeviceId();
     const deviceInfo = getDeviceInfo();
@@ -52,7 +84,8 @@ export const verifyLicense = async (code: string) => {
             licenseCode: code,
             deviceId,
             deviceInfo,
-            action: 'verify'
+            action: 'verify',
+            product: 'kiddieplan'
         })
     });
 

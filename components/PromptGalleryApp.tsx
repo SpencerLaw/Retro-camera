@@ -24,6 +24,7 @@ import {
   clearTugLicense,
   getTugLicense,
   isTugLicenseVerified,
+  recordTugLicenseUsage,
   verifyTugLicense,
 } from './TugOfWarLicenseManager';
 import {
@@ -83,6 +84,7 @@ const PROMPT_GALLERY_LICENSE_CONFIG = {
   licensePrefix: 'PT',
   storagePrefix: 'prompt_gallery',
   deviceInfo: 'Prompt Gallery',
+  productId: 'prompt-gallery',
 };
 const IMAGE_PREVIEW_DEFAULT_ZOOM = 1.4;
 const IMAGE_PREVIEW_MIN_ZOOM = 1;
@@ -377,7 +379,11 @@ const PromptGalleryApp: React.FC = () => {
   }, [hasMore, loading, summaries.length, query, activeTag, activeModel]);
 
   useEffect(() => {
-    setIsPromptLicensed(isTugLicenseVerified(PROMPT_GALLERY_LICENSE_CONFIG));
+    const verified = isTugLicenseVerified(PROMPT_GALLERY_LICENSE_CONFIG);
+    if (verified) {
+      void recordTugLicenseUsage(PROMPT_GALLERY_LICENSE_CONFIG);
+    }
+    setIsPromptLicensed(verified);
     setLoading(false);
   }, []);
 

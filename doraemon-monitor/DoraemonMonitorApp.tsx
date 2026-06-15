@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Maximize, RotateCcw, HelpCircle, X, Volume2, VolumeX, ChevronUp, ChevronDown, CalendarDays, Lock } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
-import { isVerified, getSavedLicenseCode, verifyLicenseCode, clearLicense } from './utils/licenseManager';
+import { isVerified, getSavedLicenseCode } from './utils/licenseManager';
 import { shouldStopModalMouseDown } from './utils/modalPointerGuards.js';
 import {
   clearWarningResetPasswordRecord,
@@ -154,7 +154,6 @@ const DoraemonMonitorApp: React.FC = () => {
   const navigate = useNavigate();
   const t = useTranslations();
   const [isLicensed, setIsLicensed] = useState<boolean | null>(null);
-  const [authError, setAuthError] = useState<string | null>(null);
   const [isStarted, setIsStarted] = useState(false);
   const [currentDb, setCurrentDb] = useState(40);
   const [ambientDb, setAmbientDb] = useState(40);
@@ -169,7 +168,6 @@ const DoraemonMonitorApp: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [countdown, setCountdown] = useState(4);
   const [timeStr, setTimeStr] = useState('');
   const [sensitivity, setSensitivity] = useState(50);
   const [showHelp, setShowHelp] = useState(false);
@@ -290,24 +288,7 @@ const DoraemonMonitorApp: React.FC = () => {
   useEffect(() => {
     const code = getSavedLicenseCode();
     if (isVerified() && code) {
-      verifyLicenseCode(code).then(res => {
-        if (res.success) setIsLicensed(true);
-        else {
-          setAuthError(res.message);
-          clearLicense();
-          // Start countdown
-          const timer = setInterval(() => {
-            setCountdown((prev) => {
-              if (prev <= 1) {
-                clearInterval(timer);
-                window.location.replace('/');
-                return 0;
-              }
-              return prev - 1;
-            });
-          }, 1000);
-        }
-      });
+      setIsLicensed(true);
     } else setIsLicensed(false);
   }, []);
 
@@ -1946,7 +1927,6 @@ const DoraemonMonitorApp: React.FC = () => {
     </svg>
   );
 
-  if (authError) return <div className="doraemon-app dark-mode alarm-mode" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh', textAlign: 'center' }}><h1 style={{ fontSize: '4.4rem', color: '#ff416c' }}>{t('doraemon.authExpired')}</h1><p style={{ fontSize: '2.2rem', margin: '20px 0' }}>{authError}</p><p style={{ color: '#666', fontSize: '1.1rem' }}>{t('doraemon.returnHome').replace('{seconds}', countdown.toString())}</p></div>;
   if (isLicensed === null) return <div className="doraemon-app dark-mode" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><div className="spinner" style={{ width: '80px', height: '60px' }}></div><h2 style={{ color: '#00f260' }}>{t('doraemon.verifying')}</h2></div>;
   if (isLicensed === false) return <LicenseInput onVerified={() => setIsLicensed(true)} />;
   if (!isStarted) return <div className="doraemon-start-layer"><button onClick={() => navigate('/')} className="back-btn"><ArrowLeft size={32} /></button><div className="doraemon-start-icon" style={{ width: '250px', height: '250px' }}><DoraemonSVG /></div><h1 className="start-title" style={{ fontSize: '3.5rem' }}>{t('doraemon.title')}</h1><button className="doraemon-btn-big" onClick={initApp} disabled={isLoading} style={{ padding: '25px 60px' }}>{isLoading ? <span>{t('doraemon.summoning')}</span> : <><span className="btn-main-text" style={{ fontSize: '2rem' }}>{t('doraemon.startMonitor')}</span><span className="btn-sub-text">{t('doraemon.startMonitorSub')}</span></>}</button>{error && <div className="doraemon-error-box">{error}</div>}</div>;

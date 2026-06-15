@@ -28,8 +28,41 @@
         console.log('Saving Data...', STATE.students);
         localStorage.setItem('hc_students', JSON.stringify(STATE.students));
         localStorage.setItem('hc_rules', JSON.stringify(STATE.rules));
-        localStorage.setItem('hc_verified', 'true');
-        localStorage.setItem('hc_license', STATE.licenseCode);
+        localStorage.setItem('hc_verified', STATE.isVerified && STATE.licenseCode ? 'true' : 'false');
+        if (STATE.licenseCode) localStorage.setItem('hc_license', STATE.licenseCode);
+        else localStorage.removeItem('hc_license');
+    };
+
+    var getHCDeviceId = function() {
+        var existing = localStorage.getItem('hc_device_id');
+        if (existing) return existing;
+        var next = 'hc-' + Math.random().toString(36).slice(2, 11) + '-' + Date.now().toString(36);
+        localStorage.setItem('hc_device_id', next);
+        return next;
+    };
+
+    var verifyWithBackend = function(code) {
+        return fetch('/api/verify-license', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                licenseCode: code,
+                deviceId: getHCDeviceId(),
+                deviceInfo: navigator.userAgent || 'Homework Crush'
+            })
+        }).then(function(r) { return r.json(); });
+    };
+
+    var clearAuth = function() {
+        STATE.isVerified = false;
+        STATE.licenseCode = null;
+        localStorage.setItem('hc_verified', 'false');
+        localStorage.removeItem('hc_license');
+    };
+
+    var showAuthScreen = function() {
+        hideGate();
+        document.getElementById('auth-screen').style.display = 'flex';
     };
 
     // 【核心修复】强制数据体检与隔离
@@ -285,14 +318,8 @@
 
         if (STATE.isVerified && STATE.licenseCode) {
             initApp();
-            fetch('/api/verify-license', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ licenseCode: STATE.licenseCode, deviceId: localStorage.getItem('hc_device_id') || 'hc-user' })
-            }).catch(function(){});
         } else {
-            hideGate();
-            document.getElementById('auth-screen').style.display = 'flex';
+            showAuthScreen();
             document.getElementById('verify-btn').onclick = function() {
                 var code = document.getElementById('license-input').value.trim().toUpperCase();
                 
@@ -302,18 +329,15 @@
                     return;
                 }
 
-                fetch('/api/verify-license', { 
-                    method: 'POST', 
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ licenseCode: code, deviceId: 'hc-user' }) 
-                })
-                .then(function(r){ return r.json(); }).then(function(data){
+                verifyWithBackend(code).then(function(data){
                     if (data.success) { 
                         STATE.isVerified = true; 
                         STATE.licenseCode = code; 
                         saveData(); 
                         initApp(); 
                     } else alert(data.message);
+                }).catch(function() {
+                    alert('网络连接失败，无法验证授权码');
                 });
             };
         }

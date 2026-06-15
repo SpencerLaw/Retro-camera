@@ -128,6 +128,14 @@ function isCodeInWhitelist(code: string): boolean {
   return validCodeSet.has(normalizeLicenseCode(code));
 }
 
+function getActivationExpiryDate(firstActivatedAt?: string | number | Date): Date {
+  const activationDate = new Date(firstActivatedAt || Date.now());
+  const safeActivationDate = isNaN(activationDate.getTime()) ? new Date() : activationDate;
+  const expiryDate = new Date(safeActivationDate);
+  expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+  return expiryDate;
+}
+
 // === 压缩与解压逻辑 ===
 
 export function compressMetadata(full: LicenseMetadata): CompressedMetadata {
@@ -150,10 +158,12 @@ export function compressMetadata(full: LicenseMetadata): CompressedMetadata {
 export function decompressMetadata(compressed: CompressedMetadata | LicenseMetadata, code: string): LicenseMetadata {
   // 兼容性检查：如果已经是完整版（旧数据），也强制套用最新设备限制
   if ('devices' in compressed) {
+    const firstActivatedAt = compressed.firstActivatedAt || compressed.generatedDate;
     return {
       ...compressed,
       totalDevices: compressed.devices.length,
-      maxDevices: getEffectiveMaxDevices(code)
+      maxDevices: getEffectiveMaxDevices(code),
+      expiryDate: getActivationExpiryDate(firstActivatedAt).toISOString()
     } as LicenseMetadata;
   }
 
@@ -175,8 +185,8 @@ export function decompressMetadata(compressed: CompressedMetadata | LicenseMetad
 
   // 解压逻辑
   const genDate = extractDateFromCode(code) || new Date();
-  const expDate = new Date(genDate);
-  expDate.setFullYear(expDate.getFullYear() + 1);
+  const firstActivatedAt = new Date(c.f).toISOString();
+  const expDate = getActivationExpiryDate(firstActivatedAt);
 
   return {
     code: code,
@@ -184,7 +194,7 @@ export function decompressMetadata(compressed: CompressedMetadata | LicenseMetad
     maxDevices: getEffectiveMaxDevices(code), // 强制使用最新的限制逻辑
     generatedDate: genDate.toISOString(),
     expiryDate: expDate.toISOString(),
-    firstActivatedAt: new Date(c.f).toISOString(),
+    firstActivatedAt,
     lastUsedTime: c.l ? new Date(c.l).toISOString() : new Date().toISOString(),
     devices: c.d.map(dev => ({
       deviceId: dev.i,
@@ -504,12 +514,6 @@ export default async function handler(
 
     if (!generatedDate) return res.status(401).json({ success: false, message: '授权码格式异常' });
 
-    const expiryDate = new Date(generatedDate);
-    expiryDate.setFullYear(expiryDate.getFullYear() + 1);
-    if (new Date() > expiryDate) {
-      return res.status(401).json({ success: false, message: `授权码已于 ${expiryDate.toLocaleDateString()} 过期，请购买新码` });
-    }
-
     // 2. 读取 Redis
     // 统一使用不带横杠的 Key 以匹配新旧数据 (如果旧数据也没横杠的话)
     // 提示：如果之前存的是带横杠的，这里可能需要兼容
@@ -533,13 +537,14 @@ export default async function handler(
       if (skipRegistration) {
         return res.status(404).json({ success: false, message: '该授权码尚未激活，请先由教师端激活' });
       }
+      const newExpiryDate = getActivationExpiryDate(dateNowISO);
       console.log(`[License] New Activation: ${cleanCode} Device: ${deviceId}`);
       metadata = {
         code: cleanCode,
         totalDevices: 1,
         maxDevices: getEffectiveMaxDevices(cleanCode),
         generatedDate: generatedDate.toISOString(),
-        expiryDate: expiryDate.toISOString(),
+        expiryDate: newExpiryDate.toISOString(),
         firstActivatedAt: dateNowISO,
         lastUsedTime: dateNowISO,
         devices: [{
@@ -552,6 +557,12 @@ export default async function handler(
     } else {
       // 解压旧数据
       metadata = decompressMetadata(finalData, cleanCode);
+      const existingExpiryDate = getActivationExpiryDate(metadata.firstActivatedAt || metadata.generatedDate);
+      metadata.expiryDate = existingExpiryDate.toISOString();
+      if (dateNow > existingExpiryDate.getTime()) {
+        return res.status(401).json({ success: false, message: `授权码已于 ${existingExpiryDate.toLocaleDateString()} 过期，请购买新码` });
+      }
+
       const deviceIndex = metadata.devices.findIndex(d => d.deviceId === deviceId);
 
       if (deviceIndex > -1) {
@@ -568,7 +579,7 @@ export default async function handler(
         // 添加新设备
         if (skipRegistration) {
           // 只读验证，不添加设备，直接返回成功以允许进入（前提是 License 存在且未过期）
-          const token = Buffer.from(`${cleanCode}:${deviceId}:${expiryDate.getTime()}`).toString('base64');
+          const token = Buffer.from(`${cleanCode}:${deviceId}:${existingExpiryDate.getTime()}`).toString('base64');
           return res.status(200).json({
             success: true,
             message: '授权验证成功 (只读)',
@@ -606,7 +617,8 @@ export default async function handler(
     await kv.set(redisKey, compressed);
 
     // 4. 返回 Token
-    const token = Buffer.from(`${cleanCode}:${deviceId}:${expiryDate.getTime()}`).toString('base64');
+    const tokenExpiryTime = new Date(metadata.expiryDate).getTime();
+    const token = Buffer.from(`${cleanCode}:${deviceId}:${tokenExpiryTime}`).toString('base64');
 
     return res.status(200).json({
       success: true,
@@ -633,11 +645,9 @@ export default async function handler(
       });
     }
 
-    // 普通验证请求可降级处理
-    return res.status(200).json({
-      success: true,
-      message: '验证成功(离线)',
-      data: { validFor: '1年' }
+    return res.status(500).json({
+      success: false,
+      message: `服务器错误: ${(error as Error).message || '授权记录写入失败'}`
     });
   }
 }

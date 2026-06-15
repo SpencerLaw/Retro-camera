@@ -199,7 +199,7 @@ async function validateLicense() {
             forceExit(data.message || t('authError'));
         }
     } catch (e) {
-        showApp();
+        forceExit("网络连接失败，无法验证授权码");
     }
 }
 
@@ -286,7 +286,7 @@ function bindAllEvents() {
                     })
                 });
                 const data = await res.json();
-                if (data.success || code.length > 10) {
+                if (data.success) {
                     STATE.authorized = true;
                     STATE.licenseCode = code;
                     localStorage.setItem('magic_rc_auth', 'true');
@@ -294,8 +294,7 @@ function bindAllEvents() {
                     showApp();
                 } else { alert(data.message || t('authError')); }
             } catch (e) {
-                if (code.length > 5) { STATE.authorized = true; localStorage.setItem('magic_rc_auth', 'true'); showApp(); }
-                else { alert("API Error"); }
+                alert("网络连接失败，无法验证授权码");
             } finally { verifyBtn.disabled = false; }
         };
     }
@@ -453,6 +452,6 @@ window.addEventListener('DOMContentLoaded', () => {
     setInterval(updateClock, 1000);
     initCosmos();
     bindAllEvents();
-    if (STATE.authorized) validateLicense();
+    if (STATE.authorized) showApp();
     else showAuth();
 });

@@ -10,6 +10,7 @@
 
 /* --- Constants & State --- */
 const AUTH_KEY = 'morning_tree_auth';
+const AUTH_DEVICE_KEY = 'morning_tree_device_id';
 const LICENSE_PREFIX = 'ZD';
 const REPORT_STORAGE_KEY = 'morning_tree_weekly_reports_v1';
 const TASK_STORAGE_KEY = 'morning_tree_weekly_tasks_v1';
@@ -3167,19 +3168,57 @@ function initTaskUI() {
 /* --- 1. Gatekeeper Logic --- */
 function initGatekeeper() {
     const savedAuth = localStorage.getItem(AUTH_KEY);
+    bindLicenseForm();
     if (savedAuth && savedAuth.startsWith(LICENSE_PREFIX)) {
         showApp();
-    } else {
-        $('verify-btn').onclick = verifyLicense;
-        $('license-input').onkeyup = (e) => {
-            if (e.key === 'Enter') verifyLicense();
-        };
     }
 }
 
-function verifyLicense() {
+function bindLicenseForm() {
+    $('verify-btn').onclick = verifyLicense;
+    $('license-input').onkeyup = (e) => {
+        if (e.key === 'Enter') verifyLicense();
+    };
+}
+
+function getLicenseDeviceId() {
+    try {
+        let deviceId = localStorage.getItem(AUTH_DEVICE_KEY);
+        if (!deviceId) {
+            deviceId = `zd-${Math.random().toString(36).slice(2, 11)}-${Date.now().toString(36)}`;
+            localStorage.setItem(AUTH_DEVICE_KEY, deviceId);
+        }
+        return deviceId;
+    } catch (error) {
+        return `zd-temp-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    }
+}
+
+function getLicenseDeviceInfo() {
+    try {
+        return navigator.userAgent || 'Morning Energy Tree';
+    } catch (error) {
+        return 'Morning Energy Tree';
+    }
+}
+
+async function verifyLicenseWithBackend(input) {
+    const response = await fetch('/api/verify-license', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            licenseCode: input,
+            deviceId: getLicenseDeviceId(),
+            deviceInfo: getLicenseDeviceInfo()
+        })
+    });
+    return response.json();
+}
+
+async function verifyLicense() {
     const input = $('license-input').value.trim().toUpperCase();
     const errorMsg = $('auth-error');
+    const verifyBtn = $('verify-btn');
 
     // 🚨 前端预检
     if (!input.startsWith(LICENSE_PREFIX) || input.length < 6) {
@@ -3194,9 +3233,21 @@ function verifyLicense() {
         return;
     }
 
-    if (input.startsWith(LICENSE_PREFIX) && input.length >= 5) {
-        localStorage.setItem(AUTH_KEY, input);
-        showApp();
+    verifyBtn.disabled = true;
+    try {
+        const data = await verifyLicenseWithBackend(input);
+        if (data.success) {
+            localStorage.setItem(AUTH_KEY, input);
+            showApp();
+        } else {
+            errorMsg.style.display = 'block';
+            errorMsg.textContent = data.message || '授权码验证失败';
+        }
+    } catch (error) {
+        errorMsg.style.display = 'block';
+        errorMsg.textContent = '网络连接失败，无法验证授权码';
+    } finally {
+        verifyBtn.disabled = false;
     }
 }
 

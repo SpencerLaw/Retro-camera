@@ -29,6 +29,6 @@ runTest('math and word tug-of-war licenses are limited to two devices', () => {
 runTest('existing full YW and SX metadata is displayed with the latest two-device limit', () => {
   assert.match(
     decompressMetadataFunction,
-    /if \('devices' in compressed\) \{\s*return \{[\s\S]*\.\.\.compressed,[\s\S]*maxDevices:\s*getEffectiveMaxDevices\(code\)/
+    /if \('devices' in compressed\) \{[\s\S]*return \{[\s\S]*\.\.\.compressed,[\s\S]*maxDevices:\s*getEffectiveMaxDevices\(code\)/
   );
 });

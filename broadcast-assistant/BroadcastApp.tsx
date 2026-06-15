@@ -117,24 +117,7 @@ const BroadcastApp: React.FC<{ forceReceiver?: boolean }> = ({ forceReceiver = f
 
     const handleTeacherMode = async () => {
         if (isBCVerified()) {
-            // Re-validate license to ensure it's still active
-            const currentLicense = getBCLicense();
-            if (currentLicense) {
-                setVerifying(true);
-                const result = await verifyLicense(currentLicense, false);
-                setVerifying(false);
-
-                if (result.success) {
-                    setMode('sender');
-                } else {
-                    // License is no longer valid, clear it and show license screen
-                    await clearBCLicense();
-                    setError(result.message || 'License is no longer valid');
-                    setMode('license');
-                }
-            } else {
-                setMode('license');
-            }
+            setMode('sender');
         } else {
             setMode('license');
         }

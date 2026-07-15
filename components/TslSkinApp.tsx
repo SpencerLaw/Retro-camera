@@ -8,7 +8,6 @@ import {
   Folder,
   Layers,
   Palette,
-  RefreshCcw,
   Search,
   ShieldCheck,
   Sun,
@@ -23,7 +22,11 @@ import {
   getTeslaTemplateById,
   TESLA_MODEL_TEMPLATES,
 } from './tslSkinLogic.js';
-import TslVehicle3DPreview from './TslVehicle3DPreview';
+import { TslSkinPreviewDialog } from './TslSkinPreviewDialog';
+import type {
+  TslSkinPreviewDialogActions,
+  TslSkinPreviewDialogViewModel,
+} from './TslSkinPreviewDialog';
 
 export type TeslaModelTemplate = {
   id: string;
@@ -80,6 +83,19 @@ type DragState = {
   startY: number;
   layerX: number;
   layerY: number;
+};
+
+type PreviewDialogTarget =
+  | { readonly kind: 'gallery'; readonly wrap: OfficialWrapExample }
+  | { readonly kind: 'custom'; readonly imageUrl: string | null };
+
+type PreviewDialogContext = {
+  readonly open: boolean;
+  readonly target: PreviewDialogTarget | null;
+  readonly template: TeslaModelTemplate;
+  readonly wrapColor: string;
+  readonly isDayMode: boolean;
+  readonly status: string;
 };
 
 const PRESET_COLORS = ['#ffffff', '#111827', '#e82127', '#3e6ae1', '#14b8a6', '#fbbf24', '#f5d0fe', '#cbd5e1'];
@@ -214,6 +230,51 @@ function getCanvasCoords(canvas: HTMLCanvasElement, event: React.PointerEvent<HT
   };
 }
 
+function buildPreviewDialogViewModel(context: PreviewDialogContext): TslSkinPreviewDialogViewModel {
+  const common = {
+    wrapColor: context.wrapColor,
+    isDayMode: context.isDayMode,
+    model: context.template,
+    status: context.status,
+  };
+  const target = context.target;
+
+  if (!target) {
+    return {
+      ...common,
+      open: false,
+      title: '三维预览',
+      sourceLabel: '请选择皮肤',
+      riskTags: [],
+      wrapImageUrl: null,
+    };
+  }
+
+  switch (target.kind) {
+    case 'gallery':
+      return {
+        ...common,
+        open: context.open,
+        title: target.wrap.title,
+        sourceLabel: target.wrap.sourceLabel,
+        riskTags: target.wrap.riskTags || [],
+        wrapImageUrl: target.wrap.imageUrl,
+      };
+    case 'custom':
+      return {
+        ...common,
+        open: context.open,
+        title: target.imageUrl ? '自定义上传图片' : '当前车身颜色',
+        sourceLabel: '本地自定义',
+        riskTags: [],
+        wrapImageUrl: target.imageUrl,
+      };
+  }
+
+  const exhaustiveTarget: never = target;
+  return exhaustiveTarget;
+}
+
 const TslSkinApp: React.FC = () => {
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
@@ -237,7 +298,8 @@ const TslSkinApp: React.FC = () => {
   const [remoteIndexStatus, setRemoteIndexStatus] = React.useState('正在加载本地皮肤库...');
   const [showRiskWraps, setShowRiskWraps] = React.useState(true);
   const [selectedPreviewWrap, setSelectedPreviewWrap] = React.useState<OfficialWrapExample | null>(null);
-  const [previewPinned, setPreviewPinned] = React.useState(false);
+  const [previewDialogTarget, setPreviewDialogTarget] = React.useState<PreviewDialogTarget | null>(null);
+  const [isPreviewDialogOpen, setIsPreviewDialogOpen] = React.useState(false);
   const [customPreviewUrl, setCustomPreviewUrl] = React.useState<string | null>(null);
   const [customRenderUrl, setCustomRenderUrl] = React.useState<string | null>(null);
 
@@ -300,10 +362,17 @@ const TslSkinApp: React.FC = () => {
       return getGalleryPopularity(b) - getGalleryPopularity(a);
     });
   }, [galleryItems, gallerySort, searchWrapQuery, selectedWrapTag]);
-  const previewWrapUrl = customRenderUrl || customPreviewUrl || selectedPreviewWrap?.imageUrl || filteredGalleryItems[0]?.imageUrl || null;
-  const previewWrapTitle = customRenderUrl || customPreviewUrl
-    ? '自定义上传图片'
-    : selectedPreviewWrap?.title || filteredGalleryItems[0]?.title || '未选择皮肤';
+  const previewDialogViewModel = React.useMemo(
+    () => buildPreviewDialogViewModel({
+      open: isPreviewDialogOpen,
+      target: previewDialogTarget,
+      template: selectedTemplate,
+      wrapColor,
+      isDayMode,
+      status,
+    }),
+    [isDayMode, isPreviewDialogOpen, previewDialogTarget, selectedTemplate, status, wrapColor],
+  );
 
   React.useLayoutEffect(() => {
     const root = document.documentElement;
@@ -527,20 +596,6 @@ const TslSkinApp: React.FC = () => {
     };
   }, [customPreviewUrl, drawCanvas, layers.length, templateImage]);
 
-  React.useEffect(() => {
-    if (customPreviewUrl) {
-      return;
-    }
-
-    setSelectedPreviewWrap((currentWrap) => {
-      if (previewPinned && currentWrap && filteredGalleryItems.some((item) => item.id === currentWrap.id)) {
-        return currentWrap;
-      }
-
-      return filteredGalleryItems[0] || null;
-    });
-  }, [customPreviewUrl, filteredGalleryItems, previewPinned]);
-
   const updateSelectedLayer = React.useCallback((changes: Partial<SkinLayer>) => {
     if (!selectedLayerId) {
       return;
@@ -592,14 +647,22 @@ const TslSkinApp: React.FC = () => {
     event.target.value = '';
   };
 
-  const applyOfficialWrapToPreview = (example: OfficialWrapExample) => {
-    setCustomPreviewUrl(null);
-    setCustomRenderUrl(null);
-    setLayers([]);
-    setSelectedLayerId(null);
+  const openWrapPreview = (example: OfficialWrapExample) => {
     setSelectedPreviewWrap(example);
-    setPreviewPinned(true);
-    setStatus(`${example.title} 已显示在右侧三维渲染区。`);
+    setPreviewDialogTarget({ kind: 'gallery', wrap: example });
+    setIsPreviewDialogOpen(true);
+    setStatus(`${example.title} 已打开三维预览。`);
+  };
+
+  const openCustomPreview = () => {
+    setPreviewDialogTarget({ kind: 'custom', imageUrl: customRenderUrl || customPreviewUrl });
+    setIsPreviewDialogOpen(true);
+    setStatus('已打开当前自定义皮肤的三维预览。');
+  };
+
+  const closePreviewDialog = () => {
+    setIsPreviewDialogOpen(false);
+    setPreviewDialogTarget(null);
   };
 
   const removeCustomWrap = () => {
@@ -607,19 +670,7 @@ const TslSkinApp: React.FC = () => {
     setCustomRenderUrl(null);
     setLayers([]);
     setSelectedLayerId(null);
-    setSelectedPreviewWrap(galleryItems[0] || null);
-    setPreviewPinned(false);
     setStatus('自定义图片已删除，已恢复现有皮肤预览。');
-  };
-
-  const clearPreviewWrap = () => {
-    setCustomPreviewUrl(null);
-    setCustomRenderUrl(null);
-    setSelectedPreviewWrap(null);
-    setPreviewPinned(false);
-    setLayers([]);
-    setSelectedLayerId(null);
-    setStatus('右侧预览已清除，可选择现有皮肤或上传自定义图片。');
   };
 
   const getWrapAssetBytes = async (example: OfficialWrapExample) => {
@@ -755,13 +806,30 @@ const TslSkinApp: React.FC = () => {
     }
   };
 
-  const downloadSelectedWrapAsset = () => {
-    if (customPreviewUrl || customRenderUrl || layers.length > 0 || !selectedPreviewWrap) {
-      downloadCanvas();
+  const downloadPreviewTarget = (): void => {
+    const target = previewDialogTarget;
+    if (!target) {
+      setStatus('请先选择要下载的皮肤。');
       return;
     }
 
-    void downloadWrapExample(selectedPreviewWrap);
+    switch (target.kind) {
+      case 'gallery':
+        void downloadWrapExample(target.wrap);
+        return;
+      case 'custom':
+        downloadCanvas();
+        return;
+    }
+
+    const exhaustiveTarget: never = target;
+    return exhaustiveTarget;
+  };
+
+  const previewDialogActions: TslSkinPreviewDialogActions = {
+    close: closePreviewDialog,
+    download: downloadPreviewTarget,
+    setPaintColor: setWrapColor,
   };
 
   const rootClassName = isDayMode
@@ -780,7 +848,7 @@ const TslSkinApp: React.FC = () => {
 
   return (
     <div className={rootClassName}>
-      <main className="tsl-skin-studio-workbench mx-auto grid min-h-screen w-full max-w-[1440px] gap-4 overflow-x-hidden px-3 py-3 lg:grid-cols-[minmax(0,1fr)_420px] lg:px-5 lg:py-5">
+      <main className="tsl-skin-studio-workbench mx-auto min-h-screen w-full max-w-[1440px] overflow-x-hidden px-3 py-3 lg:px-5 lg:py-5">
         <section className={`tsl-skin-gallery-board min-w-0 overflow-hidden rounded-xl border shadow-sm ${sidebarClassName}`}>
           <div className="border-b border-inherit p-3">
             <div className="flex items-center justify-between gap-3">
@@ -859,7 +927,8 @@ const TslSkinApp: React.FC = () => {
                 <select
                   value={selectedTemplateId}
                   onChange={(event) => {
-                    setPreviewPinned(false);
+                    closePreviewDialog();
+                    setSelectedPreviewWrap(null);
                     setSelectedTemplateId(event.target.value);
                   }}
                   className={`h-11 rounded-md border px-3 text-sm font-bold outline-none focus:border-[#3e6ae1] ${
@@ -947,21 +1016,22 @@ const TslSkinApp: React.FC = () => {
               <div className="mb-3 flex items-center justify-between gap-3">
                 <div>
                   <h1 className="text-lg font-black">现有皮肤</h1>
-                  <p className={`mt-1 text-xs font-bold ${mutedTextClassName}`}>点击缩略图预览，底部按钮下载当前选中的皮肤。</p>
+                  <p className={`mt-1 text-xs font-bold ${mutedTextClassName}`}>点击皮肤打开三维预览，在弹窗中旋转车辆并下载。</p>
                 </div>
                 <span className="rounded-full bg-[#3e6ae1]/10 px-3 py-1 text-xs font-black text-[#3e6ae1]">
                   {filteredGalleryItems.length}
                 </span>
               </div>
 
-              <div className="tsl-skin-wrap-grid grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+              <div className="tsl-skin-wrap-grid grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
                 {filteredGalleryItems.map((example) => (
                   <button
                     key={example.id}
                     type="button"
-                    onClick={() => applyOfficialWrapToPreview(example)}
+                    onClick={() => openWrapPreview(example)}
+                    aria-label={`${example.title}，点击查看三维效果`}
                     className={`tsl-skin-wrap-card min-w-0 overflow-hidden rounded-md border transition ${
-                      selectedPreviewWrap?.id === example.id && !customPreviewUrl && !customRenderUrl
+                      selectedPreviewWrap?.id === example.id
                         ? 'border-[#3e6ae1] ring-2 ring-[#3e6ae1]/20'
                         : isDayMode
                           ? 'border-slate-200 bg-white hover:border-[#3e6ae1]'
@@ -984,8 +1054,9 @@ const TslSkinApp: React.FC = () => {
                           {formatRiskTags(example.riskTags)}
                         </span>
                       )}
-                      <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/80 to-transparent px-1.5 py-1 text-center text-[10px] font-black text-white">
-                        {example.title}
+                      <span className="absolute inset-x-0 bottom-0 bg-slate-950/80 px-1.5 py-1 text-center text-[10px] font-black text-white backdrop-blur-sm">
+                        <span className="block truncate">{example.title}</span>
+                        <span className="mt-0.5 block text-[9px] font-bold text-white/80">点击查看 3D 效果</span>
                       </span>
                     </div>
                   </button>
@@ -1006,7 +1077,7 @@ const TslSkinApp: React.FC = () => {
                 <div>
                   <h2 className="text-lg font-black">自定义上传裁剪</h2>
                   <div className={`mt-1 text-xs font-black ${mutedTextClassName}`}>上传自己的皮肤</div>
-                  <p className={`mt-1 text-xs font-bold ${mutedTextClassName}`}>上传图片后拖动、缩放、旋转，右侧同步渲染。</p>
+                  <p className={`mt-1 text-xs font-bold ${mutedTextClassName}`}>上传图片后拖动、缩放、旋转，再打开三维弹窗查看效果。</p>
                 </div>
                 <ShieldCheck size={19} className="text-emerald-500" />
               </div>
@@ -1066,7 +1137,7 @@ const TslSkinApp: React.FC = () => {
                   className="h-11 w-14 cursor-pointer rounded-md border border-slate-200 bg-white"
                   aria-label="选择车身颜色"
                 />
-                <div className={`text-xs font-bold ${mutedTextClassName}`}>未上传图片时，右侧会显示纯色车身效果。</div>
+                <div className={`text-xs font-bold ${mutedTextClassName}`}>未上传图片时，三维预览会显示纯色车身效果。</div>
               </div>
               <div className="mt-3 grid grid-cols-8 gap-2">
                 {PRESET_COLORS.map((color) => (
@@ -1085,7 +1156,18 @@ const TslSkinApp: React.FC = () => {
             <div className={`mt-4 rounded-md border p-3 ${panelClassName}`}>
               <div className="mb-2 flex items-center justify-between gap-3">
                 <div className="text-sm font-black">裁剪画布</div>
-                <span className={`text-xs font-bold ${mutedTextClassName}`}>{selectedTemplate.label} · 一比一</span>
+                <div className="flex items-center gap-2">
+                  <span className={`hidden text-xs font-bold sm:inline ${mutedTextClassName}`}>{selectedTemplate.label} · 一比一</span>
+                  <button
+                    type="button"
+                    onClick={openCustomPreview}
+                    disabled={loading || !templateImage}
+                    className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#3e6ae1] px-3 text-xs font-black text-white transition hover:bg-[#3457b1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3e6ae1] focus-visible:ring-offset-2 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <Car size={15} />
+                    查看 3D 效果
+                  </button>
+                </div>
               </div>
               <div className="relative flex items-center justify-center overflow-hidden rounded-md bg-slate-950 p-2">
                 {loading && (
@@ -1249,54 +1331,14 @@ const TslSkinApp: React.FC = () => {
             </div>
 
             <p className={`mt-4 text-xs leading-5 ${mutedTextClassName}`}>
-              使用顺序：先选车型，再上传图片调整位置，最后点击右下角下载当前皮肤。
+              使用顺序：先选车型，再上传图片调整位置，最后打开三维预览并下载当前皮肤。
             </p>
           </section>
         </section>
 
-        <section className={`tsl-skin-render-stage relative lg:sticky top-24 min-h-[580px] min-w-0 overflow-hidden rounded-xl border lg:h-[calc(100vh-7rem)] ${isDayMode ? 'border-slate-200 bg-[#e5e7eb]' : 'border-white/10 bg-slate-900'}`}>
-          <TslVehicle3DPreview
-            wrapColor={wrapColor}
-            wrapImageUrl={previewWrapUrl}
-            modelUrl={selectedTemplate.previewModelUrl}
-            objModelUrl={selectedTemplate.previewObjUrl}
-            mtlModelUrl={selectedTemplate.previewMtlUrl}
-            vehicleImageUrl={selectedTemplate.vehicleImageUrl}
-            modelLabel={selectedTemplate.label}
-            isDayMode={isDayMode}
-          />
-
-          <div className="pointer-events-none absolute left-5 top-5 max-w-[min(420px,calc(100%-40px))] rounded-md border border-white/70 bg-white/90 p-3 shadow-lg backdrop-blur">
-            <div className="truncate text-sm font-black text-slate-900">{previewWrapTitle}</div>
-            <div className="mt-1 text-xs font-bold text-slate-500">右侧为三维动态预览，鼠标拖动旋转，滚轮缩放。</div>
-          </div>
-
-          <div className="absolute bottom-5 left-3 right-3 flex flex-col gap-3 rounded-lg border border-white/70 bg-white/90 p-3 shadow-2xl backdrop-blur sm:left-1/2 sm:right-auto sm:w-[min(820px,calc(100%-24px))] sm:-translate-x-1/2 sm:flex-row sm:items-center sm:justify-between">
-            <div className="min-w-0">
-              <div className="truncate text-sm font-black text-slate-800">{selectedTemplate.label}</div>
-              <div className="mt-1 text-xs font-bold text-slate-500">{status}</div>
-            </div>
-            <div className="grid shrink-0 grid-cols-1 gap-2 sm:grid-cols-2">
-              <button
-                type="button"
-                onClick={clearPreviewWrap}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-md border border-slate-200 bg-slate-100 px-3 text-sm font-black text-slate-700 transition hover:border-[#e82127]"
-              >
-                <RefreshCcw size={16} />
-                清除皮肤
-              </button>
-              <button
-                type="button"
-                onClick={downloadSelectedWrapAsset}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-[#3e6ae1] px-3 text-sm font-black text-white transition hover:bg-[#3457b1]"
-              >
-                <Download size={16} />
-                下载当前皮肤
-              </button>
-            </div>
-          </div>
-        </section>
       </main>
+
+      <TslSkinPreviewDialog viewModel={previewDialogViewModel} actions={previewDialogActions} />
     </div>
   );
 };

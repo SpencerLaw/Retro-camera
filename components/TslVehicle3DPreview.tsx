@@ -5,6 +5,7 @@ import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+import { addMarkerWheels } from './tslVehicleWheel';
 
 type TslVehicle3DPreviewProps = {
   wrapColor: string;
@@ -95,9 +96,11 @@ const HIDDEN_HELPER_HINTS = [
   'roof_sensor',
   'door_sensor',
 ];
+const TIRE_MATERIAL_HINTS = ['tire', 'tyre', 'rubber', 'sidewall'];
+const WHEEL_MATERIAL_HINTS = ['wheel', 'rim', 'alloy', 'spoke', 'hubcap'];
 const BASE_PAINT_COLOR = new THREE.Color(0xc4c4c4);
 const OBJ_PAINT_MATERIAL_NAMES = ['CarPaint', 'CarPaint.001'];
-const MODEL_LOAD_TIMEOUT_MS = 12000;
+const MODEL_LOAD_TIMEOUT_MS = 30000;
 
 function materialName(mesh: THREE.Mesh) {
   const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
@@ -127,6 +130,20 @@ function assignTargetMaterial(target: MaterialTarget, material: THREE.Material) 
   }
 
   target.mesh.material = material;
+}
+
+function replaceTargetMaterial(target: MaterialTarget, material: THREE.Material) {
+  const currentMaterial = target.mesh.material;
+  const previousMaterial = Array.isArray(currentMaterial)
+    ? target.materialIndex === null
+      ? null
+      : currentMaterial[target.materialIndex] || null
+    : currentMaterial;
+
+  assignTargetMaterial(target, material);
+  if (previousMaterial && previousMaterial !== material) {
+    previousMaterial.dispose();
+  }
 }
 
 function assignAllMeshMaterials(mesh: THREE.Mesh, createMaterial: () => THREE.Material) {
@@ -176,6 +193,24 @@ function makeBlackTrimMaterial() {
     color: 0x05070a,
     metalness: 0.26,
     roughness: 0.72,
+  });
+}
+
+function makeTireMaterial() {
+  return new THREE.MeshStandardMaterial({
+    color: 0x111318,
+    metalness: 0.06,
+    roughness: 0.78,
+    envMapIntensity: 0.72,
+  });
+}
+
+function makeWheelMaterial() {
+  return new THREE.MeshStandardMaterial({
+    color: 0x8d949f,
+    metalness: 0.82,
+    roughness: 0.24,
+    envMapIntensity: 1.45,
   });
 }
 
@@ -244,6 +279,18 @@ function shouldKeepAsChrome(mesh: THREE.Mesh) {
     'door_top_lr',
     'door_top_rr',
   ].includes(parent);
+}
+
+function wheelSlotKey(slot: MaterialSlot, mesh: THREE.Mesh) {
+  return `${meshName(mesh)} ${parentName(mesh)} ${materialSlotName(slot)}`;
+}
+
+function isTireMaterialSlot(slot: MaterialSlot, mesh: THREE.Mesh) {
+  return includesAny(wheelSlotKey(slot, mesh), TIRE_MATERIAL_HINTS);
+}
+
+function isWheelMaterialSlot(slot: MaterialSlot, mesh: THREE.Mesh) {
+  return includesAny(wheelSlotKey(slot, mesh), WHEEL_MATERIAL_HINTS);
 }
 
 function isPaintMaterialSlot(slot: MaterialSlot, mesh: THREE.Mesh) {
@@ -356,6 +403,18 @@ function prepareVehicleModel(source: THREE.Group): PreparedModel {
         return;
       }
 
+      if (isTireMaterialSlot(slot, mesh)) {
+        assignTargetMaterial(target, makeTireMaterial());
+        trimTargets.push(target);
+        return;
+      }
+
+      if (isWheelMaterialSlot(slot, mesh)) {
+        assignTargetMaterial(target, makeWheelMaterial());
+        trimTargets.push(target);
+        return;
+      }
+
       if (isPaintMaterialSlot(slot, mesh)) {
         assignTargetMaterial(target, makePaintMaterial(BASE_PAINT_COLOR));
         paintTargets.push(target);
@@ -372,6 +431,8 @@ function prepareVehicleModel(source: THREE.Group): PreparedModel {
       }
     });
   });
+
+  addMarkerWheels(group);
 
   const finalBox = fitVehicleGroup(
     group,
@@ -404,6 +465,18 @@ function prepareObjVehicleModel(source: THREE.Group): PreparedModel {
       const target: MaterialTarget = { mesh: slot.mesh, materialIndex: slot.materialIndex };
       const slotName = materialSlotName(slot);
 
+      if (isTireMaterialSlot(slot, mesh)) {
+        assignTargetMaterial(target, makeTireMaterial());
+        trimTargets.push(target);
+        return;
+      }
+
+      if (isWheelMaterialSlot(slot, mesh)) {
+        assignTargetMaterial(target, makeWheelMaterial());
+        trimTargets.push(target);
+        return;
+      }
+
       if (isObjPaintMaterial(slot)) {
         assignTargetMaterial(target, makeObjPaintMaterial(BASE_PAINT_COLOR));
         paintTargets.push(target);
@@ -432,16 +505,28 @@ function prepareObjVehicleModel(source: THREE.Group): PreparedModel {
 function fitCameraToModel(camera: THREE.PerspectiveCamera, controls: OrbitControls, box: THREE.Box3, narrow: boolean) {
   const center = box.getCenter(new THREE.Vector3());
   const size = box.getSize(new THREE.Vector3());
-  const distance = narrow ? 1.9 : 1.22;
-
-  camera.position.set(
-    center.x + size.x * (narrow ? 2.25 : 2.05) * distance,
-    center.y + size.y * (narrow ? 0.9 : 0.66),
-    center.z - size.z * (narrow ? 1.2 : 1.05) * distance,
-  );
+  let requiredDistance = 0;
+  if (camera.aspect < 1.35) {
+    const verticalFov = THREE.MathUtils.degToRad(camera.fov);
+    const fitSpan = size.length();
+    const fitHeightDistance = fitSpan / (2 * Math.tan(verticalFov / 2));
+    const fitWidthDistance = fitHeightDistance / camera.aspect;
+    const fitDistance = Math.max(fitHeightDistance, fitWidthDistance) * 1.2;
+    const viewDirection = new THREE.Vector3(1.25, 0.46, -1).normalize();
+    camera.position.copy(center).addScaledVector(viewDirection, fitDistance);
+    requiredDistance = fitDistance;
+  } else {
+    const distance = narrow ? 1.9 : 1.22;
+    camera.position.set(
+      center.x + size.x * (narrow ? 2.25 : 2.05) * distance,
+      center.y + size.y * (narrow ? 0.9 : 0.66),
+      center.z - size.z * (narrow ? 1.2 : 1.05) * distance,
+    );
+    requiredDistance = camera.position.distanceTo(center);
+  }
   controls.target.set(center.x, center.y + size.y * 0.1, center.z);
   controls.minDistance = Math.max(size.length() * 0.36, 2.4);
-  controls.maxDistance = Math.max(size.length() * 1.55, 7.5);
+  controls.maxDistance = Math.max(size.length() * 1.55, requiredDistance * 1.15, 7.5);
   controls.update();
 }
 
@@ -489,7 +574,31 @@ function makePreviewWrapMaterial(mode: PreviewModelMode, texture: THREE.Texture)
   return mode === 'obj' ? makeObjWrapMaterial(texture) : makeWrapMaterial(texture);
 }
 
-function disposeObject(root: THREE.Object3D) {
+function disposeMaterialTextures(material: THREE.Material, disposedTextures: Set<unknown>) {
+  const materialValues: unknown[] = Object.values(material);
+  materialValues.forEach((value) => {
+    if (
+      typeof value !== 'object'
+      || value === null
+      || !('isTexture' in value)
+      || value.isTexture !== true
+      || !('dispose' in value)
+      || typeof value.dispose !== 'function'
+      || disposedTextures.has(value)
+    ) {
+      return;
+    }
+
+    disposedTextures.add(value);
+    value.dispose();
+  });
+}
+
+function disposeObject(
+  root: THREE.Object3D,
+  disposedTextures = new Set<unknown>(),
+  disposedMaterials = new Set<THREE.Material>(),
+) {
   root.traverse((item) => {
     const mesh = item as THREE.Mesh;
     if (!mesh.isMesh) {
@@ -498,7 +607,15 @@ function disposeObject(root: THREE.Object3D) {
 
     mesh.geometry?.dispose();
     const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-    materials.forEach((material) => material?.dispose());
+    materials.forEach((material) => {
+      if (!material || disposedMaterials.has(material)) {
+        return;
+      }
+
+      disposedMaterials.add(material);
+      disposeMaterialTextures(material, disposedTextures);
+      material.dispose();
+    });
   });
 }
 
@@ -563,12 +680,18 @@ const TslVehicle3DPreview: React.FC<TslVehicle3DPreviewProps> = ({
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
-    controls.autoRotate = true;
     controls.autoRotateSpeed = 0.32;
     controls.enablePan = false;
     controls.minPolarAngle = Math.PI / 7;
     controls.maxPolarAngle = Math.PI / 2 - 0.04;
     controlsRef.current = controls;
+
+    const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const syncAutoRotate = () => {
+      controls.autoRotate = !motionPreference.matches;
+    };
+    syncAutoRotate();
+    motionPreference.addEventListener('change', syncAutoRotate);
 
     scene.add(new THREE.HemisphereLight(0xffffff, isDayMode ? 0xe5e7eb : 0x111827, 1.35));
     scene.add(new THREE.AmbientLight(0xffffff, 1.55));
@@ -603,6 +726,44 @@ const TslVehicle3DPreview: React.FC<TslVehicle3DPreviewProps> = ({
     resize();
     const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(mount);
+
+    let resourcesDisposed = false;
+    const disposePreviewResources = () => {
+      if (resourcesDisposed) {
+        return;
+      }
+
+      resourcesDisposed = true;
+      cancelled = true;
+      if (loadTimeoutId !== null) {
+        window.clearTimeout(loadTimeoutId);
+        loadTimeoutId = null;
+      }
+      cancelAnimationFrame(frameId);
+      resizeObserver.disconnect();
+      motionPreference.removeEventListener('change', syncAutoRotate);
+      controls.dispose();
+      dracoLoader?.dispose();
+
+      const disposedTextures = new Set<unknown>();
+      const activeTexture = textureRef.current;
+      if (activeTexture) {
+        disposedTextures.add(activeTexture);
+        activeTexture.dispose();
+      }
+      if (preparedModel) {
+        disposeObject(preparedModel.group, disposedTextures);
+      }
+
+      renderer.dispose();
+      renderer.forceContextLoss();
+      renderer.domElement.remove();
+      controlsRef.current = null;
+      wrapTargetsRef.current = [];
+      paintTargetsRef.current = [];
+      trimTargetsRef.current = [];
+      textureRef.current = null;
+    };
 
     const activatePreparedModel = (nextPreparedModel: PreparedModel) => {
       if (loadTimeoutId !== null) {
@@ -642,6 +803,7 @@ const TslVehicle3DPreview: React.FC<TslVehicle3DPreviewProps> = ({
           loadTimeoutId = null;
         }
         setLoadState('fallback');
+        disposePreviewResources();
       }
     };
 
@@ -742,32 +904,12 @@ const TslVehicle3DPreview: React.FC<TslVehicle3DPreviewProps> = ({
     };
     render();
 
-    return () => {
-      cancelled = true;
-      if (loadTimeoutId !== null) {
-        window.clearTimeout(loadTimeoutId);
-      }
-      cancelAnimationFrame(frameId);
-      resizeObserver.disconnect();
-      controls.dispose();
-      dracoLoader?.dispose();
-      textureRef.current?.dispose();
-      if (preparedModel) {
-        disposeObject(preparedModel.group);
-      }
-      renderer.dispose();
-      renderer.domElement.remove();
-      controlsRef.current = null;
-      wrapTargetsRef.current = [];
-      paintTargetsRef.current = [];
-      trimTargetsRef.current = [];
-      textureRef.current = null;
-    };
+    return disposePreviewResources;
   }, [isDayMode, modelUrl, mtlModelUrl, objModelUrl]);
 
   React.useEffect(() => {
     paintTargetsRef.current.forEach((target) => {
-      assignTargetMaterial(target, makePreviewPaintMaterial(previewModeRef.current, wrapColor));
+      replaceTargetMaterial(target, makePreviewPaintMaterial(previewModeRef.current, wrapColor));
     });
   }, [wrapColor, modelVersion]);
 
@@ -779,10 +921,10 @@ const TslVehicle3DPreview: React.FC<TslVehicle3DPreviewProps> = ({
       textureRef.current?.dispose();
       textureRef.current = null;
       targets.forEach((target) => {
-        assignTargetMaterial(target, makePreviewPaintMaterial(previewModeRef.current, wrapColor));
+        replaceTargetMaterial(target, makePreviewPaintMaterial(previewModeRef.current, wrapColor));
       });
       trimTargetsRef.current.forEach((target) => {
-        assignTargetMaterial(target, makeBlackTrimMaterial());
+        replaceTargetMaterial(target, makeBlackTrimMaterial());
       });
     };
 
@@ -810,11 +952,15 @@ const TslVehicle3DPreview: React.FC<TslVehicle3DPreviewProps> = ({
         textureRef.current = texture;
 
         targets.forEach((target) => {
-          assignTargetMaterial(target, makePreviewWrapMaterial(previewModeRef.current, texture));
+          replaceTargetMaterial(target, makePreviewWrapMaterial(previewModeRef.current, texture));
         });
       },
       undefined,
-      clearWrapTexture,
+      () => {
+        if (!cancelled) {
+          clearWrapTexture();
+        }
+      },
     );
 
     return () => {

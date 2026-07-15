@@ -9,6 +9,14 @@ const logicSource = fs.readFileSync('components/tslSkinLogic.js', 'utf8');
 const packageSource = fs.readFileSync('package.json', 'utf8');
 const vehicle3DFileExists = fs.existsSync('components/TslVehicle3DPreview.tsx');
 const vehicle3DSource = vehicle3DFileExists ? fs.readFileSync('components/TslVehicle3DPreview.tsx', 'utf8') : '';
+const wheelModuleFileExists = fs.existsSync('components/tslVehicleWheel.ts');
+const wheelModuleSource = wheelModuleFileExists
+  ? fs.readFileSync('components/tslVehicleWheel.ts', 'utf8')
+  : '';
+const previewDialogFileExists = fs.existsSync('components/TslSkinPreviewDialog.tsx');
+const previewDialogSource = previewDialogFileExists
+  ? fs.readFileSync('components/TslSkinPreviewDialog.tsx', 'utf8')
+  : '';
 
 function runTest(name, fn) {
   try {
@@ -55,28 +63,43 @@ runTest('tsl skin page only offers stable Model 3 and Model Y variants', () => {
 runTest('tsl skin page uses a gallery-first 3d workbench layout', () => {
   assert.equal(vehicle3DFileExists, true);
   assert.match(packageSource, /"three"/);
-  assert.match(componentSource, /TslVehicle3DPreview/);
+  assert.equal(previewDialogFileExists, true);
+  assert.match(previewDialogSource, /TslVehicle3DPreview/);
   assert.match(componentSource, /tsl-skin-studio-workbench/);
   assert.match(componentSource, /tsl-skin-flow-steps/);
   assert.match(componentSource, /tsl-skin-filter-bar/);
   assert.match(componentSource, /tsl-skin-gallery-board/);
-  assert.match(componentSource, /tsl-skin-render-stage/);
   assert.match(componentSource, /tsl-skin-wrap-grid/);
   assert.match(componentSource, /activeWorkspace/);
   assert.match(componentSource, /searchWrapQuery/);
   assert.match(componentSource, /selectedWrapTag/);
   assert.match(componentSource, /gallerySort/);
   assert.match(componentSource, /filteredGalleryItems/);
-  assert.match(componentSource, /filteredGalleryItems\[0\]/);
-  assert.match(componentSource, /applyOfficialWrapToPreview/);
-  assert.match(componentSource, /downloadSelectedWrapAsset/);
+  assert.match(componentSource, /openWrapPreview/);
+  assert.match(componentSource, /PreviewDialogTarget/);
+  assert.match(componentSource, /downloadPreviewTarget/);
   assert.match(componentSource, /removeCustomWrap/);
   assert.match(componentSource, /删除自定义图片/);
-  assert.match(componentSource, /拖动旋转/);
-  assert.match(componentSource, /滚轮缩放/);
-  assert.match(componentSource, /清除皮肤/);
-  assert.match(componentSource, /下载当前皮肤/);
+  assert.match(previewDialogSource, /下载当前皮肤/);
   assert.doesNotMatch(componentSource, /skin-detail-dialog/);
+});
+
+runTest('tsl skin gallery opens an on-demand native 3d preview dialog', () => {
+  assert.equal(previewDialogFileExists, true);
+  assert.match(previewDialogSource, /<dialog/);
+  assert.match(previewDialogSource, /showModal\(\)/);
+  assert.match(previewDialogSource, /aria-labelledby/);
+  assert.match(previewDialogSource, /TslVehicle3DPreview/);
+  assert.match(previewDialogSource, /下载当前皮肤/);
+  assert.match(componentSource, /TslSkinPreviewDialog/);
+  assert.match(componentSource, /openWrapPreview/);
+  assert.match(componentSource, /查看 3D 效果/);
+});
+
+runTest('tsl skin gallery no longer keeps a persistent right preview column', () => {
+  assert.doesNotMatch(componentSource, /tsl-skin-render-stage/);
+  assert.doesNotMatch(componentSource, /lg:grid-cols-\[minmax\(0,1fr\)_420px\]/);
+  assert.match(componentSource, /2xl:grid-cols-6/);
 });
 
 runTest('tsl skin 3d preview uses threejs orbit controls without copying remote model assets', () => {
@@ -95,7 +118,64 @@ runTest('tsl skin 3d preview uses threejs orbit controls without copying remote 
   assert.match(vehicle3DSource, /uv1/);
   assert.match(vehicle3DSource, /PAINT_MATERIAL_HINTS/);
   assert.match(vehicle3DSource, /官方静态预览/);
-  assert.doesNotMatch(vehicle3DSource, /function createWheel\(|CylinderGeometry|ExtrudeGeometry|createBodyShellGeometry|sideSkirt|frontBumper|rearBumper/);
+  assert.doesNotMatch(vehicle3DSource, /function createWheel\(|createBodyShellGeometry|sideSkirt|frontBumper|rearBumper/);
+});
+
+runTest('tsl skin 3d preview builds proportionate twin-spoke Model Y wheels', () => {
+  assert.equal(wheelModuleFileExists, true);
+  assert.match(vehicle3DSource, /from '\.\/tslVehicleWheel'/);
+  assert.match(wheelModuleSource, /MODEL_Y_TIRE_WIDTH_M = 0\.255/);
+  assert.match(wheelModuleSource, /MODEL_Y_TIRE_OUTER_RADIUS_M = 0\.356/);
+  assert.match(wheelModuleSource, /GEMINI_SPOKE_PAIR_COUNT = 10/);
+  assert.match(wheelModuleSource, /GEMINI_SPOKE_PAIR_OFFSETS = \[-0\.04, 0\.04\] as const/);
+  assert.match(wheelModuleSource, /GEMINI_SPOKE_DEPTH_M = 0\.018/);
+  assert.match(wheelModuleSource, /new THREE\.CylinderGeometry/);
+  assert.match(wheelModuleSource, /new THREE\.CylinderGeometry\([\s\S]{0,240}MODEL_Y_TIRE_WIDTH_M/);
+  assert.match(wheelModuleSource, /new THREE\.ExtrudeGeometry/);
+  assert.match(wheelModuleSource, /new THREE\.ExtrudeGeometry\([\s\S]{0,180}GEMINI_SPOKE_DEPTH_M/);
+  assert.match(wheelModuleSource, /createGeminiSpoke/);
+  assert.match(wheelModuleSource, /makeMarkerTireMaterial/);
+  assert.match(wheelModuleSource, /makeGeminiWheelMaterial/);
+  assert.match(wheelModuleSource, /WHEEL_MARKER_PATTERN/);
+  assert.match(wheelModuleSource, /addMarkerWheels/);
+  assert.match(wheelModuleSource, /tire\.rotation\.x = Math\.PI \/ 2/);
+  assert.match(wheelModuleSource, /for \(let pairIndex = 0; pairIndex < GEMINI_SPOKE_PAIR_COUNT; pairIndex \+= 1\)[\s\S]{0,500}GEMINI_SPOKE_PAIR_OFFSETS[\s\S]{0,500}createGeminiSpoke/);
+  assert.match(vehicle3DSource, /group\.traverse\([\s\S]+addMarkerWheels\(group\);[\s\S]+fitVehicleGroup/);
+  assert.doesNotMatch(vehicle3DSource, /addMarkerWheels\(group\);\s*group\.traverse/);
+});
+
+runTest('tsl skin 3d preview fits the full vehicle into narrow dialog stages', () => {
+  assert.match(vehicle3DSource, /camera\.aspect < 1\.35/);
+  assert.match(vehicle3DSource, /let requiredDistance = 0/);
+  assert.match(vehicle3DSource, /const fitSpan = size\.length\(\)/);
+  assert.match(vehicle3DSource, /const fitHeightDistance = fitSpan \/ \(2 \* Math\.tan\(verticalFov \/ 2\)\)/);
+  assert.match(vehicle3DSource, /const fitWidthDistance = fitHeightDistance \/ camera\.aspect/);
+  assert.match(vehicle3DSource, /const fitDistance = Math\.max\(fitHeightDistance, fitWidthDistance\) \* 1\.2/);
+  assert.match(vehicle3DSource, /controls\.maxDistance = Math\.max\(size\.length\(\) \* 1\.55, requiredDistance \* 1\.15, 7\.5\)/);
+});
+
+runTest('tsl skin preview dialog keeps its mobile subtitle readable', () => {
+  assert.match(
+    previewDialogSource,
+    /<p className=\{`mt-1 line-clamp-2 text-xs font-medium sm:line-clamp-1 \$\{mutedTextClassName\}`\}>/,
+  );
+  assert.match(
+    previewDialogSource,
+    /<span className="whitespace-nowrap">\{viewModel\.model\.label\}<\/span>/,
+  );
+  assert.match(previewDialogSource, /<br className="sm:hidden" \/>/);
+  assert.match(
+    previewDialogSource,
+    /<span className="hidden sm:inline">\s*·\s*<\/span>/,
+  );
+  assert.match(
+    previewDialogSource,
+    /<span className="whitespace-nowrap">\{viewModel\.sourceLabel\}<\/span>/,
+  );
+  assert.doesNotMatch(
+    previewDialogSource,
+    /<p className=\{`mt-1 truncate text-xs font-medium \$\{mutedTextClassName\}`\}>\s*\{viewModel\.model\.label\}/,
+  );
 });
 
 runTest('tsl skin 3d preview updates only paint material slots', () => {
@@ -104,6 +184,14 @@ runTest('tsl skin 3d preview updates only paint material slots', () => {
   assert.match(vehicle3DSource, /getMeshMaterialSlots/);
   assert.match(vehicle3DSource, /assignTargetMaterial/);
   assert.match(vehicle3DSource, /hasUsableWrapUv\(target\.mesh/);
+  assert.match(vehicle3DSource, /WHEEL_MATERIAL_HINTS/);
+  assert.match(vehicle3DSource, /isWheelMaterialSlot/);
+  assert.match(vehicle3DSource, /makeTireMaterial/);
+  assert.match(vehicle3DSource, /makeWheelMaterial/);
+  assert.match(wheelModuleSource, /buildMarkerWheelAssembly/);
+  assert.match(wheelModuleSource, /WHEEL_MARKER_PATTERN/);
+  assert.match(vehicle3DSource, /isWheelMaterialSlot\(slot, mesh\)[\s\S]{0,250}return;/);
+  assert.doesNotMatch(vehicle3DSource, /isObjPaintMaterial\(slot\)[\s\S]{0,250}isWheelMaterialSlot/);
   assert.doesNotMatch(vehicle3DSource, /mesh\.material = makeWrapMaterial\(texture\);/);
   assert.doesNotMatch(vehicle3DSource, /mesh\.material = makePaintMaterial\(wrapColor\);/);
 });
@@ -113,6 +201,22 @@ runTest('tsl skin 3d preview uses clear non-mirrored paint materials', () => {
   assert.match(vehicle3DSource, /roughness: 0\.38/);
   assert.match(vehicle3DSource, /envMapIntensity: 1\.2/);
   assert.match(vehicle3DSource, /HemisphereLight/);
+});
+
+runTest('tsl skin 3d preview respects reduced motion', () => {
+  assert.match(vehicle3DSource, /prefers-reduced-motion: reduce/);
+  assert.match(vehicle3DSource, /addEventListener\('change'/);
+  assert.match(vehicle3DSource, /removeEventListener\('change'/);
+  assert.doesNotMatch(vehicle3DSource, /controls\.autoRotate\s*=\s*true/);
+});
+
+runTest('tsl skin 3d preview releases dialog-scoped webgl resources', () => {
+  assert.match(vehicle3DSource, /replaceTargetMaterial/);
+  assert.match(vehicle3DSource, /disposeMaterialTextures/);
+  assert.match(vehicle3DSource, /disposePreviewResources/);
+  assert.match(vehicle3DSource, /finishWithFallback[\s\S]{0,500}disposePreviewResources\(\)/);
+  assert.match(vehicle3DSource, /forceContextLoss\(\)/);
+  assert.match(vehicle3DSource, /if \(!cancelled\) \{\s*clearWrapTexture\(\);/);
 });
 
 runTest('tsl skin 3d preview prioritizes reference-quality gltf models and has a stable fallback path', () => {
@@ -146,12 +250,12 @@ runTest('tsl skin page is redesigned around two original product entrances', () 
   assert.match(componentSource, /现有皮肤/);
   assert.match(componentSource, /下载现有皮肤/);
   assert.match(componentSource, /自定义上传裁剪/);
-  assert.match(componentSource, /底部按钮下载当前选中的皮肤/);
+  assert.match(componentSource, /点击皮肤打开三维预览/);
   assert.match(componentSource, /上传自己的皮肤/);
   assert.match(componentSource, /不会上传服务器/);
   assert.match(componentSource, /tsl-skin-studio-workbench/);
   assert.match(componentSource, /tsl-skin-wrap-grid/);
-  assert.match(componentSource, /tsl-skin-render-stage/);
+  assert.match(componentSource, /TslSkinPreviewDialog/);
   assert.doesNotMatch(componentSource, /skin-detail-dialog/);
   assert.doesNotMatch(componentSource, /双入口工作台|tsl-skin-entry-panel|tsl-skin-model-strip|scrollToWorkbench|车机皮肤工作台/);
   assert.doesNotMatch(componentSource, /排行榜|联盟计划|联系我们|首页 \/ 使用教程|tsl-skin-brand-tutorial|特斯拉车机皮肤下载与[\s\S]*创作平台|landingStats|scrollToTutorial/);
@@ -169,8 +273,8 @@ runTest('tsl skin page keeps compact help inside the two workflows', () => {
 
 runTest('tsl skin download mode exposes a visible skin gallery', () => {
   assert.match(componentSource, /现有皮肤/);
-  assert.match(componentSource, /底部按钮下载当前选中的皮肤/);
-  assert.match(componentSource, /applyOfficialWrapToPreview/);
+  assert.match(componentSource, /在弹窗中旋转车辆并下载/);
+  assert.match(componentSource, /openWrapPreview/);
   assert.match(componentSource, /selectedPreviewWrap/);
   assert.match(componentSource, /filteredGalleryItems\.map/);
   assert.match(componentSource, /getOfficialExampleWrapsForTemplate/);
@@ -200,13 +304,14 @@ runTest('tsl skin page removes external source clutter from the UI', () => {
   assert.doesNotMatch(componentSource, /不在本站镜像素材/);
   assert.doesNotMatch(componentSource, /确认授权后再入库/);
   assert.doesNotMatch(componentSource, /externalSources\.map/);
-  assert.doesNotMatch(componentSource, /axios|get\(|fetch\(.+tesla-wrap|beautifulsoup|scrapy|playwright.*tesla-wrap/i);
+  assert.doesNotMatch(componentSource, /axios|fetch\(.+tesla-wrap|beautifulsoup|scrapy|playwright.*tesla-wrap/i);
 });
 
 runTest('tsl skin page supports direct png export and per-layer crop modes', () => {
   assert.match(componentSource, /buildTslSkinFileName/);
-  assert.match(componentSource, /downloadSelectedWrapAsset/);
-  assert.match(componentSource, /下载当前皮肤/);
+  assert.match(componentSource, /downloadPreviewTarget/);
+  assert.match(previewDialogSource, /actions\.download/);
+  assert.match(previewDialogSource, /下载当前皮肤/);
   assert.doesNotMatch(componentSource, /buildTslSkinZipFileName/);
   assert.doesNotMatch(componentSource, /buildWrapInstallGuide/);
   assert.doesNotMatch(componentSource, /createStoredZip/);
@@ -219,15 +324,21 @@ runTest('tsl skin page supports direct png export and per-layer crop modes', () 
 });
 
 runTest('tsl skin page shows an approximate in-car render preview', () => {
-  assert.match(componentSource, /TslVehicle3DPreview/);
-  assert.match(componentSource, /previewWrapUrl/);
+  assert.match(previewDialogSource, /TslVehicle3DPreview/);
+  assert.match(previewDialogSource, /车漆/);
+  assert.match(previewDialogSource, /白色车漆/);
+  assert.match(previewDialogSource, /黑色车漆/);
+  assert.match(previewDialogSource, /setPaintColor/);
+  assert.match(componentSource, /buildPreviewDialogViewModel/);
+  assert.match(componentSource, /previewDialogViewModel/);
+  assert.match(componentSource, /setPaintColor: setWrapColor/);
   assert.match(componentSource, /customRenderUrl/);
-  assert.match(componentSource, /wrapImageUrl=\{previewWrapUrl\}/);
-  assert.match(componentSource, /modelUrl=\{selectedTemplate\.previewModelUrl\}/);
-  assert.match(componentSource, /vehicleImageUrl=\{selectedTemplate\.vehicleImageUrl\}/);
-  assert.match(componentSource, /三维动态预览/);
-  assert.match(componentSource, /鼠标拖动旋转/);
-  assert.match(componentSource, /滚轮缩放/);
+  assert.match(previewDialogSource, /wrapImageUrl=\{viewModel\.wrapImageUrl\}/);
+  assert.match(previewDialogSource, /modelUrl=\{viewModel\.model\.previewModelUrl\}/);
+  assert.match(previewDialogSource, /vehicleImageUrl=\{viewModel\.model\.vehicleImageUrl\}/);
+  assert.match(previewDialogSource, /三维动态预览/);
+  assert.match(previewDialogSource, /鼠标拖动旋转/);
+  assert.match(previewDialogSource, /滚轮缩放/);
   assert.match(vehicle3DSource, /真实车型模型/);
   assert.match(vehicle3DSource, /prepareVehicleModel/);
   assert.match(vehicle3DSource, /prepareObjVehicleModel/);
@@ -242,10 +353,11 @@ runTest('tsl skin layout keeps gallery cards and custom editor clean', () => {
   assert.match(componentSource, /tsl-skin-wrap-card/);
   assert.match(componentSource, /tsl-skin-studio-workbench/);
   assert.match(componentSource, /tsl-skin-filter-bar/);
-  assert.match(componentSource, /lg:grid-cols-\[minmax\(0,1fr\)_420px\]/);
+  assert.doesNotMatch(componentSource, /lg:grid-cols-\[minmax\(0,1fr\)_420px\]/);
   assert.match(componentSource, /xl:grid-cols-5/);
+  assert.match(componentSource, /2xl:grid-cols-6/);
   assert.match(componentSource, /min-h-screen/);
-  assert.match(componentSource, /sticky top-24/);
+  assert.doesNotMatch(componentSource, /sticky top-24/);
   assert.match(componentSource, /--app-global-scale/);
   assert.match(componentSource, /裁剪画布/);
   assert.match(componentSource, /下载当前皮肤/);

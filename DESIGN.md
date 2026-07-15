@@ -110,9 +110,17 @@
 
 - **Structure**: 整张卡片是原生 `button`，内部为方形图片、来源、风险标签、标题和“查看 3D”提示。
 - **Variants**: 默认、选中、风险素材。
-- **States**: 默认细边框；悬停和键盘焦点使用 Electric Blue；按下轻微缩小。
+- **States**: 默认细边框；悬停和键盘焦点使用 Electric Blue；按下轻微缩小；图片等待时保留方形占位，失败时显示简短中文状态。
 - **Accessibility**: `aria-label` 同时表达皮肤名称与“查看三维效果”。
 - **Motion**: 150ms，不使用持续动画。
+- **Loading**: 首次只渲染 24 张卡片，滚动到底部后每批追加 24 张；首行图片优先加载，其他图片在进入视口附近前不得设置 `src`，避免全量图库同时下载原始 PNG。
+- **App Shell**: 生产环境使用 Vite/Tailwind 编译后的本地 CSS，不得同步加载 Tailwind CDN 阻塞首屏。
+
+### Gallery Filter Bar
+
+- **Structure**: 车型、标签、搜索、排序和统计共用同一筛选网格。
+- **Responsive**: 375px 与 768px 下使用可收缩的单列轨道，所有控件不得由选项或占位文字撑出视口；桌面端再展开为五列。
+- **Accessibility**: 排序按钮和下载统计在所有断点都必须完整可见，不能依靠裁切隐藏溢出。
 
 ### Mode Switch
 
@@ -124,7 +132,7 @@
 
 - **Structure**: 原生 `<dialog>`，内部依次为 `header`、三维 `article` 和 `footer`。
 - **Variants**: 图库皮肤、自定义皮肤、纯色车身；浅色和深色模式。
-- **States**: 关闭、加载模型、三维就绪、静态图片降级、纹理失败、下载中由现有状态文本反馈。
+- **States**: 关闭、按需加载 Dialog 代码、加载模型、三维就绪、静态图片降级、纹理失败、下载中由现有状态文本反馈。
 - **Accessibility**: `showModal()`、`aria-labelledby`、可见关闭按钮、Escape 关闭、遮罩关闭、初始焦点在关闭按钮、关闭后焦点返回触发卡片。
 - **Paint Controls**: Footer 内提供黑色/白色车漆两个原生按钮，使用圆形色块、`aria-pressed` 和中文 `aria-label`，不替代蓝色下载主按钮。
 - **Motion**: 背景遮罩和内容只允许短暂 opacity/transform 过渡；减少动态效果时停用非必要自动旋转。

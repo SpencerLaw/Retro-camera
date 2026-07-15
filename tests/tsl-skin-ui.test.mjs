@@ -7,6 +7,17 @@ const componentFileExists = fs.existsSync('components/TslSkinApp.tsx');
 const componentSource = componentFileExists ? fs.readFileSync('components/TslSkinApp.tsx', 'utf8') : '';
 const logicSource = fs.readFileSync('components/tslSkinLogic.js', 'utf8');
 const packageSource = fs.readFileSync('package.json', 'utf8');
+const indexHtmlSource = fs.readFileSync('index.html', 'utf8');
+const indexEntrySource = fs.readFileSync('index.tsx', 'utf8');
+const indexCssFileExists = fs.existsSync('index.css');
+const indexCssSource = indexCssFileExists ? fs.readFileSync('index.css', 'utf8') : '';
+const bundledFontCssSources = [
+  'adventure-game/AdventureGameStyles.css',
+  'components/course-scheduler/CourseSchedulerStyles.css',
+  'components/GroupMakerStyles.css',
+  'doraemon-monitor/doraemon-monitor.css',
+  'kiddieplan/styles.css',
+].map((filePath) => fs.readFileSync(filePath, 'utf8'));
 const vehicle3DFileExists = fs.existsSync('components/TslVehicle3DPreview.tsx');
 const vehicle3DSource = vehicle3DFileExists ? fs.readFileSync('components/TslVehicle3DPreview.tsx', 'utf8') : '';
 const wheelModuleFileExists = fs.existsSync('components/tslVehicleWheel.ts');
@@ -16,6 +27,10 @@ const wheelModuleSource = wheelModuleFileExists
 const previewDialogFileExists = fs.existsSync('components/TslSkinPreviewDialog.tsx');
 const previewDialogSource = previewDialogFileExists
   ? fs.readFileSync('components/TslSkinPreviewDialog.tsx', 'utf8')
+  : '';
+const galleryGridFileExists = fs.existsSync('components/TslSkinGalleryGrid.tsx');
+const galleryGridSource = galleryGridFileExists
+  ? fs.readFileSync('components/TslSkinGalleryGrid.tsx', 'utf8')
   : '';
 
 function runTest(name, fn) {
@@ -69,7 +84,7 @@ runTest('tsl skin page uses a gallery-first 3d workbench layout', () => {
   assert.match(componentSource, /tsl-skin-flow-steps/);
   assert.match(componentSource, /tsl-skin-filter-bar/);
   assert.match(componentSource, /tsl-skin-gallery-board/);
-  assert.match(componentSource, /tsl-skin-wrap-grid/);
+  assert.match(galleryGridSource, /tsl-skin-wrap-grid/);
   assert.match(componentSource, /activeWorkspace/);
   assert.match(componentSource, /searchWrapQuery/);
   assert.match(componentSource, /selectedWrapTag/);
@@ -93,13 +108,86 @@ runTest('tsl skin gallery opens an on-demand native 3d preview dialog', () => {
   assert.match(previewDialogSource, /下载当前皮肤/);
   assert.match(componentSource, /TslSkinPreviewDialog/);
   assert.match(componentSource, /openWrapPreview/);
-  assert.match(componentSource, /查看 3D 效果/);
+  assert.match(galleryGridSource, /查看 3D 效果/);
 });
 
 runTest('tsl skin gallery no longer keeps a persistent right preview column', () => {
   assert.doesNotMatch(componentSource, /tsl-skin-render-stage/);
   assert.doesNotMatch(componentSource, /lg:grid-cols-\[minmax\(0,1fr\)_420px\]/);
-  assert.match(componentSource, /2xl:grid-cols-6/);
+  assert.match(galleryGridSource, /2xl:grid-cols-6/);
+});
+
+runTest('tsl skin gallery progressively renders a bounded card batch', () => {
+  assert.equal(galleryGridFileExists, true);
+  assert.match(componentSource, /<TslSkinGalleryGrid[\s\S]*?items=\{filteredGalleryItems\}/);
+  assert.doesNotMatch(componentSource, /filteredGalleryItems\.map/);
+  assert.match(galleryGridSource, /INITIAL_GALLERY_ITEM_COUNT\s*=\s*24/);
+  assert.match(galleryGridSource, /GALLERY_ITEM_BATCH_SIZE\s*=\s*24/);
+  assert.match(galleryGridSource, /items\.slice\(0, visibleItemCount\)/);
+  assert.doesNotMatch(galleryGridSource, /\bitems\.map\(/);
+  assert.match(galleryGridSource, /visibleItems\.map\(/);
+});
+
+runTest('tsl skin gallery defers offscreen image requests until intersection', () => {
+  assert.match(galleryGridSource, /IntersectionObserver/);
+  assert.match(galleryGridSource, /src=\{shouldLoad \? item\.imageUrl : undefined\}/);
+  assert.doesNotMatch(galleryGridSource, /src=\{item\.imageUrl\}/);
+  assert.match(galleryGridSource, /decoding="async"/);
+});
+
+runTest('tsl skin progressive gallery keeps card clicks wired to the 3d dialog', () => {
+  assert.match(galleryGridSource, /onOpen\(item\)/);
+  assert.match(componentSource, /<TslSkinGalleryGrid[\s\S]*?onOpen=\{openWrapPreview\}/);
+});
+
+runTest('tsl skin gallery keeps pagination state without remounting on every search keystroke', () => {
+  assert.doesNotMatch(componentSource, /<TslSkinGalleryGrid[^>]*\bkey=\{/);
+  assert.match(componentSource, /const openWrapPreview = React\.useCallback/);
+  assert.match(galleryGridSource, /React\.useLayoutEffect/);
+  assert.match(galleryGridSource, /React\.memo/);
+});
+
+runTest('tsl skin filter controls stay inside narrow viewports', () => {
+  assert.match(
+    componentSource,
+    /tsl-skin-filter-bar grid min-w-0 grid-cols-\[minmax\(0,1fr\)\]/,
+  );
+  assert.ok(
+    componentSource.match(/h-11 w-full min-w-0 rounded-md border/g)?.length >= 2,
+    'model and tag selects should be allowed to shrink inside the filter grid',
+  );
+  assert.match(componentSource, /<label className="relative block min-w-0 w-full">/);
+  assert.match(componentSource, /grid h-11 min-w-0 w-full grid-cols-2/);
+  assert.match(componentSource, /flex h-11 min-w-0 w-full items-center justify-start/);
+});
+
+runTest('tsl skin production shell does not block first paint on the Tailwind CDN', () => {
+  assert.match(packageSource, /"@tailwindcss\/vite"/);
+  assert.doesNotMatch(indexHtmlSource, /cdn\.tailwindcss\.com/);
+  assert.doesNotMatch(indexHtmlSource, /tailwind\.config/);
+  assert.equal(indexCssFileExists, true);
+  assert.match(indexEntrySource, /import '\.\/index\.css';/);
+  assert.match(indexCssSource, /@import "tailwindcss\/theme\.css";/);
+  assert.match(indexCssSource, /@import "tailwindcss\/preflight\.css";/);
+  assert.match(indexCssSource, /@import "tailwindcss\/utilities\.css";/);
+  assert.doesNotMatch(indexCssSource, /@import "tailwindcss";/);
+});
+
+runTest('tsl skin production shell loads shared Google fonts without blocking first paint', () => {
+  assert.doesNotMatch(indexHtmlSource, /@import url\(['"]https:\/\/fonts\.googleapis\.com/);
+  bundledFontCssSources.forEach((cssSource) => {
+    assert.doesNotMatch(cssSource, /@import url\(['"]https:\/\/fonts\.googleapis\.com/);
+  });
+  assert.match(indexHtmlSource, /rel="preconnect" href="https:\/\/fonts\.googleapis\.com"/);
+  assert.match(indexHtmlSource, /rel="preconnect" href="https:\/\/fonts\.gstatic\.com" crossorigin/);
+  assert.match(indexHtmlSource, /rel="preload" as="style" href="https:\/\/fonts\.googleapis\.com\/css2\?/);
+  assert.match(indexHtmlSource, /onload="this\.onload=null;this\.rel='stylesheet'"/);
+});
+
+runTest('tsl skin gallery defers the heavy 3d dialog bundle until a card is opened', () => {
+  assert.match(componentSource, /React\.lazy\(\(\) => import\('\.\/TslSkinPreviewDialog'\)/);
+  assert.match(componentSource, /isPreviewDialogOpen &&/);
+  assert.match(componentSource, /<React\.Suspense/);
 });
 
 runTest('tsl skin 3d preview uses threejs orbit controls without copying remote model assets', () => {
@@ -254,7 +342,7 @@ runTest('tsl skin page is redesigned around two original product entrances', () 
   assert.match(componentSource, /上传自己的皮肤/);
   assert.match(componentSource, /不会上传服务器/);
   assert.match(componentSource, /tsl-skin-studio-workbench/);
-  assert.match(componentSource, /tsl-skin-wrap-grid/);
+  assert.match(galleryGridSource, /tsl-skin-wrap-grid/);
   assert.match(componentSource, /TslSkinPreviewDialog/);
   assert.doesNotMatch(componentSource, /skin-detail-dialog/);
   assert.doesNotMatch(componentSource, /双入口工作台|tsl-skin-entry-panel|tsl-skin-model-strip|scrollToWorkbench|车机皮肤工作台/);
@@ -276,7 +364,7 @@ runTest('tsl skin download mode exposes a visible skin gallery', () => {
   assert.match(componentSource, /在弹窗中旋转车辆并下载/);
   assert.match(componentSource, /openWrapPreview/);
   assert.match(componentSource, /selectedPreviewWrap/);
-  assert.match(componentSource, /filteredGalleryItems\.map/);
+  assert.match(componentSource, /items=\{filteredGalleryItems\}/);
   assert.match(componentSource, /getOfficialExampleWrapsForTemplate/);
   assert.match(componentSource, /下载当前皮肤/);
   assert.doesNotMatch(componentSource, /马上预览|tsl-skin-gallery-strip/);
@@ -292,7 +380,7 @@ runTest('tsl skin download mode reads a local remote-free index without live thi
   assert.match(componentSource, /显示风险素材/);
   assert.match(componentSource, /已隐藏/);
   assert.match(componentSource, /疑似角色\/IP/);
-  assert.match(componentSource, /formatRiskTags/);
+  assert.match(galleryGridSource, /formatRiskTags/);
   assert.doesNotMatch(componentSource, /tesla\.timor419\.com|tesla-wrap\.mrproper\.dev|gwhjdgbjcqbhhdwzrijk|\/api\/wrap/);
   assert.doesNotMatch(componentSource, /远程免费索引|远程免费皮肤|远程免费：/);
 });
@@ -349,13 +437,13 @@ runTest('tsl skin page shows an approximate in-car render preview', () => {
 
 runTest('tsl skin layout keeps gallery cards and custom editor clean', () => {
   assert.match(componentSource, /tsl-skin-shell/);
-  assert.match(componentSource, /tsl-skin-wrap-grid/);
-  assert.match(componentSource, /tsl-skin-wrap-card/);
+  assert.match(galleryGridSource, /tsl-skin-wrap-grid/);
+  assert.match(galleryGridSource, /tsl-skin-wrap-card/);
   assert.match(componentSource, /tsl-skin-studio-workbench/);
   assert.match(componentSource, /tsl-skin-filter-bar/);
   assert.doesNotMatch(componentSource, /lg:grid-cols-\[minmax\(0,1fr\)_420px\]/);
-  assert.match(componentSource, /xl:grid-cols-5/);
-  assert.match(componentSource, /2xl:grid-cols-6/);
+  assert.match(galleryGridSource, /xl:grid-cols-5/);
+  assert.match(galleryGridSource, /2xl:grid-cols-6/);
   assert.match(componentSource, /min-h-screen/);
   assert.doesNotMatch(componentSource, /sticky top-24/);
   assert.match(componentSource, /--app-global-scale/);

@@ -22,11 +22,16 @@ import {
   getTeslaTemplateById,
   TESLA_MODEL_TEMPLATES,
 } from './tslSkinLogic.js';
-import { TslSkinPreviewDialog } from './TslSkinPreviewDialog';
 import type {
   TslSkinPreviewDialogActions,
   TslSkinPreviewDialogViewModel,
 } from './TslSkinPreviewDialog';
+import { TslSkinGalleryGrid } from './TslSkinGalleryGrid';
+import type { TslSkinGalleryItem } from './TslSkinGalleryGrid';
+
+const TslSkinPreviewDialog = React.lazy(() => import('./TslSkinPreviewDialog').then((module) => ({
+  default: module.TslSkinPreviewDialog,
+})));
 
 export type TeslaModelTemplate = {
   id: string;
@@ -52,27 +57,7 @@ export type SkinLayer = {
   name: string;
 };
 
-type OfficialWrapExample = {
-  id: string;
-  title: string;
-  fileName: string;
-  imageUrl: string;
-  downloadUrl?: string;
-  modelIds: string[];
-  sourceLabel: string;
-  sourceName?: string;
-  sourcePageUrl?: string;
-  isRemote?: boolean;
-  isLocal?: boolean;
-  originalImageUrl?: string;
-  originalDownloadUrl?: string;
-  riskTags?: string[];
-  tags?: string[];
-  downloads?: number;
-  likes?: number;
-  author?: string;
-  createdAt?: string;
-};
+type OfficialWrapExample = TslSkinGalleryItem;
 
 type WorkspaceMode = 'download' | 'design';
 type GallerySortMode = 'newest' | 'popular';
@@ -105,10 +90,6 @@ const FLOW_STEPS = [
   { id: 'folder', title: '复制到 U 盘', detail: '放入根目录 Wraps 文件夹', icon: Folder },
   { id: 'setup', title: '车机设置', detail: 'Toybox 里打开 Paint Shop', icon: Car },
 ];
-
-function formatRiskTags(riskTags?: string[]) {
-  return riskTags?.length ? riskTags.join('、') : '疑似风险素材';
-}
 
 function getGalleryTimestamp(item: OfficialWrapExample) {
   const time = new Date(item.createdAt || '').getTime();
@@ -647,12 +628,12 @@ const TslSkinApp: React.FC = () => {
     event.target.value = '';
   };
 
-  const openWrapPreview = (example: OfficialWrapExample) => {
+  const openWrapPreview = React.useCallback((example: OfficialWrapExample) => {
     setSelectedPreviewWrap(example);
     setPreviewDialogTarget({ kind: 'gallery', wrap: example });
     setIsPreviewDialogOpen(true);
     setStatus(`${example.title} 已打开三维预览。`);
-  };
+  }, []);
 
   const openCustomPreview = () => {
     setPreviewDialogTarget({ kind: 'custom', imageUrl: customRenderUrl || customPreviewUrl });
@@ -923,7 +904,7 @@ const TslSkinApp: React.FC = () => {
 
           <section className={activeWorkspace === 'download' ? 'flex min-h-0 flex-1 flex-col' : 'hidden'}>
             <div className="border-b border-inherit p-3">
-              <div className="tsl-skin-filter-bar grid gap-2 lg:grid-cols-[220px_150px_minmax(220px,1fr)_auto_auto] lg:items-center">
+              <div className="tsl-skin-filter-bar grid min-w-0 grid-cols-[minmax(0,1fr)] gap-2 lg:grid-cols-[220px_150px_minmax(220px,1fr)_auto_auto] lg:items-center">
                 <select
                   value={selectedTemplateId}
                   onChange={(event) => {
@@ -931,7 +912,7 @@ const TslSkinApp: React.FC = () => {
                     setSelectedPreviewWrap(null);
                     setSelectedTemplateId(event.target.value);
                   }}
-                  className={`h-11 rounded-md border px-3 text-sm font-bold outline-none focus:border-[#3e6ae1] ${
+                  className={`h-11 w-full min-w-0 rounded-md border px-3 text-sm font-bold outline-none focus:border-[#3e6ae1] ${
                     isDayMode ? 'border-slate-200 bg-white text-slate-900' : 'border-white/10 bg-slate-900 text-white'
                   }`}
                   aria-label="选择车型"
@@ -946,7 +927,7 @@ const TslSkinApp: React.FC = () => {
                 <select
                   value={selectedWrapTag}
                   onChange={(event) => setSelectedWrapTag(event.target.value)}
-                  className={`h-11 rounded-md border px-3 text-sm font-bold outline-none focus:border-[#3e6ae1] ${
+                  className={`h-11 w-full min-w-0 rounded-md border px-3 text-sm font-bold outline-none focus:border-[#3e6ae1] ${
                     isDayMode ? 'border-slate-200 bg-white text-slate-900' : 'border-white/10 bg-slate-900 text-white'
                   }`}
                   aria-label="选择标签"
@@ -959,7 +940,7 @@ const TslSkinApp: React.FC = () => {
                   ))}
                 </select>
 
-                <label className="relative block">
+                <label className="relative block min-w-0 w-full">
                   <Search size={17} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
                     value={searchWrapQuery}
@@ -971,7 +952,7 @@ const TslSkinApp: React.FC = () => {
                   />
                 </label>
 
-                <div className={`grid h-11 grid-cols-2 rounded-md border p-1 ${isDayMode ? 'border-slate-200 bg-white' : 'border-white/10 bg-slate-900'}`}>
+                <div className={`grid h-11 min-w-0 w-full grid-cols-2 rounded-md border p-1 ${isDayMode ? 'border-slate-200 bg-white' : 'border-white/10 bg-slate-900'}`}>
                   {[
                     { id: 'newest' as const, label: '最新' },
                     { id: 'popular' as const, label: '最热' },
@@ -989,7 +970,7 @@ const TslSkinApp: React.FC = () => {
                   ))}
                 </div>
 
-                <div className={`flex h-11 items-center justify-end whitespace-nowrap text-xs font-black ${mutedTextClassName}`}>
+                <div className={`flex h-11 min-w-0 w-full items-center justify-start whitespace-nowrap text-xs font-black lg:justify-end ${mutedTextClassName}`}>
                   {galleryStats.total} 款 · {galleryStats.downloads.toLocaleString('zh-CN')} 次下载
                 </div>
               </div>
@@ -1023,45 +1004,12 @@ const TslSkinApp: React.FC = () => {
                 </span>
               </div>
 
-              <div className="tsl-skin-wrap-grid grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
-                {filteredGalleryItems.map((example) => (
-                  <button
-                    key={example.id}
-                    type="button"
-                    onClick={() => openWrapPreview(example)}
-                    aria-label={`${example.title}，点击查看三维效果`}
-                    className={`tsl-skin-wrap-card min-w-0 overflow-hidden rounded-md border transition ${
-                      selectedPreviewWrap?.id === example.id
-                        ? 'border-[#3e6ae1] ring-2 ring-[#3e6ae1]/20'
-                        : isDayMode
-                          ? 'border-slate-200 bg-white hover:border-[#3e6ae1]'
-                          : 'border-white/10 bg-slate-900 hover:border-[#3e6ae1]'
-                    }`}
-                  >
-                    <div className="relative aspect-square bg-slate-100">
-                      <img
-                        src={example.imageUrl}
-                        crossOrigin="anonymous"
-                        alt={example.title}
-                        className="h-full w-full object-contain p-1"
-                        loading="lazy"
-                      />
-                      <span className="absolute left-1.5 top-1.5 max-w-[calc(100%-12px)] truncate rounded-full bg-white/90 px-1.5 py-0.5 text-[9px] font-black text-slate-700 shadow-sm">
-                        {example.sourceLabel}
-                      </span>
-                      {Boolean(example.riskTags?.length) && (
-                        <span className="absolute right-1.5 top-7 max-w-[calc(100%-12px)] truncate rounded-full bg-amber-100 px-1.5 py-0.5 text-[9px] font-black text-amber-700 shadow-sm">
-                          {formatRiskTags(example.riskTags)}
-                        </span>
-                      )}
-                      <span className="absolute inset-x-0 bottom-0 bg-slate-950/80 px-1.5 py-1 text-center text-[10px] font-black text-white backdrop-blur-sm">
-                        <span className="block truncate">{example.title}</span>
-                        <span className="mt-0.5 block text-[9px] font-bold text-white/80">点击查看 3D 效果</span>
-                      </span>
-                    </div>
-                  </button>
-                ))}
-              </div>
+              <TslSkinGalleryGrid
+                items={filteredGalleryItems}
+                selectedItemId={selectedPreviewWrap?.id || null}
+                isDayMode={isDayMode}
+                onOpen={openWrapPreview}
+              />
 
               {filteredGalleryItems.length === 0 && (
                 <div className={`mt-4 rounded-md border p-4 text-center text-sm ${subtlePanelClassName}`}>
@@ -1338,7 +1286,19 @@ const TslSkinApp: React.FC = () => {
 
       </main>
 
-      <TslSkinPreviewDialog viewModel={previewDialogViewModel} actions={previewDialogActions} />
+      {isPreviewDialogOpen && (
+        <React.Suspense
+          fallback={(
+            <div className="fixed inset-0 z-[80] grid place-items-center bg-slate-950/70 p-4 backdrop-blur-sm" role="status">
+              <div className="rounded-md border border-white/10 bg-slate-950 px-5 py-4 text-sm font-black text-white shadow-2xl">
+                正在打开三维预览...
+              </div>
+            </div>
+          )}
+        >
+          <TslSkinPreviewDialog viewModel={previewDialogViewModel} actions={previewDialogActions} />
+        </React.Suspense>
+      )}
     </div>
   );
 };

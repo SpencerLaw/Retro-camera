@@ -4,7 +4,13 @@ import fs from 'node:fs';
 const appSource = fs.readFileSync('App.tsx', 'utf8');
 const homeSource = fs.readFileSync('components/HomePage.tsx', 'utf8');
 const componentFileExists = fs.existsSync('components/TslSkinApp.tsx');
-const componentSource = componentFileExists ? fs.readFileSync('components/TslSkinApp.tsx', 'utf8') : '';
+const appComponentSource = componentFileExists ? fs.readFileSync('components/TslSkinApp.tsx', 'utf8') : '';
+const wrapStudioFileExists = fs.existsSync('components/tsl-skin/TslWrapStudio.tsx');
+const wrapStudioSource = wrapStudioFileExists
+  ? fs.readFileSync('components/tsl-skin/TslWrapStudio.tsx', 'utf8')
+  : '';
+const modelAwareImageSource = fs.readFileSync('components/tsl-skin/modelAwareImage.ts', 'utf8');
+const componentSource = `${appComponentSource}\n${wrapStudioSource}`;
 const logicSource = fs.readFileSync('components/tslSkinLogic.js', 'utf8');
 const packageSource = fs.readFileSync('package.json', 'utf8');
 const indexHtmlSource = fs.readFileSync('index.html', 'utf8');
@@ -32,6 +38,7 @@ const galleryGridFileExists = fs.existsSync('components/TslSkinGalleryGrid.tsx')
 const galleryGridSource = galleryGridFileExists
   ? fs.readFileSync('components/TslSkinGalleryGrid.tsx', 'utf8')
   : '';
+const { fitLayerToBounds, reconcileLayerObjectUrls } = await import('../components/tsl-skin/modelAwareImage.ts');
 
 function runTest(name, fn) {
   try {
@@ -51,17 +58,119 @@ runTest('tsl skin route and homepage entry are wired', () => {
   assert.match(homeSource, /特斯拉皮肤/);
 });
 
-runTest('tsl skin page includes canvas editor controls', () => {
+runTest('tsl skin page mounts the model-aware Konva editor', () => {
   assert.equal(componentFileExists, true);
-  assert.match(componentSource, /TESLA_MODEL_TEMPLATES/);
-  assert.match(componentSource, /type="file"/);
-  assert.match(componentSource, /accept="image\/png,image\/jpeg,image\/webp"/);
-  assert.match(componentSource, /downloadCanvas/);
-  assert.match(componentSource, /generateBodyMask/);
-  assert.match(componentSource, /moveLayer/);
-  assert.match(componentSource, /deleteLayer/);
-  assert.match(componentSource, /原创或已授权素材/);
-  assert.match(componentSource, /图片仅在你的浏览器本地处理，不会上传服务器/);
+  assert.equal(wrapStudioFileExists, true);
+  assert.match(appComponentSource, /<TslWrapStudio/);
+  assert.match(appComponentSource, /onTextureChange=\{setCustomRenderUrl\}/);
+  assert.match(wrapStudioSource, /<Stage/);
+  assert.match(wrapStudioSource, /<Transformer/);
+  assert.match(wrapStudioSource, /accept="image\/png,image\/jpeg,image\/webp"/);
+  assert.match(wrapStudioSource, /fitLayerToBounds/);
+  assert.match(wrapStudioSource, /renderWrapTexture/);
+  assert.match(wrapStudioSource, /仅在当前浏览器处理。/);
+  assert.match(wrapStudioSource, /图片不会上传。/);
+});
+
+runTest('custom wrap canvas cannot stretch when viewport height is smaller than its width', () => {
+  assert.doesNotMatch(
+    appComponentSource,
+    /aspect-square h-auto max-h-\[52vh\] w-full/,
+    'a full-width canvas must not be independently clamped by max-height',
+  );
+  assert.match(wrapStudioSource, /style=\{\{ width: displaySize, height: displaySize \}\}/);
+  assert.match(wrapStudioSource, /width=\{displaySize\}[\s\S]{0,80}height=\{displaySize\}/);
+});
+
+runTest('model-aware fit modes preserve aspect ratio and choose contain or cover', () => {
+  const baseLayer = {
+    id: 'fit-layer',
+    name: 'fit.png',
+    src: 'blob:fit',
+    blob: new Blob(['fit'], { type: 'image/png' }),
+    image: { src: 'blob:fit' },
+    width: 400,
+    height: 200,
+    x: 0,
+    y: 0,
+    scaleX: 1,
+    scaleY: 1,
+    rotation: 17,
+    opacity: 1,
+    visible: true,
+    locked: false,
+    artworkMode: 'subject',
+  };
+  const bounds = { x: 100, y: 200, width: 600, height: 300 };
+  const subject = fitLayerToBounds(baseLayer, bounds, 'smart', 'subject');
+  const texture = fitLayerToBounds(baseLayer, bounds, 'smart', 'texture');
+
+  assert.equal(subject.x, 400);
+  assert.equal(subject.y, 350);
+  assert.equal(subject.scaleX, subject.scaleY);
+  assert.equal(subject.rotation, 0);
+  assert.ok(subject.scaleX < texture.scaleX, 'continuous texture should cover more area than a subject image');
+  assert.equal(texture.scaleX, texture.scaleY);
+});
+
+runTest('deleted layer URLs are revoked and recreated only when undo restores the layer', () => {
+  const activeUrls = new Set(['blob:original']);
+  const revoked = [];
+  const created = [];
+  const image = { src: 'blob:original' };
+  const layer = {
+    id: 'url-layer',
+    name: 'url.png',
+    src: 'blob:original',
+    blob: new Blob(['url'], { type: 'image/png' }),
+    image,
+    width: 100,
+    height: 100,
+    x: 50,
+    y: 50,
+    scaleX: 1,
+    scaleY: 1,
+    rotation: 0,
+    opacity: 1,
+    visible: true,
+    locked: false,
+    artworkMode: 'subject',
+  };
+  const objectUrlApi = {
+    createObjectURL: () => {
+      const url = `blob:restored-${created.length + 1}`;
+      created.push(url);
+      return url;
+    },
+    revokeObjectURL: (url) => revoked.push(url),
+  };
+
+  const deleted = reconcileLayerObjectUrls([layer], [], activeUrls, objectUrlApi);
+  assert.deepEqual(deleted, []);
+  assert.deepEqual(revoked, ['blob:original']);
+  assert.equal(activeUrls.size, 0);
+
+  const restored = reconcileLayerObjectUrls([], [layer], activeUrls, objectUrlApi);
+  assert.equal(restored[0].src, 'blob:restored-1');
+  assert.equal(image.src, 'blob:restored-1');
+  assert.deepEqual(created, ['blob:restored-1']);
+  assert.equal(activeUrls.has('blob:restored-1'), true);
+});
+
+runTest('custom 3d preview follows the live finalized texture and blocks pending download', () => {
+  assert.match(appComponentSource, /wrapImageUrl: context\.customRenderUrl/);
+  assert.match(appComponentSource, /texturePending: !context\.customRenderUrl/);
+  assert.match(appComponentSource, /setPreviewDialogTarget\(\{ kind: 'custom' \}\)/);
+  assert.doesNotMatch(appComponentSource, /kind: 'custom', imageUrl:/);
+  assert.match(wrapStudioSource, /setRenderedTextureUrl\(null\);[\s\S]{0,160}onTextureChange\(null\)/);
+  assert.match(wrapStudioSource, /disabled=\{templateStatus !== 'ready' \|\| !renderedTextureUrl\}/);
+  assert.match(previewDialogSource, /disabled=\{viewModel\.texturePending\}/);
+});
+
+runTest('editor source owns object URL lifecycle reconciliation', () => {
+  assert.match(modelAwareImageSource, /export function reconcileLayerObjectUrls/);
+  assert.match(wrapStudioSource, /reconcileLayerObjectUrls\(current, updater\(current\)/);
+  assert.match(wrapStudioSource, /objectUrlsRef\.current\.forEach\(\(url\) => URL\.revokeObjectURL\(url\)\)/);
 });
 
 runTest('tsl skin page only offers stable Model 3 and Model Y variants', () => {
@@ -93,8 +202,8 @@ runTest('tsl skin page uses a gallery-first 3d workbench layout', () => {
   assert.match(componentSource, /openWrapPreview/);
   assert.match(componentSource, /PreviewDialogTarget/);
   assert.match(componentSource, /downloadPreviewTarget/);
-  assert.match(componentSource, /removeCustomWrap/);
-  assert.match(componentSource, /删除自定义图片/);
+  assert.match(wrapStudioSource, /deleteLayer/);
+  assert.match(wrapStudioSource, /aria-label="删除图层"/);
   assert.match(previewDialogSource, /下载当前皮肤/);
   assert.doesNotMatch(componentSource, /skin-detail-dialog/);
 });
@@ -319,7 +428,7 @@ runTest('tsl skin 3d preview prioritizes reference-quality gltf models and has a
 runTest('tsl skin page keeps the download workflow uncluttered', () => {
   assert.match(componentSource, /下载现有皮肤/);
   assert.match(componentSource, /现有皮肤/);
-  assert.match(componentSource, /下载当前皮肤/);
+  assert.match(previewDialogSource, /下载当前皮肤/);
   assert.doesNotMatch(componentSource, /价格说明|免费资源站|单张下载|五张打包|自定义设计 30 元|原创商品样张/);
   assert.doesNotMatch(componentSource, /DOWNLOAD_PRICE_TIERS|EXTERNAL_WRAP_SOURCES|SKIN_CATALOG_PRODUCTS|getCatalogProductsForTemplate/);
   assert.doesNotMatch(componentSource, /授权码|激活码|待接入支付|后端支付|定制套餐|CUSTOM_WRAP_PACKAGES|calculateCustomOrderQuote/);
@@ -328,19 +437,20 @@ runTest('tsl skin page keeps the download workflow uncluttered', () => {
 
 runTest('tsl skin page separates download and design workflows', () => {
   assert.match(componentSource, /下载现有皮肤/);
-  assert.match(componentSource, /自定义上传裁剪/);
+  assert.match(componentSource, /自定义上传/);
   assert.match(componentSource, /activeWorkspace/);
   assert.match(componentSource, /setActiveWorkspace/);
+  assert.match(appComponentSource, /<TslWrapStudio/);
 });
 
 runTest('tsl skin page is redesigned around two original product entrances', () => {
   assert.match(componentSource, /特斯拉皮肤/);
   assert.match(componentSource, /现有皮肤/);
   assert.match(componentSource, /下载现有皮肤/);
-  assert.match(componentSource, /自定义上传裁剪/);
+  assert.match(componentSource, /自定义上传/);
   assert.match(componentSource, /点击皮肤打开三维预览/);
-  assert.match(componentSource, /上传自己的皮肤/);
-  assert.match(componentSource, /不会上传服务器/);
+  assert.match(wrapStudioSource, /上传你的图片/);
+  assert.match(wrapStudioSource, /图片不会上传/);
   assert.match(componentSource, /tsl-skin-studio-workbench/);
   assert.match(galleryGridSource, /tsl-skin-wrap-grid/);
   assert.match(componentSource, /TslSkinPreviewDialog/);
@@ -352,10 +462,9 @@ runTest('tsl skin page is redesigned around two original product entrances', () 
 
 runTest('tsl skin page keeps compact help inside the two workflows', () => {
   assert.match(componentSource, /选择车型/);
-  assert.match(componentSource, /先选车型/);
-  assert.match(componentSource, /上传图片调整位置/);
-  assert.match(componentSource, /下载当前皮肤/);
-  assert.match(componentSource, /一比一/);
+  assert.match(wrapStudioSource, /先选车型 · 上传图片 · 调整布局 · 查看 3D/);
+  assert.match(previewDialogSource, /下载当前皮肤/);
+  assert.match(wrapStudioSource, /WRAP_CANVAS_SIZE/);
   assert.doesNotMatch(componentSource, /导出交付包|文件放入 Wraps|exFAT/);
 });
 
@@ -366,7 +475,7 @@ runTest('tsl skin download mode exposes a visible skin gallery', () => {
   assert.match(componentSource, /selectedPreviewWrap/);
   assert.match(componentSource, /items=\{filteredGalleryItems\}/);
   assert.match(componentSource, /getOfficialExampleWrapsForTemplate/);
-  assert.match(componentSource, /下载当前皮肤/);
+  assert.match(previewDialogSource, /下载当前皮肤/);
   assert.doesNotMatch(componentSource, /马上预览|tsl-skin-gallery-strip/);
   assert.doesNotMatch(componentSource, /适配车型|立即预览|addOfficialExampleLayer/);
 });
@@ -395,7 +504,7 @@ runTest('tsl skin page removes external source clutter from the UI', () => {
   assert.doesNotMatch(componentSource, /axios|fetch\(.+tesla-wrap|beautifulsoup|scrapy|playwright.*tesla-wrap/i);
 });
 
-runTest('tsl skin page supports direct png export and per-layer crop modes', () => {
+runTest('tsl skin page supports direct png export and model-aware fit modes', () => {
   assert.match(componentSource, /buildTslSkinFileName/);
   assert.match(componentSource, /downloadPreviewTarget/);
   assert.match(previewDialogSource, /actions\.download/);
@@ -406,9 +515,10 @@ runTest('tsl skin page supports direct png export and per-layer crop modes', () 
   assert.doesNotMatch(componentSource, /install-guide\.txt/);
   assert.doesNotMatch(componentSource, /model-info\.json/);
   assert.doesNotMatch(componentSource, /下载压缩包/);
-  assert.match(componentSource, /clipMode/);
-  assert.match(componentSource, /贴合车身/);
-  assert.match(componentSource, /保留完整图案/);
+  assert.match(wrapStudioSource, /fitSelected\('smart'\)/);
+  assert.match(wrapStudioSource, /智能适配/);
+  assert.match(wrapStudioSource, /完整显示/);
+  assert.match(wrapStudioSource, /铺满车身/);
 });
 
 runTest('tsl skin page shows an approximate in-car render preview', () => {
@@ -447,8 +557,8 @@ runTest('tsl skin layout keeps gallery cards and custom editor clean', () => {
   assert.match(componentSource, /min-h-screen/);
   assert.doesNotMatch(componentSource, /sticky top-24/);
   assert.match(componentSource, /--app-global-scale/);
-  assert.match(componentSource, /裁剪画布/);
-  assert.match(componentSource, /下载当前皮肤/);
+  assert.match(wrapStudioSource, /车型感知车衣工作台/);
+  assert.match(previewDialogSource, /下载当前皮肤/);
   assert.match(componentSource, /最新/);
   assert.match(componentSource, /最热/);
   assert.match(componentSource, /全部标签/);
@@ -460,12 +570,11 @@ runTest('tsl skin page is Chinese-first and includes day mode plus help', () => 
   assert.match(componentSource, /浅色模式/);
   assert.match(componentSource, /深色模式/);
   assert.match(componentSource, /选择车型/);
-  assert.match(componentSource, /先选车型/);
-  assert.match(componentSource, /上传图片调整位置/);
-  assert.match(componentSource, /下载当前皮肤/);
+  assert.match(wrapStudioSource, /先选车型 · 上传图片 · 调整布局 · 查看 3D/);
+  assert.match(previewDialogSource, /下载当前皮肤/);
   assert.doesNotMatch(
     componentSource,
-    /Tesla Paint Shop|TSL Skin|Body Color|Loading Tesla template|Instant PNG download|Free PNG sample|Race stripe|Tech grid|Satin wave|procedural|Quick Polish|Quote|workspace|Export-ready|Commercial-use|Priority designer|Color match|One uploaded logo|Full Custom|Brand Drop|导出 PNG|下载 ZIP 包|2 元|9\.99 元|30 元|Vercel|WebP/,
+    /Tesla Paint Shop|TSL Skin|Body Color|Loading Tesla template|Instant PNG download|Free PNG sample|Race stripe|Tech grid|Satin wave|procedural|Quick Polish|Quote|workspace|Export-ready|Commercial-use|Priority designer|Color match|One uploaded logo|Full Custom|Brand Drop|导出 PNG|下载 ZIP 包|2 元|9\.99 元|30 元|Vercel/,
   );
   assert.doesNotMatch(appSource, /Loading TSL Skin/);
 });

@@ -18,6 +18,7 @@ export type TslSkinPreviewDialogViewModel = {
   readonly riskTags: readonly string[];
   readonly wrapColor: string;
   readonly wrapImageUrl: string | null;
+  readonly texturePending: boolean;
   readonly isDayMode: boolean;
   readonly model: TslSkinPreviewDialogModel;
 };
@@ -117,7 +118,7 @@ export const TslSkinPreviewDialog: React.FC<TslSkinPreviewDialogProps> = ({ view
         <header className={`flex shrink-0 items-center justify-between gap-4 border-b px-4 py-3 sm:px-5 ${headerClassName}`}>
           <div className="min-w-0">
             <div className={`mb-1 text-xs font-bold ${mutedTextClassName}`}>三维动态预览</div>
-            <h2 id={PREVIEW_TITLE_ID} className="truncate text-lg font-bold">
+            <h2 id={PREVIEW_TITLE_ID} className="break-words text-lg font-bold leading-6">
               {viewModel.title}
             </h2>
             <p className={`mt-1 line-clamp-2 text-xs font-medium sm:line-clamp-1 ${mutedTextClassName}`}>
@@ -151,6 +152,13 @@ export const TslSkinPreviewDialog: React.FC<TslSkinPreviewDialogProps> = ({ view
               isDayMode={viewModel.isDayMode}
             />
           )}
+          {viewModel.texturePending && (
+            <div className="pointer-events-none absolute inset-x-0 top-4 z-10 flex justify-center px-4">
+              <span className="rounded-full border border-white/20 bg-slate-950/80 px-4 py-2 text-xs font-bold text-white shadow-lg backdrop-blur">
+                正在同步高清纹理…
+              </span>
+            </div>
+          )}
         </article>
 
         <footer className={`flex shrink-0 flex-col gap-3 border-t px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5 ${footerClassName}`}>
@@ -159,7 +167,7 @@ export const TslSkinPreviewDialog: React.FC<TslSkinPreviewDialogProps> = ({ view
               <MousePointer2 size={15} className="shrink-0" />
               鼠标拖动旋转，滚轮缩放，按 Esc 关闭。
             </p>
-            <p aria-live="polite" className={`mt-1 truncate text-xs font-medium ${mutedTextClassName}`}>
+            <p aria-live="polite" className={`mt-1 break-words text-xs font-medium ${mutedTextClassName}`}>
               {viewModel.status}
             </p>
             {viewModel.riskTags.length > 0 && (
@@ -181,7 +189,7 @@ export const TslSkinPreviewDialog: React.FC<TslSkinPreviewDialogProps> = ({ view
                     aria-pressed={selected}
                     aria-label={option.label}
                     title={option.label}
-                    className={`inline-flex h-8 w-8 items-center justify-center rounded-md border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3e6ae1] focus-visible:ring-offset-2 active:scale-[0.98] ${
+                    className={`inline-flex h-11 w-11 items-center justify-center rounded-md border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3e6ae1] focus-visible:ring-offset-2 active:scale-[0.98] ${
                       selected ? 'border-[#3e6ae1] ring-2 ring-[#3e6ae1]/20' : 'border-slate-300 hover:border-[#3e6ae1]'
                     }`}
                   >
@@ -193,7 +201,8 @@ export const TslSkinPreviewDialog: React.FC<TslSkinPreviewDialogProps> = ({ view
             <button
               type="button"
               onClick={actions.download}
-              className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-md bg-[#3e6ae1] px-5 text-sm font-bold text-white transition hover:bg-[#3457b1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3e6ae1] focus-visible:ring-offset-2 active:scale-[0.98]"
+              disabled={viewModel.texturePending}
+              className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-md bg-[#3e6ae1] px-5 text-sm font-bold text-white transition hover:bg-[#3457b1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3e6ae1] focus-visible:ring-offset-2 active:scale-[0.98] disabled:cursor-wait disabled:opacity-45"
             >
               <Download size={17} />
               下载当前皮肤

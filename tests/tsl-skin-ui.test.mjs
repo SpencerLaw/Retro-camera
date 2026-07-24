@@ -521,6 +521,18 @@ runTest('tsl skin page supports direct png export and model-aware fit modes', ()
   assert.match(wrapStudioSource, /铺满车身/);
 });
 
+runTest('gallery download stays synchronous and uses a mounted same-origin anchor', () => {
+  assert.doesNotMatch(
+    appComponentSource,
+    /const getWrapAssetBytes|URL\.createObjectURL|URL\.revokeObjectURL/,
+    'gallery downloads must not leave the click gesture to fetch and rebuild an already-local PNG',
+  );
+  assert.match(appComponentSource, /const downloadWrapExample = \(example: OfficialWrapExample\) =>/);
+  assert.match(appComponentSource, /link\.href = example\.downloadUrl \|\| example\.imageUrl/);
+  assert.match(appComponentSource, /document\.body\.appendChild\(link\)/);
+  assert.match(appComponentSource, /link\.remove\(\)/);
+});
+
 runTest('tsl skin page shows an approximate in-car render preview', () => {
   assert.match(previewDialogSource, /TslVehicle3DPreview/);
   assert.match(previewDialogSource, /车漆/);

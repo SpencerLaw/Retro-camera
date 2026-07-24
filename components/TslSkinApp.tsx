@@ -323,35 +323,15 @@ const TslSkinApp: React.FC = () => {
     setPreviewDialogTarget(null);
   };
 
-  const getWrapAssetBytes = async (example: OfficialWrapExample) => {
-    const response = await fetch(example.downloadUrl || example.imageUrl);
-    if (!response.ok) {
-      throw new Error('皮肤文件下载失败。');
-    }
-
-    return new Uint8Array(await response.arrayBuffer());
-  };
-
-  const downloadWrapExample = async (example: OfficialWrapExample) => {
-    try {
-      const bytes = await getWrapAssetBytes(example);
-      const blob = new Blob([bytes], { type: 'image/png' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = example.fileName || buildTslSkinFileName(selectedTemplate.label);
-      link.click();
-      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-      setStatus(`${example.title} 下载已开始。`);
-    } catch {
-      const link = document.createElement('a');
-      link.href = example.downloadUrl || example.imageUrl;
-      link.download = example.fileName || buildTslSkinFileName(selectedTemplate.label);
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-      link.click();
-      setStatus(`${example.title} 已在新窗口打开，可保存图片。`);
-    }
+  const downloadWrapExample = (example: OfficialWrapExample) => {
+    const link = document.createElement('a');
+    link.href = example.downloadUrl || example.imageUrl;
+    link.download = example.fileName || buildTslSkinFileName(selectedTemplate.label);
+    link.rel = 'noopener noreferrer';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setStatus(`${example.title} 已请求浏览器下载，请检查下载列表。`);
   };
 
   const downloadCanvas = () => {

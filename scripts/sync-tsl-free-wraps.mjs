@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -19,6 +20,9 @@ export const SUPPORTED_REMOTE_MODEL_IDS = [
 ];
 
 const DEFAULT_TESLA_WRAP_COM_MODEL_IDS = ['modely-2025-premium'];
+const CONFIRMED_VISUAL_DUPLICATE_WRAP_IDS = new Set([
+  'teslawrap-17e988e2-b6c4-47e8-9d8b-28ac168b2269',
+]);
 
 const MODEL_ID_ALIASES = {
   model3: 'model3',
@@ -237,6 +241,7 @@ export function buildFreeWrapIndexPayload({
   const seenUrls = new Set();
   const items = [...timorItems, ...mrproperItems, ...teslaWrapComItems]
     .filter(Boolean)
+    .filter((item) => !CONFIRMED_VISUAL_DUPLICATE_WRAP_IDS.has(item.id))
     .filter((item) => {
       const key = item.imageUrl.toLowerCase();
       if (seenUrls.has(key)) {
@@ -420,11 +425,13 @@ async function mirrorSingleWrapAsset(item, {
   generatedAt,
   fetchImpl,
   fileExists,
+  readFile,
   writeFile,
   makeDirectory,
 }) {
   const sourceUrl = item.downloadUrl || item.imageUrl;
   const { publicPath, filePath } = buildLocalWrapAssetTarget(item, { publicRoot, publicBasePath });
+  let bytes;
 
   if (!(await fileExists(filePath))) {
     const response = await fetchImpl(sourceUrl, {
@@ -443,24 +450,30 @@ async function mirrorSingleWrapAsset(item, {
       throw new Error(`Not an image response: ${sourceUrl}`);
     }
 
-    const bytes = new Uint8Array(await response.arrayBuffer());
+    bytes = new Uint8Array(await response.arrayBuffer());
     if (bytes.byteLength === 0) {
       throw new Error(`Empty image response: ${sourceUrl}`);
     }
 
     await makeDirectory(path.dirname(filePath), { recursive: true });
     await writeFile(filePath, bytes);
+  } else {
+    bytes = new Uint8Array(await readFile(filePath));
   }
 
   return {
-    ...item,
-    originalImageUrl: item.originalImageUrl || item.imageUrl,
-    originalDownloadUrl: item.originalDownloadUrl || item.downloadUrl || item.imageUrl,
-    imageUrl: publicPath,
-    downloadUrl: publicPath,
-    isRemote: false,
-    isLocal: true,
-    mirroredAt: generatedAt,
+    contentHash: createHash('sha256').update(bytes).digest('hex'),
+    filePath,
+    item: {
+      ...item,
+      originalImageUrl: item.originalImageUrl || item.imageUrl,
+      originalDownloadUrl: item.originalDownloadUrl || item.downloadUrl || item.imageUrl,
+      imageUrl: publicPath,
+      downloadUrl: publicPath,
+      isRemote: false,
+      isLocal: true,
+      mirroredAt: generatedAt,
+    },
   };
 }
 
@@ -514,24 +527,27 @@ export async function mirrorWrapAssetsForPayload(payload, {
   retryDelayMs = 300,
   fetchImpl = fetch,
   fileExists = defaultFileExists,
+  readFile = fs.readFile,
   writeFile = fs.writeFile,
   makeDirectory = fs.mkdir,
+  removeFile = fs.unlink,
 } = {}) {
   const mirrorResults = await mapWithConcurrency(payload.items || [], concurrency, async (item) => {
     try {
-      const mirroredItem = await mirrorSingleWrapAssetWithRetry(item, {
+      const mirroredAsset = await mirrorSingleWrapAssetWithRetry(item, {
         publicRoot,
         publicBasePath,
         generatedAt,
         fetchImpl,
         fileExists,
+        readFile,
         writeFile,
         makeDirectory,
         maxDownloadAttempts,
         retryDelayMs,
       });
 
-      return { item: mirroredItem, error: null };
+      return { ...mirroredAsset, error: null };
     } catch (error) {
       return {
         item: null,
@@ -544,7 +560,33 @@ export async function mirrorWrapAssetsForPayload(payload, {
       };
     }
   });
-  const mirroredItems = mirrorResults.map((result) => result.item).filter(Boolean);
+  const mirroredItems = [];
+  const contentHashIndexes = new Map();
+  const duplicateFilePaths = [];
+
+  mirrorResults.forEach((result) => {
+    if (!result.item) {
+      return;
+    }
+
+    const existingIndex = contentHashIndexes.get(result.contentHash);
+    if (existingIndex === undefined) {
+      contentHashIndexes.set(result.contentHash, mirroredItems.length);
+      mirroredItems.push(result.item);
+      return;
+    }
+
+    const existingItem = mirroredItems[existingIndex];
+    mirroredItems[existingIndex] = {
+      ...existingItem,
+      modelIds: [...new Set([...(existingItem.modelIds || []), ...(result.item.modelIds || [])])],
+      riskTags: [...new Set([...(existingItem.riskTags || []), ...(result.item.riskTags || [])])],
+      tags: compactTags([...(existingItem.tags || []), ...(result.item.tags || [])]),
+    };
+    duplicateFilePaths.push(result.filePath);
+  });
+
+  await Promise.all(duplicateFilePaths.map((filePath) => removeFile(filePath)));
   const mirrorErrors = mirrorResults.map((result) => result.error).filter(Boolean);
 
   return {

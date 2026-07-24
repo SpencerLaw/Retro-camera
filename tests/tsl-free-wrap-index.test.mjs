@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import fs from 'node:fs';
+import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 async function runTest(name, fn) {
@@ -162,6 +164,50 @@ await runTest('free wrap mirror rewrites png urls to local public assets and kee
   assert.deepEqual([...writes.values()][0], [137, 80, 78, 71]);
 });
 
+await runTest('free wrap mirror keeps one local item for identical image bytes', async () => {
+  const { mirrorWrapAssetsForPayload, normaliseTeslaWrapComWrap, normaliseTimorWrap } = await loadSyncModule();
+  const removedFiles = [];
+  const payload = {
+    generatedAt: '2026-05-28T00:00:00.000Z',
+    sources: [],
+    supportedModelIds: ['modely', 'modely-2025-premium'],
+    items: [
+      normaliseTimorWrap({
+        id: 1,
+        title: 'Shared wrap',
+        vehicleModel: 'modely',
+        previewUrl: 'https://cdn.example.com/timor.png',
+        fileUrl: 'https://cdn.example.com/timor.png',
+        tags: ['popular'],
+      }),
+      normaliseTeslaWrapComWrap({
+        id: 'shared',
+        title: 'Shared wrap copy',
+        model_id: 'modely-2025-premium',
+        preview_image_url: 'https://cdn.example.com/teslawrap.png',
+        description: 'premium',
+      }),
+    ],
+  };
+
+  const mirrored = await mirrorWrapAssetsForPayload(payload, {
+    fetchImpl: async () => ({
+      ok: true,
+      headers: new Map([['content-type', 'image/png']]),
+      arrayBuffer: async () => new Uint8Array([137, 80, 78, 71]).buffer,
+    }),
+    fileExists: async () => false,
+    writeFile: async () => {},
+    makeDirectory: async () => {},
+    removeFile: async (filePath) => removedFiles.push(filePath),
+  });
+
+  assert.equal(mirrored.items.length, 1);
+  assert.deepEqual(mirrored.items[0].modelIds, ['modely', 'modely-2025-premium']);
+  assert.deepEqual(mirrored.items[0].tags, ['popular', 'premium']);
+  assert.equal(removedFiles.length, 1);
+});
+
 await runTest('free wrap mirror skips failed image downloads and records mirror errors', async () => {
   const { mirrorWrapAssetsForPayload, normaliseTimorWrap } = await loadSyncModule();
 
@@ -256,6 +302,26 @@ await runTest('free wrap index payload deduplicates remote urls and records sour
   assert.ok(payload.items.every((item) => item.isRemote));
 });
 
+await runTest('free wrap index excludes the confirmed visual duplicate', async () => {
+  const { buildFreeWrapIndexPayload, normaliseTeslaWrapComWrap } = await loadSyncModule();
+  const makeWrap = (id, title) => normaliseTeslaWrapComWrap({
+    id,
+    title,
+    model_id: 'modely-2025-premium',
+    preview_image_url: `https://cdn.example.com/${id}.png`,
+  });
+  const payload = buildFreeWrapIndexPayload({
+    teslaWrapComItems: [
+      makeWrap('b132d355-037d-4663-9fb2-d158f05e8ecc', 'Panda Black Top'),
+      makeWrap('17e988e2-b6c4-47e8-9d8b-28ac168b2269', 'Panda The black top'),
+    ],
+  });
+
+  assert.deepEqual(payload.items.map((item) => item.id), [
+    'teslawrap-b132d355-037d-4663-9fb2-d158f05e8ecc',
+  ]);
+});
+
 await runTest('generated free wrap index points to mirrored local images with original url metadata', async () => {
   const indexPath = 'public/tsl-skins/free-wrap-index.json';
   assert.equal(fs.existsSync(indexPath), true);
@@ -268,6 +334,29 @@ await runTest('generated free wrap index points to mirrored local images with or
   assert.ok(payload.items.every((item) => /^https:\/\//.test(item.originalImageUrl)));
   assert.ok(payload.items.every((item) => item.isRemote === false));
   assert.ok(payload.items.every((item) => item.isLocal === true));
+});
+
+await runTest('generated free wrap index references one unique local png per item', async () => {
+  const indexPath = 'public/tsl-skins/free-wrap-index.json';
+  const localWrapRoot = 'public/tsl-skins/local-wraps';
+  const payload = JSON.parse(fs.readFileSync(indexPath, 'utf8'));
+  const seenHashes = new Map();
+
+  payload.items.forEach((item) => {
+    const filePath = path.join('public', item.imageUrl.replace(/^\//, ''));
+    assert.equal(fs.existsSync(filePath), true, `${item.id} references missing ${item.imageUrl}`);
+    const contentHash = createHash('sha256').update(fs.readFileSync(filePath)).digest('hex');
+    assert.equal(
+      seenHashes.has(contentHash),
+      false,
+      `${item.id} duplicates ${seenHashes.get(contentHash)}`,
+    );
+    seenHashes.set(contentHash, item.id);
+  });
+
+  const localPngFiles = fs.readdirSync(localWrapRoot, { recursive: true })
+    .filter((fileName) => fileName.toLowerCase().endsWith('.png'));
+  assert.equal(localPngFiles.length, payload.items.length);
 });
 
 await runTest('pwa build does not precache mirrored wrap png library', async () => {

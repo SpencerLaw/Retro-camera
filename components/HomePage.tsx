@@ -600,7 +600,7 @@ export const HomePage: React.FC = () => {
           {/* Kiddie Plan - Hand-drawn Style */}
           <Link
             to="/kiddie-plan"
-            className="group relative bg-gradient-to-br from-[#FFF9E1] via-[#FFD95A] to-[#FFB1B1] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(255,217,90,0.4)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(255,217,90,0.6)] hover:rotate-2 block"
+            className="group relative bg-gradient-to-br from-[#FFF9E1] via-[#FFD95A] to-[#FFB1B1] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(255,217,90,0.4)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(255,217,90,0.6)] hover:rotate-2 hidden"
             style={{
               transformStyle: 'preserve-3d',
             }}
@@ -636,7 +636,7 @@ export const HomePage: React.FC = () => {
           {/* Adventure Game Card */}
           <Link
             to="/adventure"
-            className="group relative bg-gradient-to-br from-[#FFD1FF] via-[#FFB5E8] to-[#FF8DC7] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(255,182,193,0.4)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(255,182,193,0.6)] hover:rotate-2 block"
+            className="group relative bg-gradient-to-br from-[#FFD1FF] via-[#FFB5E8] to-[#FF8DC7] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(255,182,193,0.4)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(255,182,193,0.6)] hover:rotate-2 hidden"
             style={{
               transformStyle: 'preserve-3d',
             }}
@@ -679,7 +679,7 @@ export const HomePage: React.FC = () => {
           {/* Group Maker Card - Bright Yellow/Blue */}
           <Link
             to="/group-maker"
-            className="group relative bg-gradient-to-br from-[#FFF9C4] via-[#FFF176] to-[#FFEE58] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(251,192,45,0.4)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(251,192,45,0.6)] hover:rotate-2 block"
+            className="group relative bg-gradient-to-br from-[#FFF9C4] via-[#FFF176] to-[#FFEE58] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(251,192,45,0.4)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(251,192,45,0.6)] hover:rotate-2 hidden"
             style={{
               transformStyle: 'preserve-3d',
             }}
@@ -723,7 +723,7 @@ export const HomePage: React.FC = () => {
           {/* Course Scheduler Card - Professional/Modern Style */}
           <Link
             to="/course-scheduler"
-            className="group relative bg-gradient-to-br from-[#E2E8F0] via-[#F1F5F9] to-[#F8FAFC] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(148,163,184,0.3)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(148,163,184,0.5)] hover:rotate-2 block"
+            className="group relative bg-gradient-to-br from-[#E2E8F0] via-[#F1F5F9] to-[#F8FAFC] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(148,163,184,0.3)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(148,163,184,0.5)] hover:rotate-2 hidden"
             style={{
               transformStyle: 'preserve-3d',
             }}

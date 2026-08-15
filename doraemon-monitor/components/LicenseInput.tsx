@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslations } from '../../hooks/useTranslations';
 import { Key, CheckCircle, XCircle, Loader, Trash2, ArrowLeft } from 'lucide-react';
+import type { DoraemonVariant } from '../types';
 import { 
   verifyLicenseCode, 
   formatLicenseCode, 
@@ -11,9 +12,11 @@ import '../styles/license-input.css';
 
 interface LicenseInputProps {
   onVerified: () => void;
+  variant?: DoraemonVariant;
+  onChooseVersion?: () => void;
 }
 
-const LicenseInput: React.FC<LicenseInputProps> = ({ onVerified }) => {
+const LicenseInput: React.FC<LicenseInputProps> = ({ onVerified, variant = 'legacy', onChooseVersion }) => {
   const navigate = useNavigate();
   const t = useTranslations();
   const [licenseCode, setLicenseCode] = useState('');
@@ -91,11 +94,11 @@ const LicenseInput: React.FC<LicenseInputProps> = ({ onVerified }) => {
   };
 
   return (
-    <div className="license-container">
+    <div className={variant === 'legacy' ? 'license-container' : `dm-license-screen dm-license-screen--${variant}`}>
       <div className="license-card">
         {/* 返回按钮 */}
         <button 
-          onClick={() => navigate('/')} 
+          onClick={onChooseVersion ?? (() => navigate('/'))}
           className="license-back-btn"
           title={t('doraemon.license.backHome')}
           style={{

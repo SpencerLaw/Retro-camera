@@ -5,7 +5,7 @@ import { HomePage } from './components/HomePage';
 import AdventureGameApp from './adventure-game/AdventureGameApp';
 import AdventureGameEdit from './adventure-game/AdventureGameEdit';
 import AdventureLicenseGate from './adventure-game/AdventureLicenseGate';
-import DoraemonMonitorApp from './doraemon-monitor/DoraemonMonitorApp';
+import DoraemonVersionGate from './doraemon-monitor/DoraemonVersionGate';
 import { GroupMakerApp } from './components/GroupMakerApp';
 import BroadcastApp from './broadcast-assistant/BroadcastApp';
 import KiddiePlanApp from './kiddieplan/KiddiePlanApp';
@@ -36,7 +36,7 @@ const App: React.FC = () => {
           <Route path="/" element={<HomePage />} />
           <Route path="/adventure" element={<AdventureLicenseGate><AdventureGameApp /></AdventureLicenseGate>} />
           <Route path="/adventure/edit" element={<AdventureLicenseGate><AdventureGameEdit /></AdventureLicenseGate>} />
-          <Route path="/doraemon" element={<DoraemonMonitorApp />} />
+          <Route path="/doraemon" element={<DoraemonVersionGate />} />
           <Route path="/group-maker" element={<GroupMakerApp />} />
           <Route path="/broadcast" element={<BroadcastApp />} />
           <Route path="/broadcast/receiver" element={<BroadcastApp forceReceiver />} />

@@ -14,6 +14,12 @@ import {
   verifyWarningResetPassword
 } from './utils/warningResetPassword.js';
 import LicenseInput from './components/LicenseInput';
+import type { DoraemonVariant } from './types';
+import { getModernEmotionTone, type ModernEmotionTone } from './modernEmotionState';
+import campusMascotUrl from './assets/doraemon-campus-3d.png';
+import pocketMascotUrl from './assets/doraemon-pocket-3d.png';
+import seriousMascotUrl from './assets/doraemon-serious-3d.png';
+import angryMascotUrl from './assets/doraemon-angry-3d.png';
 import './doraemon-monitor.css';
 
 type MonitorState = 'calm' | 'alarm';
@@ -61,6 +67,11 @@ interface SessionReport {
   threshold: number;
   sensitivity: number;
   history?: SessionHistoryPoint[];
+}
+
+interface DoraemonMonitorAppProps {
+  readonly variant: DoraemonVariant;
+  readonly onChooseVersion: () => void;
 }
 
 const REPORT_STORAGE_KEY = 'doraemon_session_reports_v1';
@@ -150,7 +161,7 @@ const getReportWeekdayKey = (dateLike: Date | string): ReportWeekday | null => {
   return null;
 };
 
-const DoraemonMonitorApp: React.FC = () => {
+const DoraemonMonitorApp: React.FC<DoraemonMonitorAppProps> = ({ variant, onChooseVersion }) => {
   const navigate = useNavigate();
   const t = useTranslations();
   const [isLicensed, setIsLicensed] = useState<boolean | null>(null);
@@ -1387,14 +1398,15 @@ const DoraemonMonitorApp: React.FC = () => {
     if (!isReportOpen) return null;
 
     return (
-      <div style={{
+      <div className="dm-report-layer" style={{
         position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center',
         background: 'rgba(5, 10, 26, 0.6)', backdropFilter: 'blur(8px)', animation: 'fadeIn 0.3s ease'
       }}>
         {/* Full-screen click-to-close backdrop */}
         <div style={{ position: 'absolute', inset: 0 }} onClick={closeReport} />
         
-        <div 
+        <div
+          className="dm-report-shell"
           onClick={stopModalPropagation}
           style={{
             position: 'relative', width: 'min(90vw, 860px)', height: 'min(85vh, 800px)',
@@ -1405,7 +1417,7 @@ const DoraemonMonitorApp: React.FC = () => {
           }}
         >
           {/* Header (Fixed) */}
-          <div style={{
+          <div className="dm-report-header" style={{
             flex: '0 0 auto', padding: '24px 32px', borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
             display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255, 255, 255, 0.02)'
           }}>
@@ -1418,8 +1430,10 @@ const DoraemonMonitorApp: React.FC = () => {
                 <p style={{ margin: '4px 0 0', fontSize: '0.9rem', color: '#94a3b8' }}>{t('doraemon.report.localOnly')}</p>
               </div>
             </div>
-            <button 
+            <button
+              className="dm-report-close"
               type="button"
+              aria-label={t('doraemon.report.hide')}
               onClick={closeReport}
               onPointerDown={(event) => {
                 event.preventDefault();
@@ -1437,6 +1451,7 @@ const DoraemonMonitorApp: React.FC = () => {
 
           {/* Body (Scrollable) */}
           <div
+            className="dm-report-body"
             ref={reportBodyRef}
             style={{
               flex: '1 1 auto',
@@ -1836,23 +1851,72 @@ const DoraemonMonitorApp: React.FC = () => {
   };
 
   const NoiseLevelReference = () => {
-    const levels = [
+    const legacyLevels = [
       { min: 0, max: 20, label: t('doraemon.levels.l0') },
       { min: 20, max: 40, label: t('doraemon.levels.l20') },
       { min: 40, max: 60, label: t('doraemon.levels.l40') },
       { min: 60, max: 80, label: t('doraemon.levels.l60') },
       { min: 80, max: 120, label: t('doraemon.levels.l80') },
     ];
-    const pointerPos = Math.min(100, Math.max(0, currentDb));
     const activeTextColor = '#0096E1';
     const textColor = isDarkMode ? '#94a3b8' : '#475569';
+
+    if (variant === 'legacy') {
+      const pointerPos = Math.min(100, Math.max(0, currentDb));
+
+      return (
+        <div className="reference-stack">
+          <div className="db-reference-panel">
+            <div className="reference-title">{t('doraemon.dbReference')}</div>
+            <div className="vertical-meter-container">
+              <div style={{ position: 'relative', width: '12px' }}>
+                <div className="meter-bar-bg">
+                  <div className="meter-gradient-fill"></div>
+                </div>
+                <div
+                  className="current-level-pointer"
+                  style={{
+                    bottom: `${pointerPos}%`
+                  }}
+                >
+                  <div style={{ position: 'absolute', right: '-12px', width: 0, height: 0, borderTop: '6px solid transparent', borderBottom: '6px solid transparent', borderLeft: `10px solid #0096E1` }} />
+                </div>
+              </div>
+              <div className="level-nodes">
+                {legacyLevels.reverse().map((l, i) => (
+                  <div key={i} style={{
+                    color: currentDb >= l.min && currentDb < l.max ? activeTextColor : textColor,
+                    opacity: currentDb >= l.min && currentDb < l.max ? 1 : 0.5,
+                    fontWeight: currentDb >= l.min && currentDb < l.max ? 'bold' : 'normal',
+                    fontSize: '0.9rem'
+                  }}>
+                    {l.label}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    const modernLevels = [
+      { min: 0, max: 20, label: t('doraemon.levels.l0') },
+      { min: 20, max: 40, label: t('doraemon.levels.l20') },
+      { min: 40, max: 60, label: t('doraemon.levels.l40') },
+      { min: 60, max: 80, label: t('doraemon.levels.l60') },
+      { min: 80, max: 100, label: t('doraemon.levels.l80') },
+      { min: 100, max: 121, label: t('doraemon.levels.l100') },
+    ];
+    const pointerPos = Math.min(100, Math.max(0, Math.round(currentDb / 120 * 100)));
+    const displayLevels = [...modernLevels].reverse();
 
     return (
       <div className="reference-stack">
         <div className="db-reference-panel">
           <div className="reference-title">{t('doraemon.dbReference')}</div>
           <div className="vertical-meter-container">
-            <div style={{ position: 'relative', width: '12px' }}>
+            <div className="dm-reference-rail" aria-hidden="true">
               <div className="meter-bar-bg">
                 <div className="meter-gradient-fill"></div>
               </div>
@@ -1861,21 +1925,25 @@ const DoraemonMonitorApp: React.FC = () => {
                 style={{
                   bottom: `${pointerPos}%`
                 }}
-              >
-                <div style={{ position: 'absolute', right: '-12px', width: 0, height: 0, borderTop: '6px solid transparent', borderBottom: '6px solid transparent', borderLeft: `10px solid #0096E1` }} />
-              </div>
+              />
             </div>
             <div className="level-nodes">
-              {levels.reverse().map((l, i) => (
-                <div key={i} style={{
-                  color: currentDb >= l.min && currentDb < l.max ? activeTextColor : textColor,
-                  opacity: currentDb >= l.min && currentDb < l.max ? 1 : 0.5,
-                  fontWeight: currentDb >= l.min && currentDb < l.max ? 'bold' : 'normal',
-                  fontSize: '0.9rem'
-                }}>
-                  {l.label}
-                </div>
-              ))}
+              {displayLevels.map((l) => {
+                const isCurrentLevel = currentDb >= l.min && currentDb < l.max;
+                const labelParts = l.label.match(/^([0-9]+[–-][0-9]+ dB)\s*(.*)$/);
+                const rangeText = labelParts?.[1] ?? l.label;
+                const descriptionText = labelParts?.[2] ?? '';
+
+                return (
+                  <div
+                    key={`${l.min}-${l.max}`}
+                    className={`level-node ${isCurrentLevel ? 'is-current' : 'is-reference'}`}
+                  >
+                    <span className="dm-level-range">{rangeText}</span>
+                    {descriptionText && <span className="dm-level-name">{descriptionText}</span>}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -1928,16 +1996,306 @@ const DoraemonMonitorApp: React.FC = () => {
     </svg>
   );
 
-  if (isLicensed === null) return <div className="doraemon-app dark-mode" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><div className="spinner" style={{ width: '80px', height: '60px' }}></div><h2 style={{ color: '#00f260' }}>{t('doraemon.verifying')}</h2></div>;
-  if (isLicensed === false) return <LicenseInput onVerified={() => setIsLicensed(true)} />;
-  if (!isStarted) return <div className="doraemon-start-layer"><button onClick={() => navigate('/')} className="back-btn"><ArrowLeft size={32} /></button><div className="doraemon-start-icon" style={{ width: '250px', height: '250px' }}><DoraemonSVG /></div><h1 className="start-title" style={{ fontSize: '3.5rem' }}>{t('doraemon.title')}</h1><button className="doraemon-btn-big" onClick={initApp} disabled={isLoading} style={{ padding: '25px 60px' }}>{isLoading ? <span>{t('doraemon.summoning')}</span> : <><span className="btn-main-text" style={{ fontSize: '2rem' }}>{t('doraemon.startMonitor')}</span><span className="btn-sub-text">{t('doraemon.startMonitorSub')}</span></>}</button>{error && <div className="doraemon-error-box">{error}</div>}</div>;
+  const stripMetricPrefix = (label: string) => label.replace(/^[^\p{L}\p{N}]+/u, '');
+  const modernVariantName = variant === 'campus' ? '校园声场' : '未来口袋教室';
+  const modernEmotionTone = getModernEmotionTone({ currentDb, limit, monitorState: visualState });
+  const modernCalmMascotUrls = {
+    legacy: campusMascotUrl,
+    campus: campusMascotUrl,
+    pocket: pocketMascotUrl
+  } satisfies Record<DoraemonVariant, string>;
+  const modernMascotUrl = ({
+    calm: modernCalmMascotUrls[variant],
+    caution: seriousMascotUrl,
+    danger: angryMascotUrl
+  } satisfies Record<ModernEmotionTone, string>)[modernEmotionTone];
+  const modernToneContent = ({
+    calm: {
+      status: '监测稳定',
+      state: t('doraemon.monitorTitle', { db: Math.round(currentDb) }),
+      detail: t('doraemon.levels.l40'),
+      lead: '让教室保持刚刚好的安静'
+    },
+    caution: {
+      status: '音量偏高',
+      state: '注意音量',
+      detail: '正在接近提醒阈值',
+      lead: '声音偏高，请大家稍微轻一点'
+    },
+    danger: {
+      status: '需要安静',
+      state: t('doraemon.quiet'),
+      detail: t('doraemon.quiet'),
+      lead: t('doraemon.quiet')
+    }
+  } satisfies Record<ModernEmotionTone, {
+    readonly status: string;
+    readonly state: string;
+    readonly detail: string;
+    readonly lead: string;
+  }>)[modernEmotionTone];
+
+  const renderModernMonitor = () => (
+    <div
+      className={`doraemon-modern doraemon-modern--${variant} dm-tone--${modernEmotionTone} ${visualState === 'alarm' ? 'dm-alarm-mode' : ''}`}
+      data-doraemon-variant={variant}
+      data-emotion-tone={modernEmotionTone}
+    >
+      <header className="dm-modern-header">
+        <div className="dm-modern-brand">
+          <span className="dm-modern-avatar" aria-hidden="true"><DoraemonSVG /></span>
+          <span className="dm-modern-brand-copy">
+            <strong>{t('doraemon.title')}</strong>
+            <small>{modernVariantName} · {timeStr}</small>
+          </span>
+        </div>
+        <nav className="dm-modern-actions" aria-label="课堂监测操作">
+          <button type="button" className="dm-switch-version" onClick={onChooseVersion} aria-label="切换版本">
+            <ArrowLeft size={20} aria-hidden="true" />
+            <span>切换版本</span>
+          </button>
+          <button type="button" className="dm-modern-action" onClick={openReport} aria-label={t('doraemon.report.trigger')}>
+            <CalendarDays size={20} aria-hidden="true" />
+            <span>{t('doraemon.report.trigger')}</span>
+          </button>
+          <button
+            type="button"
+            className={`dm-modern-action ${isMuted ? 'is-active' : ''}`}
+            onClick={toggleMute}
+            aria-label={isMuted ? t('doraemon.unmute') : t('doraemon.mute')}
+          >
+            {isMuted ? <VolumeX size={21} aria-hidden="true" /> : <Volume2 size={21} aria-hidden="true" />}
+            <span>{isMuted ? t('doraemon.unmute') : t('doraemon.mute')}</span>
+          </button>
+          <button type="button" className="dm-modern-action dm-modern-action--icon" onClick={toggleFullscreen} aria-label="全屏">
+            <Maximize size={21} aria-hidden="true" />
+            <span>全屏</span>
+          </button>
+        </nav>
+      </header>
+
+      <main className="dm-modern-layout">
+        <aside className="dm-modern-reference" aria-label={t('doraemon.dbReference')}>
+          <div className="dm-section-heading">
+            <span>01</span>
+            <strong>{variant === 'campus' ? '教室声音区间' : '自习守护中'}</strong>
+          </div>
+          <p className="dm-reference-lead">
+            {modernToneContent.lead}
+          </p>
+          <NoiseLevelReference />
+        </aside>
+
+        <section className="dm-live-stage" aria-label="实时声场监测">
+          {visualState === 'alarm' && (
+            <div className="dm-alarm-banner" role="alert">{t('doraemon.quiet')}</div>
+          )}
+          <div className="dm-section-heading dm-live-heading">
+            <span>02</span>
+            <strong>实时声场监测</strong>
+            <small className={`dm-live-status dm-live-status--${modernEmotionTone}`} aria-live="polite">
+              {modernToneContent.status}
+            </small>
+          </div>
+
+          <div className="dm-live-core">
+            <div className="dm-live-mascot" style={{ transform: `scale(${1 + (currentDb - 40) / 300})` }} aria-hidden="true">
+              <img
+                className="dm-modern-mascot-image"
+                src={modernMascotUrl}
+                width={1254}
+                height={1254}
+                alt=""
+              />
+            </div>
+            <div className="dm-live-reading">
+              <div className="dm-live-number-row">
+                <strong className="dm-live-number">{Math.round(currentDb)}</strong>
+                <span>dB</span>
+              </div>
+              <div className={`dm-room-state dm-room-state--${modernEmotionTone}`}>{modernToneContent.state}</div>
+              <p>{modernToneContent.detail}</p>
+            </div>
+          </div>
+
+          <div className="dm-modern-visualizer" aria-hidden="true"><Visualizer /></div>
+
+          <div className="dm-metric-band">
+            <div className="dm-metric-cell">
+              <span>{stripMetricPrefix(t('doraemon.quietTime'))}</span>
+              <strong>{formatTime(quietTime)}</strong>
+            </div>
+            <div className="dm-metric-cell">
+              <span>{stripMetricPrefix(t('doraemon.totalTime'))}</span>
+              <strong>{formatTime(totalTime)}</strong>
+            </div>
+            <div className={`dm-metric-cell ${warnCount > 0 ? 'is-warning' : ''}`}>
+              <span>{stripMetricPrefix(t('doraemon.warnCount'))}</span>
+              <strong>{warnCount}</strong>
+            </div>
+            <div className="dm-metric-cell">
+              <span>{stripMetricPrefix(t('doraemon.maxDb'))}</span>
+              <strong>{Math.round(maxDb)} <small>dB</small></strong>
+            </div>
+          </div>
+        </section>
+
+        <aside className="dm-teacher-console" aria-label="教师控制面板">
+          <div className="dm-section-heading dm-console-heading">
+            <span>03</span>
+            <strong>教师控制面板</strong>
+          </div>
+
+          <div className="dm-control-block">
+            <div className="dm-control-title-row">
+              <span>{t('doraemon.sensitivity')}</span>
+              <strong>{sensitivity}%</strong>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={sensitivity}
+              onChange={(event) => setSensitivity(Number(event.target.value))}
+              className="dm-modern-slider"
+              aria-label={t('doraemon.sensitivity')}
+            />
+            <button type="button" className="dm-inline-help" onClick={() => setShowHelp(!showHelp)}>
+              <HelpCircle size={16} aria-hidden="true" />
+              {t('doraemon.helpTitle')}
+            </button>
+            {showHelp && (
+              <div className="dm-control-help">
+                <strong>{t('doraemon.helpAdviceTitle')}</strong>
+                <p>{t('doraemon.helpAdviceMute')}{t('doraemon.helpAdviceMuteDesc')}</p>
+                <p>{t('doraemon.helpAdviceRead')}{t('doraemon.helpAdviceReadDesc')}</p>
+              </div>
+            )}
+          </div>
+
+          <div className="dm-control-block">
+            <div className="dm-control-title-row">
+              <span>{t('doraemon.threshold')}</span>
+              <strong>{limit} <small>dB</small></strong>
+            </div>
+            <input
+              type="range"
+              min="40"
+              max="90"
+              value={limit}
+              onChange={(event) => setLimit(Number(event.target.value))}
+              className="dm-modern-slider"
+              aria-label={t('doraemon.threshold')}
+            />
+            <button type="button" className="dm-inline-help" onClick={() => setShowThresholdHelp(!showThresholdHelp)}>
+              <HelpCircle size={16} aria-hidden="true" />
+              {t('doraemon.thresholdHelpTitle')}
+            </button>
+            {showThresholdHelp && (
+              <div className="dm-control-help"><p>{t('doraemon.thresholdHelpDesc')}</p></div>
+            )}
+          </div>
+
+          <div className="dm-control-block dm-warning-control">
+            <div>
+              <span>警告重置保护</span>
+              <small>{warningResetPasswordEnabled ? '密码保护已开启' : '当前可直接重置'}</small>
+            </div>
+            <div className="dm-warning-actions">
+              <button type="button" onClick={handleResetWarnCount} title={t('doraemon.resetCount')} aria-label={t('doraemon.resetCount')}>
+                <RotateCcw size={18} aria-hidden="true" />
+              </button>
+              <button type="button" onClick={handleOpenWarningResetSettings} title={t('doraemon.warningResetPassword.settingsTrigger')} aria-label={t('doraemon.warningResetPassword.settingsTrigger')}>
+                <Lock size={18} aria-hidden="true" />
+              </button>
+              <button type="button" onClick={handleOpenWarningResetHelp} title={t('doraemon.warningResetPassword.helpTrigger')} aria-label={t('doraemon.warningResetPassword.helpTrigger')}>
+                <HelpCircle size={18} aria-hidden="true" />
+              </button>
+            </div>
+          </div>
+
+          <button type="button" className="dm-open-report" onClick={openReport}>
+            <span>
+              <small>{t('doraemon.report.localOnly')}</small>
+              <strong>{t('doraemon.report.title')}</strong>
+            </span>
+            <CalendarDays size={24} aria-hidden="true" />
+          </button>
+        </aside>
+      </main>
+
+      {renderWarningResetDialog()}
+      {renderReportDrawer()}
+    </div>
+  );
+
+  if (isLicensed === null) {
+    if (variant === 'legacy') {
+      return <div className="doraemon-app dark-mode" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><div className="spinner" style={{ width: '80px', height: '60px' }}></div><h2 style={{ color: '#00f260' }}>{t('doraemon.verifying')}</h2></div>;
+    }
+    return (
+      <div className={`doraemon-modern doraemon-modern--${variant} dm-modern-loading`} data-doraemon-variant={variant}>
+        <div className="dm-loading-orbit" aria-hidden="true"><span /></div>
+        <strong>{t('doraemon.verifying')}</strong>
+      </div>
+    );
+  }
+
+  if (isLicensed === false) {
+    return (
+      <LicenseInput
+        onVerified={() => setIsLicensed(true)}
+        variant={variant}
+        onChooseVersion={variant === 'legacy' ? undefined : onChooseVersion}
+      />
+    );
+  }
+
+  if (!isStarted) {
+    if (variant === 'legacy') {
+      return <div className="doraemon-start-layer"><button onClick={() => navigate('/')} className="back-btn" title={t('doraemon.license.backHome')}><ArrowLeft size={32} /></button><div className="doraemon-start-icon" style={{ width: '250px', height: '250px' }}><DoraemonSVG /></div><h1 className="start-title" style={{ fontSize: '3.5rem' }}>{t('doraemon.title')}</h1><button className="doraemon-btn-big" onClick={initApp} disabled={isLoading} style={{ padding: '25px 60px' }}>{isLoading ? <span>{t('doraemon.summoning')}</span> : <><span className="btn-main-text" style={{ fontSize: '2rem' }}>{t('doraemon.startMonitor')}</span><span className="btn-sub-text">{t('doraemon.startMonitorSub')}</span></>}</button>{error && <div className="doraemon-error-box">{error}</div>}</div>;
+    }
+
+    return (
+      <div className={`doraemon-modern doraemon-modern--${variant} dm-modern-start`} data-doraemon-variant={variant}>
+        <header className="dm-start-header">
+          <button type="button" className="dm-switch-version" onClick={onChooseVersion} aria-label="切换版本">
+            <ArrowLeft size={20} aria-hidden="true" />
+            <span>切换版本</span>
+          </button>
+          <span>{modernVariantName}</span>
+        </header>
+        <main className="dm-start-stage">
+          <div className="dm-start-kicker">READY FOR CLASS</div>
+          <div className="dm-start-mascot" aria-hidden="true">
+            <img
+              className="dm-modern-mascot-image"
+              src={variant === 'campus' ? campusMascotUrl : pocketMascotUrl}
+              width={1254}
+              height={1254}
+              alt=""
+            />
+          </div>
+          <h1>{t('doraemon.title')}</h1>
+          <p>{t('doraemon.pleaseAllowMic')}</p>
+          <button type="button" className="dm-modern-start-button" onClick={initApp} disabled={isLoading}>
+            <span>{isLoading ? t('doraemon.summoning') : t('doraemon.startMonitor')}</span>
+            {!isLoading && <small>{t('doraemon.startMonitorSub')}</small>}
+          </button>
+          {error && <div className="dm-modern-error" role="alert">{error}</div>}
+        </main>
+      </div>
+    );
+  }
+
+  if (variant !== 'legacy') return renderModernMonitor();
 
   return (
     <div className={`doraemon-app ${isDarkMode ? 'dark-mode' : ''} ${visualState === 'alarm' ? 'alarm-mode' : ''}`}>
       {visualState === 'alarm' && <div className="doraemon-giant-text">{t('doraemon.quiet')}</div>}
       <header className="doraemon-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-          <button onClick={() => navigate('/')} className="icon-btn"><ArrowLeft size={32} /></button>
+          <button onClick={() => navigate('/')} className="icon-btn" title={t('doraemon.license.backHome')}><ArrowLeft size={32} /></button>
           <div style={{ fontSize: '1.26rem', fontWeight: 'bold', color: isDarkMode ? '#fff' : '#333' }}>{timeStr}</div>
         </div>
         <div style={{ display: 'flex', gap: '20px' }}>
@@ -1957,8 +2315,8 @@ const DoraemonMonitorApp: React.FC = () => {
           >
             {isMuted ? <VolumeX size={32} /> : <Volume2 size={32} />}
           </button>
-          <button onClick={toggleFullscreen} className="icon-btn"><Maximize size={32} /></button>
-          <button onClick={() => setIsDarkMode(!isDarkMode)} className="icon-btn">{isDarkMode ? '🌞' : '🌙'}</button>
+          <button onClick={toggleFullscreen} className="icon-btn" title="全屏"><Maximize size={32} /></button>
+          <button onClick={() => setIsDarkMode(!isDarkMode)} className="icon-btn" title="切换明暗模式">{isDarkMode ? '🌞' : '🌙'}</button>
         </div>
       </header>
         <main className="doraemon-main">

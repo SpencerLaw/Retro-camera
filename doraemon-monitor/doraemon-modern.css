@@ -8,13 +8,16 @@
   --dm-danger-ink-light: #c82431;
   --dm-radius-card: 18px;
   --dm-radius-control: 10px;
+  --dm-radius-device: 42px;
+  --dm-radius-device-inner: 32px;
+  --dm-radius-device-chip: 12px;
   --dm-radius-pill: 999px;
   --dm-control-min: 44px;
   --dm-control-target-rendered: calc((var(--dm-control-min) + 0.25px) * var(--app-global-scale-inverse, 1));
   --dm-content-max: 1680px;
-  --dm-reference-column: clamp(148px, 10vw, 184px);
-  --dm-stage-min-column: 680px;
-  --dm-console-column: clamp(226px, 17vw, 280px);
+  --dm-reference-column: clamp(132px, 8.4vw, 160px);
+  --dm-stage-min-column: 720px;
+  --dm-console-column: clamp(208px, 14vw, 248px);
 }
 
 .dm-version-gate,
@@ -98,6 +101,18 @@ html:has(.doraemon-modern--pocket)::-webkit-scrollbar-thumb {
 
 html:has(.doraemon-modern--campus)::-webkit-scrollbar-thumb { background-color: #2d6f9b; }
 html:has(.doraemon-modern--pocket)::-webkit-scrollbar-thumb { background-color: #7fafd0; }
+
+@media (min-width: 1181px) {
+  html:has(.doraemon-modern),
+  body:has(.doraemon-modern),
+  #root:has(.doraemon-modern) {
+    overflow: hidden;
+  }
+
+  .doraemon-modern {
+    height: var(--app-scaled-viewport-height, 100dvh);
+  }
+}
 
 .dm-version-gate::before {
   position: absolute;
@@ -719,14 +734,14 @@ html:has(.doraemon-modern--pocket)::-webkit-scrollbar-thumb { background-color: 
   position: relative;
   z-index: 20;
   width: min(100%, var(--dm-content-max));
-  min-height: 92px;
+  min-height: 78px;
   margin-inline: auto;
   border-bottom: 1px solid var(--dm-border);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  padding: 16px clamp(18px, 2.5vw, 34px);
+  padding: 11px clamp(16px, 2.2vw, 30px);
 }
 
 .doraemon-modern--pocket .dm-modern-header {
@@ -744,8 +759,8 @@ html:has(.doraemon-modern--pocket)::-webkit-scrollbar-thumb { background-color: 
 
 .dm-modern-avatar {
   flex: 0 0 auto;
-  width: 54px;
-  height: 54px;
+  width: 48px;
+  height: 48px;
   border: 2px solid rgba(255, 255, 255, 0.72);
   border-radius: 50%;
   overflow: hidden;
@@ -790,12 +805,12 @@ html:has(.doraemon-modern--pocket)::-webkit-scrollbar-thumb { background-color: 
 
 .dm-modern-layout {
   width: min(100%, var(--dm-content-max));
-  min-height: calc(var(--app-scaled-viewport-height, 100dvh) - 92px);
+  min-height: calc(var(--app-scaled-viewport-height, 100dvh) - 78px);
   margin-inline: auto;
   display: grid;
   grid-template-columns: var(--dm-reference-column) minmax(var(--dm-stage-min-column), 1fr) var(--dm-console-column);
-  gap: clamp(12px, 1vw, 16px);
-  padding: clamp(12px, 1.3vw, 18px);
+  gap: clamp(10px, 0.8vw, 14px);
+  padding: clamp(9px, 1vw, 14px);
 }
 
 .dm-modern-reference,
@@ -821,12 +836,12 @@ html:has(.doraemon-modern--pocket)::-webkit-scrollbar-thumb { background-color: 
 }
 
 .dm-section-heading {
-  min-height: 64px;
+  min-height: 56px;
   border-bottom: 1px solid var(--dm-border);
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 13px 18px;
+  padding: 10px 16px;
 }
 
 .dm-section-heading > span {
@@ -851,7 +866,7 @@ html:has(.doraemon-modern--pocket)::-webkit-scrollbar-thumb { background-color: 
 }
 
 .dm-modern-reference .dm-section-heading {
-  min-height: 58px;
+  min-height: 52px;
   gap: 8px;
   padding: 12px 14px;
 }
@@ -869,12 +884,12 @@ html:has(.doraemon-modern--pocket)::-webkit-scrollbar-thumb { background-color: 
   width: 100%;
   min-width: 0;
   max-width: none;
-  height: calc(100% - 58px);
-  padding: 14px 12px 16px;
+  height: calc(100% - 52px);
+  padding: 10px 10px 12px;
 }
 
 .doraemon-modern .db-reference-panel {
-  --dm-meter-height: clamp(430px, calc(var(--app-scaled-viewport-height, 100dvh) - 214px), 670px);
+  --dm-meter-height: clamp(360px, calc(var(--app-scaled-viewport-height, 100dvh) - 188px), 570px);
   width: 100%;
   height: 100%;
   min-height: var(--dm-meter-height);
@@ -890,9 +905,9 @@ html:has(.doraemon-modern--pocket)::-webkit-scrollbar-thumb { background-color: 
   min-height: var(--dm-meter-height);
   height: var(--dm-meter-height);
   display: grid;
-  grid-template-columns: 30px minmax(0, 1fr);
+  grid-template-columns: 24px minmax(0, 1fr);
   align-items: stretch;
-  gap: 10px;
+  gap: 8px;
   padding: 2px 0 4px;
 }
 
@@ -990,7 +1005,7 @@ html:has(.doraemon-modern--pocket)::-webkit-scrollbar-thumb { background-color: 
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 7px 0 7px 10px;
+  padding: 6px 0 6px 8px;
   text-align: left;
 }
 
@@ -1084,12 +1099,24 @@ html:has(.doraemon-modern--pocket)::-webkit-scrollbar-thumb { background-color: 
 
 .dm-live-core {
   flex: 1 1 auto;
-  min-height: clamp(420px, 46vh, 640px);
+  min-height: clamp(310px, 34vh, 460px);
   display: grid;
   grid-template-columns: minmax(250px, 0.9fr) minmax(340px, 1.1fr);
   align-items: center;
-  gap: clamp(8px, 2vw, 28px);
-  padding: clamp(34px, 3.8vw, 62px);
+  gap: clamp(8px, 2vw, 30px);
+  padding: clamp(24px, 2.6vw, 42px);
+}
+
+.dm-live-device-shell,
+.dm-device-content {
+  display: contents;
+}
+
+.dm-device-speaker,
+.dm-device-visualizer,
+.dm-device-mini-metrics,
+.dm-device-signal {
+  display: none;
 }
 
 .dm-live-mascot {
@@ -1101,17 +1128,21 @@ html:has(.doraemon-modern--pocket)::-webkit-scrollbar-thumb { background-color: 
 }
 
 .doraemon-modern--pocket .dm-live-mascot {
-  padding: 6%;
-  border: 1px solid var(--dm-border);
-  border-radius: 50%;
-  background: radial-gradient(circle, var(--dm-panel) 0 62%, var(--dm-canvas) 63% 100%);
-  filter: drop-shadow(0 24px 30px var(--dm-shadow));
+  align-self: center;
+  width: min(100%, 280px);
+  filter: drop-shadow(0 18px 22px rgba(28, 78, 116, 0.18));
 }
 
 .doraemon-modern .dm-live-mascot {
   filter:
     drop-shadow(0 24px 30px var(--dm-shadow))
     drop-shadow(0 0 16px var(--dm-signal-glow));
+}
+
+.doraemon-modern--pocket .dm-live-mascot {
+  filter:
+    drop-shadow(0 16px 22px rgba(31, 89, 132, 0.18))
+    drop-shadow(0 0 12px var(--dm-signal-glow));
 }
 
 .dm-tone--caution .dm-live-mascot,
@@ -1130,7 +1161,7 @@ html:has(.doraemon-modern--pocket)::-webkit-scrollbar-thumb { background-color: 
 
 .dm-live-number {
   color: var(--dm-signal-color);
-  font: 800 clamp(116px, 12.6vw, 220px)/0.78 ui-monospace, "Cascadia Mono", "SFMono-Regular", monospace;
+  font: 800 clamp(112px, 12vw, 200px)/0.78 ui-monospace, "Cascadia Mono", "SFMono-Regular", monospace;
   letter-spacing: -0.12em;
   text-shadow: 0 0 24px var(--dm-signal-glow);
   transition: color 220ms ease, text-shadow 220ms ease;
@@ -1149,9 +1180,9 @@ html:has(.doraemon-modern--pocket)::-webkit-scrollbar-thumb { background-color: 
 }
 
 .dm-room-state {
-  margin-top: 32px;
+  margin-top: 24px;
   color: var(--dm-signal-ink);
-  font-size: clamp(22px, 2.5vw, 38px);
+  font-size: clamp(20px, 2.1vw, 32px);
   font-weight: 900;
   letter-spacing: 0.02em;
   transition: color 220ms ease;
@@ -1161,9 +1192,183 @@ html:has(.doraemon-modern--pocket)::-webkit-scrollbar-thumb { background-color: 
 .dm-room-state--danger { color: var(--dm-signal-ink); }
 .dm-live-reading p { margin: 10px 0 0; color: var(--dm-muted); font-size: 16px; }
 
+.doraemon-modern--pocket .dm-live-core {
+  min-height: clamp(360px, 40vh, 500px);
+  grid-template-columns: 1fr;
+  justify-items: center;
+  padding: clamp(18px, 2.1vw, 28px);
+}
+
+.doraemon-modern--pocket .dm-live-device-shell {
+  position: relative;
+  width: min(92%, 820px);
+  min-height: clamp(360px, 42vh, 490px);
+  border: 1px solid rgba(156, 190, 213, 0.74);
+  border-radius: var(--dm-radius-device);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(238, 247, 253, 0.96)),
+    #fdfefe;
+  box-shadow:
+    inset 0 0 0 10px rgba(222, 237, 247, 0.7),
+    inset 0 0 0 11px rgba(255, 255, 255, 0.94),
+    0 24px 54px rgba(35, 89, 128, 0.18),
+    0 7px 0 rgba(180, 205, 221, 0.34);
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) 62px auto;
+  gap: 10px;
+  padding: clamp(24px, 3vw, 36px) clamp(26px, 3.4vw, 42px) clamp(16px, 2vw, 22px);
+}
+
+.doraemon-modern--pocket .dm-live-device-shell::before {
+  position: absolute;
+  inset: 14px;
+  border: 1px solid rgba(155, 187, 208, 0.48);
+  border-radius: var(--dm-radius-device-inner);
+  background:
+    radial-gradient(circle at 32% 35%, rgba(14, 145, 237, 0.08), transparent 35%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.5), transparent 52%);
+  content: "";
+  pointer-events: none;
+}
+
+.doraemon-modern--pocket .dm-live-device-shell::after {
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--dm-theme-accent);
+  box-shadow: 0 0 0 5px rgba(11, 145, 237, 0.11);
+  content: "";
+  transform: translateX(-50%);
+}
+
+.doraemon-modern--pocket .dm-device-content {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(225px, 0.9fr) minmax(280px, 1.1fr);
+  align-items: center;
+  gap: clamp(12px, 2vw, 28px);
+  min-width: 0;
+}
+
+.doraemon-modern--pocket .dm-device-speaker {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  width: 128px;
+  height: 4px;
+  border-radius: var(--dm-radius-pill);
+  background: linear-gradient(90deg, transparent, rgba(121, 154, 177, 0.44), transparent);
+  transform: translateX(-50%);
+}
+
+.doraemon-modern--pocket .dm-device-speaker--top {
+  top: 14px;
+  display: block;
+}
+
+.doraemon-modern--pocket .dm-device-speaker--bottom {
+  bottom: 23px;
+  width: 56px;
+  background: rgba(11, 145, 237, 0.58);
+  display: block;
+}
+
+.doraemon-modern--pocket .dm-device-signal {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 8px;
+  color: var(--dm-signal-ink);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.doraemon-modern--pocket .dm-device-signal-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--dm-signal-color);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--dm-signal-color) 14%, transparent);
+}
+
+.doraemon-modern--pocket .dm-live-number {
+  font-size: clamp(94px, 9.8vw, 150px);
+  letter-spacing: -0.11em;
+}
+
+.doraemon-modern--pocket .dm-live-number-row > span {
+  font-size: clamp(24px, 2.8vw, 38px);
+}
+
+.doraemon-modern--pocket .dm-room-state {
+  margin-top: 12px;
+  font-size: clamp(18px, 1.8vw, 25px);
+}
+
+.doraemon-modern--pocket .dm-live-reading p {
+  max-width: 28ch;
+  font-size: 13px;
+}
+
+.doraemon-modern--pocket .dm-device-visualizer {
+  position: relative;
+  z-index: 1;
+  height: 62px;
+  min-height: 0;
+  border-top: 1px solid rgba(174, 201, 219, 0.72);
+  border-bottom: 1px solid rgba(174, 201, 219, 0.54);
+  overflow: hidden;
+  display: block;
+}
+
+.doraemon-modern--pocket .dm-device-mini-metrics {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.doraemon-modern--pocket .dm-device-mini-metrics > span {
+  min-width: 0;
+  border: 1px solid rgba(183, 209, 226, 0.72);
+  border-radius: var(--dm-radius-device-chip);
+  background: rgba(255, 255, 255, 0.72);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 8px 10px;
+}
+
+.doraemon-modern--pocket .dm-device-mini-metrics small {
+  color: #61798d;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.doraemon-modern--pocket .dm-device-mini-metrics strong {
+  overflow: hidden;
+  color: #123b63;
+  font: 800 14px/1 ui-monospace, "Cascadia Mono", monospace;
+  text-overflow: ellipsis;
+}
+
+.doraemon-modern--pocket .dm-device-mini-metrics .is-warning strong {
+  color: var(--dm-danger);
+}
+
+.doraemon-modern--pocket .dm-modern-visualizer {
+  display: none;
+}
+
 .dm-modern-visualizer {
-  flex: 0 0 136px;
-  margin: 0 clamp(30px, 3.6vw, 58px) 18px;
+  flex: 0 0 96px;
+  margin: 0 clamp(24px, 3vw, 48px) 12px;
   border-top: 1px solid var(--dm-border);
   border-bottom: 1px solid var(--dm-border);
   overflow: hidden;
@@ -1195,12 +1400,12 @@ html:has(.doraemon-modern--pocket)::-webkit-scrollbar-thumb { background-color: 
 
 .dm-metric-cell {
   min-width: 0;
-  min-height: 112px;
+  min-height: 88px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 10px;
-  padding: 18px clamp(13px, 1.5vw, 24px);
+  gap: 7px;
+  padding: 14px clamp(12px, 1.2vw, 20px);
 }
 
 .dm-metric-cell + .dm-metric-cell { border-left: 1px solid var(--dm-border); }
@@ -1232,11 +1437,11 @@ html:has(.doraemon-modern--pocket)::-webkit-scrollbar-thumb { background-color: 
 
 .dm-control-block {
   position: relative;
-  margin: 14px 14px 0;
+  margin: 10px 10px 0;
   border: 1px solid var(--dm-border);
   border-radius: var(--dm-radius-control);
   background: color-mix(in srgb, var(--dm-panel-strong) 64%, transparent);
-  padding: 18px;
+  padding: 14px;
 }
 
 .doraemon-modern--pocket .dm-control-block {
@@ -1255,7 +1460,7 @@ html:has(.doraemon-modern--pocket)::-webkit-scrollbar-thumb { background-color: 
 
 .dm-control-title-row strong {
   color: var(--dm-text);
-  font: 800 28px/1 ui-monospace, "Cascadia Mono", monospace;
+  font: 800 24px/1 ui-monospace, "Cascadia Mono", monospace;
 }
 
 .doraemon-modern--pocket .dm-control-title-row strong { color: #f4f9ff; }
@@ -1341,8 +1546,8 @@ html:has(.doraemon-modern--pocket)::-webkit-scrollbar-thumb { background-color: 
 .doraemon-modern--pocket .dm-warning-actions button { border-color: rgba(145, 199, 234, 0.34); }
 
 .dm-open-report {
-  min-height: 86px;
-  margin: 14px;
+  min-height: 68px;
+  margin: 10px;
   border: 1px solid color-mix(in srgb, var(--dm-theme-accent) 70%, white);
   border-radius: var(--dm-radius-control);
   background: var(--dm-theme-accent);
@@ -1352,7 +1557,7 @@ html:has(.doraemon-modern--pocket)::-webkit-scrollbar-thumb { background-color: 
   align-items: center;
   justify-content: space-between;
   gap: 18px;
-  padding: 15px 18px;
+  padding: 12px 14px;
   text-align: left;
 }
 
@@ -1608,7 +1813,81 @@ html:has(.doraemon-modern--pocket)::-webkit-scrollbar-thumb { background-color: 
   .dm-live-heading { min-height: 58px; padding-inline: 14px; }
   .dm-live-core { min-height: 260px; gap: 4px; padding: 24px 12px; }
   .dm-live-mascot { max-width: 160px; }
-  .doraemon-modern--pocket .dm-live-mascot { padding: 3%; border-width: 0; }
+  .doraemon-modern--pocket .dm-live-core {
+    min-height: auto;
+    padding: 14px 10px 18px;
+  }
+  .doraemon-modern--pocket .dm-live-device-shell {
+    width: 100%;
+    min-height: auto;
+    grid-template-rows: auto 50px auto;
+    gap: 8px;
+    padding: 22px 16px 13px;
+    border-radius: var(--dm-radius-card);
+    box-shadow:
+      inset 0 0 0 3px rgba(222, 237, 247, 0.74),
+      0 14px 30px rgba(35, 89, 128, 0.14);
+  }
+  .doraemon-modern--pocket .dm-live-device-shell::before {
+    inset: 7px;
+    border-radius: var(--dm-radius-control);
+  }
+  .doraemon-modern--pocket .dm-live-device-shell::after {
+    bottom: 5px;
+    width: 7px;
+    height: 7px;
+    box-shadow: 0 0 0 4px rgba(11, 145, 237, 0.1);
+  }
+  .doraemon-modern--pocket .dm-device-speaker--top {
+    top: 9px;
+    width: 88px;
+  }
+  .doraemon-modern--pocket .dm-device-speaker--bottom {
+    bottom: 17px;
+    width: 42px;
+  }
+  .doraemon-modern--pocket .dm-device-content {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 6px;
+    text-align: center;
+  }
+  .doraemon-modern--pocket .dm-live-mascot {
+    width: min(56vw, 150px);
+    max-width: 150px;
+    padding: 2%;
+    border-width: 0;
+  }
+  .doraemon-modern--pocket .dm-live-reading {
+    display: grid;
+    justify-items: center;
+  }
+  .doraemon-modern--pocket .dm-device-signal {
+    margin-bottom: 2px;
+  }
+  .doraemon-modern--pocket .dm-live-number {
+    font-size: clamp(62px, 19vw, 86px);
+  }
+  .doraemon-modern--pocket .dm-live-number-row > span {
+    font-size: 22px;
+  }
+  .doraemon-modern--pocket .dm-room-state {
+    margin-top: 6px;
+    font-size: 17px;
+  }
+  .doraemon-modern--pocket .dm-live-reading p {
+    max-width: 24ch;
+    margin-top: 6px;
+  }
+  .doraemon-modern--pocket .dm-device-visualizer {
+    height: 50px;
+  }
+  .doraemon-modern--pocket .dm-device-mini-metrics {
+    gap: 6px;
+  }
+  .doraemon-modern--pocket .dm-device-mini-metrics > span {
+    padding: 7px 6px;
+  }
   .dm-live-number { font-size: clamp(66px, 20vw, 92px); }
   .dm-live-number-row > span { font-size: 24px; }
   .dm-room-state { margin-top: 17px; font-size: 18px; }

@@ -6,6 +6,7 @@ const gateSource = fs.readFileSync('doraemon-monitor/DoraemonVersionGate.tsx', '
 const monitorSource = fs.readFileSync('doraemon-monitor/DoraemonMonitorApp.tsx', 'utf8');
 const modernCss = fs.readFileSync('doraemon-monitor/doraemon-modern.css', 'utf8');
 const legacyCss = fs.readFileSync('doraemon-monitor/doraemon-monitor.css', 'utf8');
+const designDoc = fs.readFileSync('doraemon-monitor/DESIGN.md', 'utf8');
 const scaleCss = fs.readFileSync('public/global-scale.css', 'utf8');
 
 function runTest(name, fn) {
@@ -81,6 +82,27 @@ runTest('both modern themes use dedicated 3D mascot assets instead of the legacy
   assert.match(monitorSource, /doraemon-pocket-3d\.png/);
   assert.match(monitorSource, /className="dm-modern-mascot-image"/);
   assert.match(monitorSource, /variant === 'campus' \? campusMascotUrl : pocketMascotUrl/);
+});
+
+runTest('pocket live stage renders the same device-shell structure promised by the selector preview', () => {
+  assert.match(monitorSource, /className="dm-live-device-shell"/);
+  assert.match(monitorSource, /className="dm-device-signal-dot"/);
+  assert.match(monitorSource, /className="dm-device-visualizer"/);
+  assert.match(monitorSource, /className="dm-device-mini-metrics"/);
+  assert.match(designDoc, /--dm-radius-device:\s*42px;/);
+  assert.match(designDoc, /Pocket Classroom device shell is the only exception/);
+  assert.match(modernCss, /\.doraemon-modern--pocket \.dm-live-device-shell\s*\{/);
+  assert.match(modernCss, /\.doraemon-modern--pocket \.dm-live-device-shell\s*\{[^}]*width:\s*min\(92%,\s*820px\);/s);
+  assert.match(modernCss, /\.doraemon-modern--pocket \.dm-device-content\s*\{[^}]*grid-template-columns:/s);
+  assert.match(modernCss, /\.doraemon-modern--pocket \.dm-device-visualizer\s*\{[^}]*display:\s*block;/s);
+  assert.match(modernCss, /\.doraemon-modern--pocket \.dm-modern-visualizer\s*\{[^}]*display:\s*none;/s);
+});
+
+runTest('pocket device shell becomes compact single-column on narrow phones', () => {
+  assert.match(modernCss, /@media\s*\(max-width:\s*480px\)\s*\{[\s\S]*?\.doraemon-modern--pocket \.dm-live-device-shell\s*\{[^}]*width:\s*100%;/s);
+  assert.match(modernCss, /@media\s*\(max-width:\s*480px\)\s*\{[\s\S]*?\.doraemon-modern--pocket \.dm-live-device-shell\s*\{[^}]*border-radius:\s*var\(--dm-radius-card\);/s);
+  assert.match(modernCss, /@media\s*\(max-width:\s*480px\)\s*\{[\s\S]*?\.doraemon-modern--pocket \.dm-device-content\s*\{[^}]*grid-template-columns:\s*1fr;/s);
+  assert.match(modernCss, /@media\s*\(max-width:\s*480px\)\s*\{[\s\S]*?\.doraemon-modern--pocket \.dm-device-visualizer\s*\{[^}]*height:\s*50px;/s);
 });
 
 runTest('modern warning states use serious and angry 3D assets instead of recoloring a flat mascot', () => {
@@ -190,8 +212,8 @@ runTest('pocket status copy and reference labels use high-contrast semantic fore
 
 runTest('modern desktop layout prioritizes the center live stage over both side panels', () => {
   // Given: classroom students read the central mascot and dB display first.
-  assert.match(modernCss, /--dm-reference-column:\s*clamp\(148px,\s*10vw,\s*184px\);/);
-  assert.match(modernCss, /--dm-console-column:\s*clamp\(226px,\s*17vw,\s*280px\);/);
+  assert.match(modernCss, /--dm-reference-column:\s*clamp\(132px,\s*8\.4vw,\s*160px\);/);
+  assert.match(modernCss, /--dm-console-column:\s*clamp\(208px,\s*14vw,\s*248px\);/);
 
   // When: the desktop grid is composed.
   // Then: the side columns are capped and the center receives the remaining width.
@@ -199,6 +221,16 @@ runTest('modern desktop layout prioritizes the center live stage over both side 
     modernCss,
     /grid-template-columns:\s*var\(--dm-reference-column\)\s+minmax\(var\(--dm-stage-min-column\),\s*1fr\)\s+var\(--dm-console-column\);/
   );
+});
+
+runTest('modern desktop stage is vertically capped so the metric band stays in the first viewport', () => {
+  assert.match(modernCss, /\.dm-modern-header\s*\{[^}]*min-height:\s*78px;/s);
+  assert.match(modernCss, /\.dm-modern-layout\s*\{[^}]*min-height:\s*calc\(var\(--app-scaled-viewport-height,\s*100dvh\)\s*-\s*78px\);/s);
+  assert.match(modernCss, /\.dm-live-core\s*\{[^}]*min-height:\s*clamp\(310px,\s*34vh,\s*460px\);/s);
+  assert.match(modernCss, /\.dm-modern-visualizer\s*\{[^}]*flex:\s*0\s+0\s+96px;/s);
+  assert.match(modernCss, /\.dm-metric-cell\s*\{[^}]*min-height:\s*88px;/s);
+  assert.match(modernCss, /@media\s*\(min-width:\s*1181px\)[\s\S]*?html:has\(\.doraemon-modern\),[\s\S]*?overflow:\s*hidden;/s);
+  assert.match(modernCss, /@media\s*\(min-width:\s*1181px\)[\s\S]*?\.doraemon-modern\s*\{[^}]*height:\s*var\(--app-scaled-viewport-height,\s*100dvh\);/s);
 });
 
 runTest('modern decibel reference is a compact rail rather than the legacy thermometer block', () => {
@@ -212,7 +244,7 @@ runTest('modern decibel reference is a compact rail rather than the legacy therm
 
   // When: modern CSS scopes the reused classes.
   // Then: it compresses the rail, removes the old 28px pointer, and wraps labels in compact rows.
-  assert.match(modernCss, /\.doraemon-modern\s+\.vertical-meter-container\s*\{[^}]*grid-template-columns:\s*30px\s+minmax\(0,\s*1fr\);/s);
+  assert.match(modernCss, /\.doraemon-modern\s+\.vertical-meter-container\s*\{[^}]*grid-template-columns:\s*24px\s+minmax\(0,\s*1fr\);/s);
   assert.match(modernCss, /\.doraemon-modern\s+\.meter-bar-bg\s*\{[^}]*width:\s*8px;/s);
   assert.match(modernCss, /\.doraemon-modern\s+\.current-level-pointer\s*\{[^}]*width:\s*20px;[^}]*height:\s*20px;/s);
   assert.match(modernCss, /\.doraemon-modern\s+\.level-nodes\s*\{[^}]*grid-template-rows:\s*repeat\(6,\s*minmax\(0,\s*1fr\)\);/s);

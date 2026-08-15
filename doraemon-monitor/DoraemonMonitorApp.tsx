@@ -2099,22 +2099,47 @@ const DoraemonMonitorApp: React.FC<DoraemonMonitorAppProps> = ({ variant, onChoo
           </div>
 
           <div className="dm-live-core">
-            <div className="dm-live-mascot" style={{ transform: `scale(${1 + (currentDb - 40) / 300})` }} aria-hidden="true">
-              <img
-                className="dm-modern-mascot-image"
-                src={modernMascotUrl}
-                width={1254}
-                height={1254}
-                alt=""
-              />
-            </div>
-            <div className="dm-live-reading">
-              <div className="dm-live-number-row">
-                <strong className="dm-live-number">{Math.round(currentDb)}</strong>
-                <span>dB</span>
+            <div className="dm-live-device-shell">
+              <span className="dm-device-speaker dm-device-speaker--top" aria-hidden="true" />
+              <span className="dm-device-speaker dm-device-speaker--bottom" aria-hidden="true" />
+              <div className="dm-device-content">
+                <div className="dm-live-mascot" style={{ transform: `scale(${1 + (currentDb - 40) / 300})` }} aria-hidden="true">
+                  <img
+                    className="dm-modern-mascot-image"
+                    src={modernMascotUrl}
+                    width={1254}
+                    height={1254}
+                    alt=""
+                  />
+                </div>
+                <div className="dm-live-reading">
+                  <div className="dm-device-signal">
+                    <span className="dm-device-signal-dot" aria-hidden="true" />
+                    <span>{modernToneContent.status}</span>
+                  </div>
+                  <div className="dm-live-number-row">
+                    <strong className="dm-live-number">{Math.round(currentDb)}</strong>
+                    <span>dB</span>
+                  </div>
+                  <div className={`dm-room-state dm-room-state--${modernEmotionTone}`}>{modernToneContent.state}</div>
+                  <p>{modernToneContent.detail}</p>
+                </div>
               </div>
-              <div className={`dm-room-state dm-room-state--${modernEmotionTone}`}>{modernToneContent.state}</div>
-              <p>{modernToneContent.detail}</p>
+              <div className="dm-device-visualizer" aria-hidden="true"><Visualizer /></div>
+              <div className="dm-device-mini-metrics" aria-hidden="true">
+                <span>
+                  <small>安静时长</small>
+                  <strong>{formatTime(quietTime)}</strong>
+                </span>
+                <span>
+                  <small>监测总计</small>
+                  <strong>{formatTime(totalTime)}</strong>
+                </span>
+                <span className={warnCount > 0 ? 'is-warning' : ''}>
+                  <small>警告</small>
+                  <strong>{warnCount}</strong>
+                </span>
+              </div>
             </div>
           </div>
 

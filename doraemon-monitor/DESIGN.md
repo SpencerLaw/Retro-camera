@@ -24,17 +24,20 @@ This design system applies only to `/doraemon`. The legacy surface remains froze
 --dm-danger-ink-light: #c82431;
 --dm-radius-card: 18px;
 --dm-radius-control: 10px;
+--dm-radius-device: 42px;
+--dm-radius-device-inner: 32px;
+--dm-radius-device-chip: 12px;
 --dm-radius-pill: 999px;
 --dm-control-min: 44px;
 --dm-control-target-rendered: calc((var(--dm-control-min) + 0.25px) * var(--app-global-scale-inverse, 1));
 --dm-content-max: 1680px;
---dm-reference-column: clamp(148px, 10vw, 184px);
---dm-stage-min-column: 680px;
---dm-console-column: clamp(226px, 17vw, 280px);
+--dm-reference-column: clamp(132px, 8.4vw, 160px);
+--dm-stage-min-column: 720px;
+--dm-console-column: clamp(208px, 14vw, 248px);
 --dm-shadow-color: rgba(4, 28, 57, 0.18);
 ```
 
-Radius rule: cards use 18px, controls use 10px, status badges use full-pill. No other radius scale is introduced.
+Radius rule: cards use 18px, controls use 10px, status badges use full-pill. The Pocket Classroom device shell is the only exception and owns the dedicated `device`, `device-inner`, and `device-chip` radii so the entered page matches the rounded preview object without leaking oversized corners into ordinary cards.
 
 Touch-target rule: the application-wide `0.8` body zoom reduces authored CSS dimensions, so every modern interactive hit area uses `--dm-control-target-rendered` to preserve a measured 44px minimum after scaling. The token includes a `0.25px` rounding guard so fractional browser layout cannot resolve a nominal 44px target just below the minimum. This includes header actions, selector navigation, sliders, inline help triggers, and warning reset actions. This is presentation-only and does not change the frozen legacy surface.
 
@@ -69,6 +72,7 @@ Signal foreground rule: the bright success, warning, and danger values remain th
 ## Layout
 
 - `>= 1180px`: three-zone desktop composition with capped side columns. The reference column uses `--dm-reference-column`, the teacher console uses `--dm-console-column`, and the live stage receives the remaining width through `minmax(var(--dm-stage-min-column), 1fr)`.
+- `>= 1180px` viewport-fit rule: the live monitor fits within the first classroom projector viewport. Header height, stage core, waveform, and metric band are capped so the bottom metric strip remains visible on short 16:9 displays. Modern desktop skins lock outer page scrolling; tablet and mobile keep normal document scroll.
 - `768–1179px`: live stage spans full width; secondary panels become two columns.
 - `< 768px`: single column with live stage first, controls second, reference/summary third.
 - `< 480px`: compact spacing, no ornamental device thickness, no clipped display title.
@@ -78,6 +82,7 @@ Signal foreground rule: the bright success, warning, and danger values remain th
 - Version cards: one full-card button, clear title, description, attribute labels, and preview motif.
 - Header actions: icon plus text at desktop; icon-only actions retain accessible names on narrow screens.
 - Live stage: one dominant dB value, visible textual state, mascot, and waveform.
+- Pocket device shell: the Pocket Classroom live stage uses a real DOM device shell, not a screenshot. The shell wraps the 3D mascot, current dB, semantic status dot, waveform, and three small telemetry chips so the entered page matches the version-card preview.
 - Decibel reference: a compact sound-scale rail, not a legacy thermometer panel. It uses a slim semantic gradient, six tick rows from 0-120 dB, a state-colored pointer, and compact range/label text so the center stage stays visually dominant.
 - Alarm decoration: the alarm wash and hazard bands belong to the live stage background layer. They render below the mascot, number, waveform, and metrics and never use a fixed page overlay or giant text that competes with telemetry.
 - Modern mascot: use transparent 3D artwork as the primary stage focal point. Campus uses the standing thumbs-up pose; Pocket uses the seated calm pose. The legacy flat SVG is retained only for the frozen legacy surface and compact header avatar.

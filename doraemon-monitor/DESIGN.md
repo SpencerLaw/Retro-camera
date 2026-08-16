@@ -27,10 +27,11 @@ This design system applies only to `/doraemon`. The legacy surface remains froze
 --dm-radius-pill: 999px;
 --dm-control-min: 44px;
 --dm-control-target-rendered: calc((var(--dm-control-min) + 0.25px) * var(--app-global-scale-inverse, 1));
---dm-content-max: 1680px;
---dm-reference-column: clamp(148px, 10vw, 184px);
---dm-stage-min-column: 680px;
---dm-console-column: clamp(226px, 17vw, 280px);
+--dm-content-max: var(--app-scaled-viewport-width, 100vw);
+--dm-reference-column: minmax(132px, 1fr);
+--dm-stage-column: minmax(0, 8fr);
+--dm-console-column: minmax(172px, 1fr);
+--dm-desktop-gap: clamp(8px, 0.65vw, 12px);
 --dm-shadow-color: rgba(4, 28, 57, 0.18);
 ```
 
@@ -68,7 +69,8 @@ Signal foreground rule: the bright success, warning, and danger values remain th
 
 ## Layout
 
-- `>= 1180px`: three-zone desktop composition with capped side columns. The reference column uses `--dm-reference-column`, the teacher console uses `--dm-console-column`, and the live stage receives the remaining width through `minmax(var(--dm-stage-min-column), 1fr)`.
+- `>= 1180px`: three-zone classroom display composition uses the full scaled viewport instead of a centered max-width card. The grid is close to 1 / 8 / 1 after the app-wide 0.8 zoom: the reference column uses `--dm-reference-column`, the live stage uses `--dm-stage-column`, and the teacher console uses `--dm-console-column`.
+- Desktop modern monitor screens own the viewport height and avoid page scroll in the normal projection state. Popovers may overlay neighboring controls but must not participate in layout height.
 - `768–1179px`: live stage spans full width; secondary panels become two columns.
 - `< 768px`: single column with live stage first, controls second, reference/summary third.
 - `< 480px`: compact spacing, no ornamental device thickness, no clipped display title.
@@ -83,7 +85,9 @@ Signal foreground rule: the bright success, warning, and danger values remain th
 - Modern mascot: use transparent 3D artwork as the primary stage focal point. Campus uses the standing thumbs-up pose; Pocket uses the seated calm pose. The legacy flat SVG is retained only for the frozen legacy surface and compact header avatar.
 - Modern emotion states: green uses each theme's smiling calm 3D mascot, orange uses the shared serious 3D mascot, and red uses the shared angry 3D mascot. Never simulate these states by recoloring the legacy SVG.
 - Metrics: grouped by dividers or a shared band; avoid independent generic floating cards where hierarchy does not require them.
-- Sliders: visible numeric value, label, min/max context, and browser-native keyboard behavior.
+- Teacher console: compact premium control rail with one dark instrument surface, slim stacked blocks, stateful icon buttons, and the report button anchored at the bottom when desktop height allows.
+- Sliders: visible numeric value, label, min/max context, styled browser-native track/thumb, and keyboard behavior.
+- Help popovers: question-mark help opens an anchored floating card with close control, matching the legacy tooltip behavior. It is absolute-positioned, mutually exclusive between controls, and never expands the control block or creates desktop page scroll.
 - Dialogs: one scroll surface, fixed header, calm backdrop, close control with accessible name.
 
 ## Motion

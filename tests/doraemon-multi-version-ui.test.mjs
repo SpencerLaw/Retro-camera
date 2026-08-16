@@ -92,7 +92,8 @@ runTest('pocket live stage renders the same device-shell structure promised by t
   assert.match(designDoc, /--dm-radius-device:\s*42px;/);
   assert.match(designDoc, /Pocket Classroom device shell is the only exception/);
   assert.match(modernCss, /\.doraemon-modern--pocket \.dm-live-device-shell\s*\{/);
-  assert.match(modernCss, /\.doraemon-modern--pocket \.dm-live-device-shell\s*\{[^}]*width:\s*min\(92%,\s*820px\);/s);
+  assert.match(modernCss, /\.doraemon-modern--pocket \.dm-live-device-shell\s*\{[^}]*width:\s*min\(96%,\s*1320px\);/s);
+  assert.doesNotMatch(modernCss, /\.doraemon-modern--pocket \.dm-live-device-shell\s*\{[^}]*width:\s*min\(92%,\s*820px\);/s);
   assert.match(modernCss, /\.doraemon-modern--pocket \.dm-device-content\s*\{[^}]*grid-template-columns:/s);
   assert.match(modernCss, /\.doraemon-modern--pocket \.dm-device-visualizer\s*\{[^}]*display:\s*block;/s);
   assert.match(modernCss, /\.doraemon-modern--pocket \.dm-modern-visualizer\s*\{[^}]*display:\s*none;/s);
@@ -212,15 +213,34 @@ runTest('pocket status copy and reference labels use high-contrast semantic fore
 
 runTest('modern desktop layout prioritizes the center live stage over both side panels', () => {
   // Given: classroom students read the central mascot and dB display first.
-  assert.match(modernCss, /--dm-reference-column:\s*clamp\(132px,\s*8\.4vw,\s*160px\);/);
-  assert.match(modernCss, /--dm-console-column:\s*clamp\(208px,\s*14vw,\s*248px\);/);
+  assert.match(modernCss, /--dm-content-max:\s*var\(--app-scaled-viewport-width,\s*100vw\);/);
+  assert.match(modernCss, /--dm-reference-column:\s*minmax\(132px,\s*1fr\);/);
+  assert.match(modernCss, /--dm-stage-column:\s*minmax\(0,\s*8fr\);/);
+  assert.match(modernCss, /--dm-console-column:\s*minmax\(172px,\s*1fr\);/);
 
   // When: the desktop grid is composed.
-  // Then: the side columns are capped and the center receives the remaining width.
+  // Then: the side columns use one share each and the center receives eight shares.
   assert.match(
     modernCss,
-    /grid-template-columns:\s*var\(--dm-reference-column\)\s+minmax\(var\(--dm-stage-min-column\),\s*1fr\)\s+var\(--dm-console-column\);/
+    /grid-template-columns:\s*var\(--dm-reference-column\)\s+var\(--dm-stage-column\)\s+var\(--dm-console-column\);/
   );
+  assert.match(modernCss, /@media\s*\(min-width:\s*1181px\)[\s\S]*?\.doraemon-modern\s*\{[^}]*height:\s*var\(--app-scaled-viewport-height,\s*100dvh\);/s);
+  assert.match(modernCss, /\.dm-modern-header\s*\{[^}]*width:\s*100%;/s);
+});
+
+runTest('modern teacher help uses legacy-style popovers instead of inline expansion', () => {
+  // Given: clicking the help icon should not consume vertical space in the control panel.
+  assert.match(monitorSource, /className="dm-control-help" role="dialog"/);
+  assert.match(monitorSource, /className="dm-control-help-head"/);
+  assert.match(monitorSource, /setShowThresholdHelp\(false\);[\s\S]*setShowHelp\(!showHelp\);/);
+  assert.match(monitorSource, /setShowHelp\(false\);[\s\S]*setShowThresholdHelp\(!showThresholdHelp\);/);
+
+  // When: the help body is rendered.
+  // Then: CSS positions it as an overlay and the console allows the layer to escape.
+  assert.match(modernCss, /\.dm-teacher-console\s*\{[^}]*overflow:\s*visible;/s);
+  assert.match(modernCss, /\.dm-control-help\s*\{[^}]*position:\s*absolute;[^}]*top:\s*calc\(100%\s*-\s*2px\);/s);
+  assert.match(modernCss, /\.dm-control-help-head button\s*\{[^}]*width:\s*var\(--dm-control-target-rendered\);[^}]*height:\s*var\(--dm-control-target-rendered\);/s);
+  assert.doesNotMatch(modernCss, /\.dm-control-help\s*\{[^}]*position:\s*relative;/s);
 });
 
 runTest('modern desktop stage is vertically capped so the metric band stays in the first viewport', () => {

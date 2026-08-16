@@ -14,10 +14,11 @@
   --dm-radius-pill: 999px;
   --dm-control-min: 44px;
   --dm-control-target-rendered: calc((var(--dm-control-min) + 0.25px) * var(--app-global-scale-inverse, 1));
-  --dm-content-max: 1680px;
-  --dm-reference-column: clamp(132px, 8.4vw, 160px);
-  --dm-stage-min-column: 720px;
-  --dm-console-column: clamp(208px, 14vw, 248px);
+  --dm-content-max: var(--app-scaled-viewport-width, 100vw);
+  --dm-reference-column: minmax(132px, 1fr);
+  --dm-stage-column: minmax(0, 8fr);
+  --dm-console-column: minmax(172px, 1fr);
+  --dm-desktop-gap: clamp(8px, 0.65vw, 12px);
 }
 
 .dm-version-gate,
@@ -111,6 +112,10 @@ html:has(.doraemon-modern--pocket)::-webkit-scrollbar-thumb { background-color: 
 
   .doraemon-modern {
     height: var(--app-scaled-viewport-height, 100dvh);
+  }
+
+  .dm-modern-layout {
+    height: calc(var(--app-scaled-viewport-height, 100dvh) - 78px);
   }
 }
 
@@ -733,7 +738,7 @@ html:has(.doraemon-modern--pocket)::-webkit-scrollbar-thumb { background-color: 
 .dm-modern-header {
   position: relative;
   z-index: 20;
-  width: min(100%, var(--dm-content-max));
+  width: 100%;
   min-height: 78px;
   margin-inline: auto;
   border-bottom: 1px solid var(--dm-border);
@@ -808,9 +813,9 @@ html:has(.doraemon-modern--pocket)::-webkit-scrollbar-thumb { background-color: 
   min-height: calc(var(--app-scaled-viewport-height, 100dvh) - 78px);
   margin-inline: auto;
   display: grid;
-  grid-template-columns: var(--dm-reference-column) minmax(var(--dm-stage-min-column), 1fr) var(--dm-console-column);
-  gap: clamp(10px, 0.8vw, 14px);
-  padding: clamp(9px, 1vw, 14px);
+  grid-template-columns: var(--dm-reference-column) var(--dm-stage-column) var(--dm-console-column);
+  gap: var(--dm-desktop-gap);
+  padding: clamp(8px, 0.8vw, 14px);
 }
 
 .dm-modern-reference,
@@ -1129,7 +1134,7 @@ html:has(.doraemon-modern--pocket)::-webkit-scrollbar-thumb { background-color: 
 
 .doraemon-modern--pocket .dm-live-mascot {
   align-self: center;
-  width: min(100%, 280px);
+  width: min(100%, 350px);
   filter: drop-shadow(0 18px 22px rgba(28, 78, 116, 0.18));
 }
 
@@ -1193,16 +1198,16 @@ html:has(.doraemon-modern--pocket)::-webkit-scrollbar-thumb { background-color: 
 .dm-live-reading p { margin: 10px 0 0; color: var(--dm-muted); font-size: 16px; }
 
 .doraemon-modern--pocket .dm-live-core {
-  min-height: clamp(360px, 40vh, 500px);
+  min-height: clamp(430px, 52vh, 650px);
   grid-template-columns: 1fr;
   justify-items: center;
-  padding: clamp(18px, 2.1vw, 28px);
+  padding: clamp(20px, 2.2vw, 30px);
 }
 
 .doraemon-modern--pocket .dm-live-device-shell {
   position: relative;
-  width: min(92%, 820px);
-  min-height: clamp(360px, 42vh, 490px);
+  width: min(96%, 1320px);
+  min-height: clamp(430px, 52vh, 650px);
   border: 1px solid rgba(156, 190, 213, 0.74);
   border-radius: var(--dm-radius-device);
   background:
@@ -1214,9 +1219,9 @@ html:has(.doraemon-modern--pocket)::-webkit-scrollbar-thumb { background-color: 
     0 24px 54px rgba(35, 89, 128, 0.18),
     0 7px 0 rgba(180, 205, 221, 0.34);
   display: grid;
-  grid-template-rows: minmax(0, 1fr) 62px auto;
-  gap: 10px;
-  padding: clamp(24px, 3vw, 36px) clamp(26px, 3.4vw, 42px) clamp(16px, 2vw, 22px);
+  grid-template-rows: minmax(0, 1fr) 70px auto;
+  gap: 12px;
+  padding: clamp(28px, 3.2vw, 46px) clamp(34px, 4vw, 58px) clamp(18px, 2.2vw, 28px);
 }
 
 .doraemon-modern--pocket .dm-live-device-shell::before {
@@ -1248,9 +1253,9 @@ html:has(.doraemon-modern--pocket)::-webkit-scrollbar-thumb { background-color: 
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: minmax(225px, 0.9fr) minmax(280px, 1.1fr);
+  grid-template-columns: minmax(300px, 0.95fr) minmax(360px, 1.05fr);
   align-items: center;
-  gap: clamp(12px, 2vw, 28px);
+  gap: clamp(18px, 2.6vw, 42px);
   min-width: 0;
 }
 
@@ -1297,7 +1302,7 @@ html:has(.doraemon-modern--pocket)::-webkit-scrollbar-thumb { background-color: 
 }
 
 .doraemon-modern--pocket .dm-live-number {
-  font-size: clamp(94px, 9.8vw, 150px);
+  font-size: clamp(116px, 10.8vw, 190px);
   letter-spacing: -0.11em;
 }
 
@@ -1318,7 +1323,7 @@ html:has(.doraemon-modern--pocket)::-webkit-scrollbar-thumb { background-color: 
 .doraemon-modern--pocket .dm-device-visualizer {
   position: relative;
   z-index: 1;
-  height: 62px;
+  height: 70px;
   min-height: 0;
   border-top: 1px solid rgba(174, 201, 219, 0.72);
   border-bottom: 1px solid rgba(174, 201, 219, 0.54);
@@ -1422,15 +1427,52 @@ html:has(.doraemon-modern--pocket)::-webkit-scrollbar-thumb { background-color: 
 .dm-metric-cell.is-warning strong { color: var(--dm-danger); }
 
 .dm-teacher-console {
-  overflow: hidden;
+  position: relative;
+  isolation: isolate;
+  overflow: visible;
   display: flex;
   flex-direction: column;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--dm-panel) 98%, white), color-mix(in srgb, var(--dm-panel-strong) 86%, transparent)),
+    var(--dm-panel);
+}
+
+.dm-teacher-console::before {
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  border-radius: calc(var(--dm-radius-card) - 1px);
+  background:
+    radial-gradient(circle at 24% 0%, color-mix(in srgb, var(--dm-theme-accent) 18%, transparent), transparent 42%),
+    linear-gradient(90deg, color-mix(in srgb, white 10%, transparent), transparent 46%);
+  content: "";
+  pointer-events: none;
 }
 
 .doraemon-modern--pocket .dm-teacher-console {
   border-color: #0a477c;
-  background: linear-gradient(160deg, #0a416f, #052d52);
+  background:
+    linear-gradient(180deg, #0d4a7d, #052b4c 82%),
+    #07345e;
   color: #f4f9ff;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 18px 42px rgba(7, 52, 94, 0.22);
+}
+
+.dm-console-heading {
+  border-bottom-color: color-mix(in srgb, var(--dm-theme-accent) 30%, transparent);
+}
+
+.dm-console-heading > span {
+  width: 26px;
+  height: 26px;
+  border: 1px solid color-mix(in srgb, var(--dm-theme-accent) 38%, transparent);
+  border-radius: var(--dm-radius-pill);
+  display: inline-grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--dm-theme-accent) 10%, transparent);
+  letter-spacing: 0;
 }
 
 .doraemon-modern--pocket .dm-console-heading { border-color: rgba(137, 195, 234, 0.28); }
@@ -1438,15 +1480,22 @@ html:has(.doraemon-modern--pocket)::-webkit-scrollbar-thumb { background-color: 
 .dm-control-block {
   position: relative;
   margin: 10px 10px 0;
-  border: 1px solid var(--dm-border);
+  border: 1px solid color-mix(in srgb, var(--dm-border) 82%, transparent);
   border-radius: var(--dm-radius-control);
-  background: color-mix(in srgb, var(--dm-panel-strong) 64%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, white 8%, transparent), transparent 70%),
+    color-mix(in srgb, var(--dm-panel-strong) 70%, transparent);
   padding: 14px;
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, white 12%, transparent),
+    0 10px 22px color-mix(in srgb, var(--dm-shadow) 38%, transparent);
 }
 
 .doraemon-modern--pocket .dm-control-block {
   border-color: rgba(145, 199, 234, 0.34);
-  background: rgba(4, 39, 70, 0.38);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.1), transparent 68%),
+    rgba(4, 39, 70, 0.44);
 }
 
 .dm-control-title-row {
@@ -1460,7 +1509,7 @@ html:has(.doraemon-modern--pocket)::-webkit-scrollbar-thumb { background-color: 
 
 .dm-control-title-row strong {
   color: var(--dm-text);
-  font: 800 24px/1 ui-monospace, "Cascadia Mono", monospace;
+  font: 800 clamp(22px, 1.5vw, 27px)/1 ui-monospace, "Cascadia Mono", monospace;
 }
 
 .doraemon-modern--pocket .dm-control-title-row strong { color: #f4f9ff; }
@@ -1469,14 +1518,60 @@ html:has(.doraemon-modern--pocket)::-webkit-scrollbar-thumb { background-color: 
 .dm-modern-slider {
   width: 100%;
   height: var(--dm-control-target-rendered);
-  margin-top: 10px;
+  margin-top: 8px;
+  appearance: none;
   accent-color: var(--dm-theme-accent);
+  background: transparent;
   cursor: pointer;
+}
+
+.dm-modern-slider::-webkit-slider-runnable-track {
+  height: 10px;
+  border: 1px solid color-mix(in srgb, var(--dm-theme-accent) 22%, var(--dm-border));
+  border-radius: var(--dm-radius-pill);
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--dm-theme-accent) 72%, white), color-mix(in srgb, var(--dm-theme-accent) 18%, transparent)),
+    color-mix(in srgb, var(--dm-panel) 72%, transparent);
+  box-shadow: inset 0 1px 2px color-mix(in srgb, black 24%, transparent);
+}
+
+.dm-modern-slider::-webkit-slider-thumb {
+  width: 22px;
+  height: 22px;
+  margin-top: -7px;
+  border: 3px solid color-mix(in srgb, white 92%, var(--dm-theme-accent));
+  border-radius: 50%;
+  appearance: none;
+  background: var(--dm-theme-accent);
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--dm-theme-accent) 20%, transparent),
+    0 8px 16px color-mix(in srgb, var(--dm-shadow) 70%, transparent);
+}
+
+.dm-modern-slider::-moz-range-track {
+  height: 10px;
+  border: 1px solid color-mix(in srgb, var(--dm-theme-accent) 22%, var(--dm-border));
+  border-radius: var(--dm-radius-pill);
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--dm-theme-accent) 72%, white), color-mix(in srgb, var(--dm-theme-accent) 18%, transparent)),
+    color-mix(in srgb, var(--dm-panel) 72%, transparent);
+  box-shadow: inset 0 1px 2px color-mix(in srgb, black 24%, transparent);
+}
+
+.dm-modern-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border: 3px solid color-mix(in srgb, white 92%, var(--dm-theme-accent));
+  border-radius: 50%;
+  background: var(--dm-theme-accent);
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--dm-theme-accent) 20%, transparent),
+    0 8px 16px color-mix(in srgb, var(--dm-shadow) 70%, transparent);
 }
 
 .dm-inline-help {
   min-height: var(--dm-control-target-rendered);
-  margin-top: 4px;
+  margin-top: 2px;
   border: 0;
   background: transparent;
   color: var(--dm-muted);
@@ -1494,24 +1589,86 @@ html:has(.doraemon-modern--pocket)::-webkit-scrollbar-thumb { background-color: 
 .doraemon-modern--pocket .dm-inline-help { color: #b7d0e4; }
 
 .dm-control-help {
-  position: relative;
-  z-index: 2;
-  margin-top: 10px;
-  border: 1px solid color-mix(in srgb, var(--dm-theme-accent) 24%, transparent);
-  background: color-mix(in srgb, var(--dm-theme-accent) 8%, transparent);
-  padding: 10px 12px;
-  color: var(--dm-muted);
+  position: absolute;
+  top: calc(100% - 2px);
+  right: 0;
+  z-index: 30;
+  width: min(300px, calc(100vw - 34px));
+  margin: 0;
+  border: 1px solid color-mix(in srgb, var(--dm-theme-accent) 32%, var(--dm-border));
+  border-radius: var(--dm-radius-control);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, white 94%, var(--dm-theme-accent)), color-mix(in srgb, white 88%, var(--dm-theme-accent)));
+  padding: 12px 13px;
+  color: #113957;
   font-size: 11px;
-  line-height: 1.6;
+  line-height: 1.55;
+  box-shadow:
+    0 18px 36px color-mix(in srgb, var(--dm-shadow) 84%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  animation: dm-help-pop 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dm-control-help::before {
+  position: absolute;
+  top: -7px;
+  right: 24px;
+  width: 12px;
+  height: 12px;
+  border-top: 1px solid color-mix(in srgb, var(--dm-theme-accent) 32%, var(--dm-border));
+  border-left: 1px solid color-mix(in srgb, var(--dm-theme-accent) 32%, var(--dm-border));
+  background: inherit;
+  content: "";
+  transform: rotate(45deg);
+}
+
+.dm-control-help strong {
+  color: #006cae;
+  font-size: 12px;
+}
+
+.dm-control-help-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dm-control-help-head button {
+  width: var(--dm-control-target-rendered);
+  height: var(--dm-control-target-rendered);
+  border: 1px solid color-mix(in srgb, var(--dm-theme-accent) 24%, transparent);
+  border-radius: var(--dm-radius-control);
+  background: rgba(255, 255, 255, 0.62);
+  color: #33546f;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.dm-control-help-head button:active {
+  transform: translateY(1px);
 }
 
 .dm-control-help p { margin: 6px 0 0; }
+
+@keyframes dm-help-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
 
 .dm-warning-control {
   display: flex;
   align-items: stretch;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .dm-warning-control > div:first-child {
@@ -1522,35 +1679,47 @@ html:has(.doraemon-modern--pocket)::-webkit-scrollbar-thumb { background-color: 
 }
 
 .dm-warning-control > div:first-child > span { font-size: 13px; font-weight: 800; }
-.dm-warning-control > div:first-child > small { color: var(--dm-muted); font-size: 10px; }
+.dm-warning-control > div:first-child > small { color: var(--dm-muted); font-size: 10px; line-height: 1.35; }
 .doraemon-modern--pocket .dm-warning-control > div:first-child > small { color: #b7d0e4; }
 
 .dm-warning-actions {
   display: flex;
-  gap: 8px;
+  gap: 6px;
 }
 
 .dm-warning-actions button {
   flex: 1 1 0;
   width: var(--dm-control-target-rendered);
   height: var(--dm-control-target-rendered);
-  border: 1px solid var(--dm-border);
+  border: 1px solid color-mix(in srgb, var(--dm-border) 78%, transparent);
   border-radius: var(--dm-radius-control);
-  background: transparent;
+  background: color-mix(in srgb, white 7%, transparent);
   color: inherit;
   cursor: pointer;
   display: grid;
   place-items: center;
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
+.dm-warning-actions button:hover {
+  border-color: color-mix(in srgb, var(--dm-theme-accent) 56%, var(--dm-border));
+  background: color-mix(in srgb, var(--dm-theme-accent) 14%, transparent);
+}
+
+.dm-warning-actions button:active {
+  transform: translateY(1px);
 }
 
 .doraemon-modern--pocket .dm-warning-actions button { border-color: rgba(145, 199, 234, 0.34); }
 
 .dm-open-report {
   min-height: 68px;
-  margin: 10px;
+  margin: auto 10px 10px;
   border: 1px solid color-mix(in srgb, var(--dm-theme-accent) 70%, white);
   border-radius: var(--dm-radius-control);
-  background: var(--dm-theme-accent);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, white 24%, transparent), transparent 48%),
+    var(--dm-theme-accent);
   color: white;
   cursor: pointer;
   display: flex;
@@ -1559,11 +1728,21 @@ html:has(.doraemon-modern--pocket)::-webkit-scrollbar-thumb { background-color: 
   gap: 18px;
   padding: 12px 14px;
   text-align: left;
+  box-shadow: 0 16px 28px color-mix(in srgb, var(--dm-theme-accent) 28%, transparent);
+  transition: transform 160ms ease, box-shadow 160ms ease;
 }
 
 .dm-open-report span { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
 .dm-open-report small { overflow: hidden; opacity: 0.76; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
 .dm-open-report strong { font-size: 16px; }
+
+.dm-open-report:hover {
+  box-shadow: 0 20px 34px color-mix(in srgb, var(--dm-theme-accent) 36%, transparent);
+}
+
+.dm-open-report:active {
+  transform: translateY(1px);
+}
 
 .dm-alarm-banner {
   position: absolute;

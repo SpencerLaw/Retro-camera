@@ -2185,13 +2185,26 @@ const DoraemonMonitorApp: React.FC<DoraemonMonitorAppProps> = ({ variant, onChoo
               className="dm-modern-slider"
               aria-label={t('doraemon.sensitivity')}
             />
-            <button type="button" className="dm-inline-help" onClick={() => setShowHelp(!showHelp)}>
+            <button
+              type="button"
+              className="dm-inline-help"
+              onClick={() => {
+                setShowThresholdHelp(false);
+                setShowHelp(!showHelp);
+              }}
+              aria-expanded={showHelp}
+            >
               <HelpCircle size={16} aria-hidden="true" />
               {t('doraemon.helpTitle')}
             </button>
             {showHelp && (
-              <div className="dm-control-help">
-                <strong>{t('doraemon.helpAdviceTitle')}</strong>
+              <div className="dm-control-help" role="dialog" aria-label={t('doraemon.helpTitle')}>
+                <div className="dm-control-help-head">
+                  <strong>{t('doraemon.helpAdviceTitle')}</strong>
+                  <button type="button" onClick={() => setShowHelp(false)} aria-label={t('doraemon.tapToClose')}>
+                    <X size={14} aria-hidden="true" />
+                  </button>
+                </div>
                 <p>{t('doraemon.helpAdviceMute')}{t('doraemon.helpAdviceMuteDesc')}</p>
                 <p>{t('doraemon.helpAdviceRead')}{t('doraemon.helpAdviceReadDesc')}</p>
               </div>
@@ -2212,12 +2225,28 @@ const DoraemonMonitorApp: React.FC<DoraemonMonitorAppProps> = ({ variant, onChoo
               className="dm-modern-slider"
               aria-label={t('doraemon.threshold')}
             />
-            <button type="button" className="dm-inline-help" onClick={() => setShowThresholdHelp(!showThresholdHelp)}>
+            <button
+              type="button"
+              className="dm-inline-help"
+              onClick={() => {
+                setShowHelp(false);
+                setShowThresholdHelp(!showThresholdHelp);
+              }}
+              aria-expanded={showThresholdHelp}
+            >
               <HelpCircle size={16} aria-hidden="true" />
               {t('doraemon.thresholdHelpTitle')}
             </button>
             {showThresholdHelp && (
-              <div className="dm-control-help"><p>{t('doraemon.thresholdHelpDesc')}</p></div>
+              <div className="dm-control-help" role="dialog" aria-label={t('doraemon.thresholdHelpTitle')}>
+                <div className="dm-control-help-head">
+                  <strong>{t('doraemon.thresholdHelpTitle')}</strong>
+                  <button type="button" onClick={() => setShowThresholdHelp(false)} aria-label={t('doraemon.tapToClose')}>
+                    <X size={14} aria-hidden="true" />
+                  </button>
+                </div>
+                <p>{t('doraemon.thresholdHelpDesc')}</p>
+              </div>
             )}
           </div>
 

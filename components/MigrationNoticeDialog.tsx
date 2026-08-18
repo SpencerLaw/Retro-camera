@@ -2,6 +2,7 @@ import React from 'react';
 import { ExternalLink, Megaphone, ShieldCheck, X } from 'lucide-react';
 
 const MIGRATION_NOTICE_STORAGE_KEY = 'smartteach_migration_notice_dismissed';
+const MIGRATION_NOTICE_END_DATE = '2026-09-05';
 const FOCUSABLE_MIGRATION_NOTICE_SELECTOR = [
   'a[href]',
   'button:not([disabled])',
@@ -10,6 +11,10 @@ const FOCUSABLE_MIGRATION_NOTICE_SELECTOR = [
   'textarea:not([disabled])',
   '[tabindex]:not([tabindex="-1"])'
 ].join(',');
+
+const isMigrationNoticePeriodEnded = (date: Date): boolean => {
+  return date >= new Date(`${MIGRATION_NOTICE_END_DATE}T00:00:00`);
+};
 
 export const MigrationNoticeDialog: React.FC = () => {
   const [isMigrationNoticeOpen, setIsMigrationNoticeOpen] = React.useState(false);
@@ -35,6 +40,8 @@ export const MigrationNoticeDialog: React.FC = () => {
   }, [rememberMigrationNoticePreference]);
 
   React.useEffect(() => {
+    if (isMigrationNoticePeriodEnded(new Date())) return;
+
     try {
       if (window.localStorage.getItem(MIGRATION_NOTICE_STORAGE_KEY) === 'true') return;
     } catch (error) {

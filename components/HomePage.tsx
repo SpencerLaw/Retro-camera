@@ -253,7 +253,8 @@ export const HomePage: React.FC = () => {
                 <div className="min-w-0 pr-10 sm:pr-0">
                   <p className="text-sm font-black text-[#0984E3]">重要通知</p>
                   <h2 id="migration-notice-title" className="text-2xl font-black leading-tight text-[#0F172A] sm:text-5xl">
-                    网站已迁移至新域名
+                    <span className="block">网站已迁移至</span>
+                    <span className="block whitespace-nowrap">新域名</span>
                   </h2>
                 </div>
               </div>
@@ -270,10 +271,15 @@ export const HomePage: React.FC = () => {
               <div className="rounded-[24px] border-4 border-dashed border-[#C4E538] bg-white/90 p-4 text-[#334155] shadow-inner sm:rounded-[28px] sm:p-6">
                 <div className="mb-3 flex items-center gap-2 text-lg font-black text-[#047857] sm:text-2xl">
                   <ShieldCheck size={28} />
-                  <span>原授权码继续有效</span>
+                  <span className="whitespace-nowrap">原授权码继续有效</span>
                 </div>
                 <p className="text-base font-bold leading-relaxed sm:text-2xl">
-                  由于浏览器安全机制，新域名第一次打开时需要重新输入一次原授权码，之后会自动记住，不影响正常使用。
+                  <span className="block">由于浏览器安全机制，</span>
+                  <span className="block">
+                    <span className="whitespace-nowrap">新域名</span>首次打开需重新输入
+                    <span className="whitespace-nowrap">原授权码</span>，
+                  </span>
+                  <span className="block">之后会自动记住，不影响<span className="whitespace-nowrap">正常使用</span>。</span>
                 </p>
               </div>
 

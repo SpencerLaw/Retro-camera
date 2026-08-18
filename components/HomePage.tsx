@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Camera, CarFront, Sparkles, Heart, Globe, Cloud, Boxes, BookOpen, Wand2, X, Users, TreeDeciduous, Megaphone, Trophy } from 'lucide-react';
+import { Camera, CarFront, Sparkles, Heart, Globe, Cloud, Boxes, BookOpen, Wand2, X, Users, TreeDeciduous, Megaphone, Trophy, ExternalLink, ShieldCheck } from 'lucide-react';
 import { useLanguage, GlobalLanguage } from '../contexts/LanguageContext';
 import { useTranslations } from '../hooks/useTranslations';
 
@@ -11,10 +11,26 @@ const languageLabels: Record<GlobalLanguage, string> = {
   'ja': '日本語'
 };
 
+const MIGRATION_NOTICE_STORAGE_KEY = 'smartteach_migration_notice_dismissed';
+
 export const HomePage: React.FC = () => {
   const { language, setLanguage } = useLanguage();
   const t = useTranslations();
   const [isWeChatOpen, setIsWeChatOpen] = React.useState(false);
+  const [isMigrationNoticeOpen, setIsMigrationNoticeOpen] = React.useState(false);
+  const [shouldHideMigrationNotice, setShouldHideMigrationNotice] = React.useState(false);
+
+  React.useEffect(() => {
+    if (window.localStorage.getItem(MIGRATION_NOTICE_STORAGE_KEY) === 'true') return;
+    setIsMigrationNoticeOpen(true);
+  }, []);
+
+  const closeMigrationNotice = () => {
+    if (shouldHideMigrationNotice) {
+      window.localStorage.setItem(MIGRATION_NOTICE_STORAGE_KEY, 'true');
+    }
+    setIsMigrationNoticeOpen(false);
+  };
 
   return (
     <div className="w-full pb-8 relative">
@@ -137,6 +153,83 @@ export const HomePage: React.FC = () => {
               <p className="font-marker text-[#576574] text-lg">
                 Scan to add on WeChat ✨
               </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isMigrationNoticeOpen && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-3 sm:p-6">
+          <div
+            className="absolute inset-0 bg-[#16324F]/70 backdrop-blur-md animate-in fade-in duration-300"
+            onClick={closeMigrationNotice}
+          ></div>
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="migration-notice-title"
+            className="relative max-h-[94dvh] w-full max-w-[calc(100vw-1.5rem)] overflow-hidden overflow-y-auto rounded-[28px] border-4 border-white bg-white shadow-[0_16px_0_#7DD3FC,0_24px_54px_rgba(15,23,42,0.38)] animate-in zoom-in duration-300 sm:max-w-3xl sm:rounded-[36px] sm:border-[6px] sm:shadow-[0_24px_0_#7DD3FC,0_34px_70px_rgba(15,23,42,0.38)]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              aria-label="关闭迁移提示"
+              onClick={closeMigrationNotice}
+              className="absolute right-4 top-4 z-10 flex h-12 w-12 items-center justify-center rounded-full border-4 border-white bg-[#FF6B6B] text-white shadow-lg transition-transform hover:scale-110 hover:rotate-90 focus:outline-none focus:ring-4 focus:ring-[#7DD3FC]"
+            >
+              <X size={24} />
+            </button>
+
+            <div className="bg-gradient-to-br from-[#E0F2FE] via-white to-[#FFE5EC] px-4 pb-6 pt-7 sm:px-10 sm:pb-9 sm:pt-10">
+              <div className="mb-5 flex min-w-0 items-start gap-3 sm:items-center">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border-4 border-white bg-[#0984E3] text-white shadow-[0_10px_22px_rgba(9,132,227,0.32)] sm:h-14 sm:w-14">
+                  <Megaphone size={30} />
+                </div>
+                <div className="min-w-0 pr-10 sm:pr-0">
+                  <p className="text-sm font-black text-[#0984E3]">重要通知</p>
+                  <h2 id="migration-notice-title" className="text-2xl font-black leading-tight text-[#0F172A] sm:text-5xl">
+                    网站已迁移至新域名
+                  </h2>
+                </div>
+              </div>
+
+              <a
+                href="https://smartteach.online"
+                className="mb-6 flex min-w-0 items-center justify-between gap-3 rounded-[22px] border-4 border-[#7DD3FC] bg-white px-4 py-4 text-lg font-black text-[#0369A1] shadow-inner transition-transform hover:scale-[1.01] focus:outline-none focus:ring-4 focus:ring-[#FFB5E8] sm:rounded-[26px] sm:px-5 sm:text-3xl"
+              >
+                <span className="min-w-0 break-all">https://smartteach.online</span>
+                <ExternalLink className="shrink-0" size={30} />
+              </a>
+
+              <div className="rounded-[24px] border-4 border-dashed border-[#C4E538] bg-white/90 p-4 text-[#334155] shadow-inner sm:rounded-[28px] sm:p-6">
+                <div className="mb-3 flex items-center gap-2 text-lg font-black text-[#047857] sm:text-2xl">
+                  <ShieldCheck size={28} />
+                  <span>原授权码继续有效</span>
+                </div>
+                <p className="text-base font-bold leading-relaxed sm:text-2xl">
+                  由于浏览器安全机制，新域名第一次打开时需要重新输入一次原授权码，之后会自动记住，不影响正常使用。
+                </p>
+              </div>
+
+              <label className="mt-6 flex cursor-pointer items-center gap-3 rounded-2xl bg-white/80 p-4 text-base font-bold text-[#475569] shadow-sm">
+                <input
+                  type="checkbox"
+                  checked={shouldHideMigrationNotice}
+                  onChange={(event) => setShouldHideMigrationNotice(event.target.checked)}
+                  className="h-5 w-5 accent-[#0984E3]"
+                />
+                <span>再也不显示此提示</span>
+              </label>
+            </div>
+
+            <div className="flex flex-col gap-3 bg-white px-6 py-5 sm:flex-row sm:justify-end sm:px-10">
+              <button
+                type="button"
+                onClick={closeMigrationNotice}
+                className="min-h-12 rounded-full bg-gradient-to-br from-[#74B9FF] to-[#0984E3] px-8 py-3 text-lg font-black text-white shadow-[0_8px_20px_rgba(9,132,227,0.32)] transition-transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-[#FFB5E8]"
+              >
+                我知道了
+              </button>
             </div>
           </div>
         </div>

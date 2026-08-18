@@ -12,6 +12,14 @@ const languageLabels: Record<GlobalLanguage, string> = {
 };
 
 const MIGRATION_NOTICE_STORAGE_KEY = 'smartteach_migration_notice_dismissed';
+const FOCUSABLE_MIGRATION_NOTICE_SELECTOR = [
+  'a[href]',
+  'button:not([disabled])',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])'
+].join(',');
 
 export const HomePage: React.FC = () => {
   const { language, setLanguage } = useLanguage();
@@ -19,16 +27,71 @@ export const HomePage: React.FC = () => {
   const [isWeChatOpen, setIsWeChatOpen] = React.useState(false);
   const [isMigrationNoticeOpen, setIsMigrationNoticeOpen] = React.useState(false);
   const [shouldHideMigrationNotice, setShouldHideMigrationNotice] = React.useState(false);
+  const migrationNoticeRef = React.useRef<HTMLDivElement>(null);
+  const migrationNoticeCloseButtonRef = React.useRef<HTMLButtonElement>(null);
+  const previousFocusRef = React.useRef<HTMLElement | null>(null);
+  const shouldHideMigrationNoticeRef = React.useRef(false);
 
   React.useEffect(() => {
-    if (window.localStorage.getItem(MIGRATION_NOTICE_STORAGE_KEY) === 'true') return;
+    try {
+      if (window.localStorage.getItem(MIGRATION_NOTICE_STORAGE_KEY) === 'true') return;
+    } catch (error) {
+      console.debug('[Migration Notice] storage read skipped', error);
+    }
     setIsMigrationNoticeOpen(true);
   }, []);
 
-  const closeMigrationNotice = () => {
-    if (shouldHideMigrationNotice) {
-      window.localStorage.setItem(MIGRATION_NOTICE_STORAGE_KEY, 'true');
+  React.useEffect(() => {
+    if (!isMigrationNoticeOpen) return undefined;
+    previousFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    migrationNoticeCloseButtonRef.current?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        closeMigrationNotice();
+        return;
+      }
+
+      if (event.key !== 'Tab') return;
+      const dialog = migrationNoticeRef.current;
+      if (!dialog) return;
+
+      const focusableElements = Array.from(
+        dialog.querySelectorAll<HTMLElement>(FOCUSABLE_MIGRATION_NOTICE_SELECTOR)
+      ).filter((element) => element.offsetParent !== null);
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+      if (!firstElement || !lastElement) return;
+
+      if (event.shiftKey && document.activeElement === firstElement) {
+        event.preventDefault();
+        lastElement.focus();
+      } else if (!event.shiftKey && document.activeElement === lastElement) {
+        event.preventDefault();
+        firstElement.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      previousFocusRef.current?.focus();
+      previousFocusRef.current = null;
+    };
+  }, [isMigrationNoticeOpen, shouldHideMigrationNotice]);
+
+  const rememberMigrationNoticePreference = () => {
+    if (shouldHideMigrationNoticeRef.current) {
+      try {
+        window.localStorage.setItem(MIGRATION_NOTICE_STORAGE_KEY, 'true');
+      } catch (error) {
+        console.debug('[Migration Notice] storage write skipped', error);
+      }
     }
+  };
+
+  const closeMigrationNotice = () => {
+    rememberMigrationNoticePreference();
     setIsMigrationNoticeOpen(false);
   };
 
@@ -168,10 +231,12 @@ export const HomePage: React.FC = () => {
             role="dialog"
             aria-modal="true"
             aria-labelledby="migration-notice-title"
+            ref={migrationNoticeRef}
             className="relative max-h-[94dvh] w-full max-w-[calc(100vw-1.5rem)] overflow-hidden overflow-y-auto rounded-[28px] border-4 border-white bg-white shadow-[0_16px_0_#7DD3FC,0_24px_54px_rgba(15,23,42,0.38)] animate-in zoom-in duration-300 sm:max-w-3xl sm:rounded-[36px] sm:border-[6px] sm:shadow-[0_24px_0_#7DD3FC,0_34px_70px_rgba(15,23,42,0.38)]"
             onClick={(e) => e.stopPropagation()}
           >
             <button
+              ref={migrationNoticeCloseButtonRef}
               type="button"
               aria-label="关闭迁移提示"
               onClick={closeMigrationNotice}
@@ -195,6 +260,7 @@ export const HomePage: React.FC = () => {
 
               <a
                 href="https://smartteach.online"
+                onClick={rememberMigrationNoticePreference}
                 className="mb-6 flex min-w-0 items-center justify-between gap-3 rounded-[22px] border-4 border-[#7DD3FC] bg-white px-4 py-4 text-lg font-black text-[#0369A1] shadow-inner transition-transform hover:scale-[1.01] focus:outline-none focus:ring-4 focus:ring-[#FFB5E8] sm:rounded-[26px] sm:px-5 sm:text-3xl"
               >
                 <span className="min-w-0 break-all">https://smartteach.online</span>
@@ -215,7 +281,10 @@ export const HomePage: React.FC = () => {
                 <input
                   type="checkbox"
                   checked={shouldHideMigrationNotice}
-                  onChange={(event) => setShouldHideMigrationNotice(event.target.checked)}
+                  onChange={(event) => {
+                    shouldHideMigrationNoticeRef.current = event.target.checked;
+                    setShouldHideMigrationNotice(event.target.checked);
+                  }}
                   className="h-5 w-5 accent-[#0984E3]"
                 />
                 <span>再也不显示此提示</span>

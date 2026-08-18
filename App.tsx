@@ -13,6 +13,7 @@ import { TugOfWarApp } from './components/TugOfWarApp';
 import JuzimiApp from './components/JuzimiApp';
 import PromptGalleryApp from './components/PromptGalleryApp';
 import CourseSchedulerApp from './components/course-scheduler/CourseSchedulerApp';
+import { MigrationNoticeDialog } from './components/MigrationNoticeDialog';
 
 const TslSkinApp = React.lazy(() => import('./components/TslSkinApp'));
 
@@ -49,6 +50,7 @@ const App: React.FC = () => {
           <Route path="/course-scheduler" element={<CourseSchedulerApp />} />
 
         </Routes>
+        <MigrationNoticeDialog />
       </BrowserRouter>
     </LanguageProvider>
   );

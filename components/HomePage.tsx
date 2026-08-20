@@ -722,7 +722,7 @@ export const HomePage: React.FC = () => {
           {/* Course Scheduler Card - Professional/Modern Style */}
           <Link
             to="/course-scheduler"
-            className="group relative bg-gradient-to-br from-[#E2E8F0] via-[#F1F5F9] to-[#F8FAFC] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(148,163,184,0.3)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(148,163,184,0.5)] hover:rotate-2 hidden"
+            className="group relative bg-gradient-to-br from-[#E2E8F0] via-[#F1F5F9] to-[#F8FAFC] rounded-[2.5rem] p-8 cursor-pointer transform transition-all duration-500 hover:scale-105 hover:-translate-y-4 shadow-[0_12px_30px_rgba(148,163,184,0.3)] border-[5px] border-white/90 hover:shadow-[0_20px_40px_rgba(148,163,184,0.5)] hover:rotate-2 block"
             style={{
               transformStyle: 'preserve-3d',
             }}
@@ -740,7 +740,7 @@ export const HomePage: React.FC = () => {
             </div>
 
             <div className="relative z-10 text-center">
-              <h2 className="font-bold text-4xl text-[#334155] mb-3 drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)]">智能排课系统</h2>
+              <h2 className="font-bold text-4xl text-[#334155] mb-3 drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)]">智能班表</h2>
               <p className="text-base text-[#475569] mb-4 font-semibold drop-shadow-[0_1px_4px_rgba(255,255,255,0.7)]">
                 走班制动态教务
               </p>

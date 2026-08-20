@@ -4,7 +4,7 @@
 ' ============================================
 
 Dim BASE_URL
-BASE_URL = "https://lovedare.baby/doraemon"
+BASE_URL = "https://smartteach.online/doraemon"
 
 ' --- Find Browser ---
 Dim objFSO, objShell

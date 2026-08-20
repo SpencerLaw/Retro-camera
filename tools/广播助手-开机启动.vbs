@@ -12,7 +12,7 @@
 ' ============================================
 
 Dim BASE_URL, ROOM_ID
-BASE_URL = "https://lovedare.baby/broadcast/receiver?autostart=1"
+BASE_URL = "https://smartteach.online/broadcast/receiver?autostart=1"
 ROOM_ID  = ""   ' <-- 填入6位房间号，例如 "123456"，留空则显示输入页面
 
 ' 拼接最终 URL

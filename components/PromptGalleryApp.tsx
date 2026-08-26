@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   Copy,
   Edit3,
+  ImageOff,
   ImagePlus,
   Loader2,
   Lock,
@@ -230,6 +231,60 @@ const getImageThumbnail = (image?: PromptGalleryImage | null) => (
   image?.thumbnailUrl || image?.thumbnail || getImageSource(image)
 );
 
+const MissingPromptImage = ({
+  className,
+  iconSize = 30,
+}: {
+  className: string;
+  iconSize?: number;
+}) => (
+  <div className={`flex flex-col items-center justify-center gap-2 bg-[#111827] px-3 text-center text-xs font-black leading-5 text-white ${className}`}>
+    <ImageOff size={iconSize} className="text-[#fbbf24]" />
+    <span>图片文件暂不可用</span>
+  </div>
+);
+
+const PromptGalleryImageView = ({
+  src,
+  alt,
+  className,
+  fallbackClassName,
+  loading,
+  iconSize,
+  hiddenOnError = false,
+  ariaHidden,
+}: {
+  src: string;
+  alt: string;
+  className: string;
+  fallbackClassName: string;
+  loading?: 'lazy' | 'eager';
+  iconSize?: number;
+  hiddenOnError?: boolean;
+  ariaHidden?: boolean;
+}) => {
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    setFailed(false);
+  }, [src]);
+
+  if (!src || failed) {
+    return hiddenOnError ? null : <MissingPromptImage className={fallbackClassName} iconSize={iconSize} />;
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      aria-hidden={ariaHidden}
+      className={className}
+      loading={loading}
+      onError={() => setFailed(true)}
+    />
+  );
+};
+
 const promptEntryToForm = (entry: PromptGalleryEntry) => ({
   id: entry.id,
   title: entry.title,
@@ -254,11 +309,13 @@ const PromptCard = ({
   >
     <div className="relative bg-[#171717]">
       {item.coverImage ? (
-        <img
+        <PromptGalleryImageView
           src={item.coverImage}
           alt={item.title}
           className="w-full object-cover"
+          fallbackClassName="aspect-[4/3] w-full"
           loading="lazy"
+          iconSize={34}
         />
       ) : (
         <div className="flex aspect-[4/3] w-full items-center justify-center bg-[linear-gradient(135deg,#111827_0%,#0f766e_45%,#f59e0b_100%)] text-white">
@@ -938,10 +995,12 @@ const PromptGalleryApp: React.FC = () => {
                   <div className="grid grid-cols-2 gap-2">
                     {form.images.map((image, index) => (
                       <div key={image.id} className="relative overflow-hidden rounded-lg border border-black/10 bg-[#111827]">
-                        <img
+                        <PromptGalleryImageView
                           src={getImageThumbnail(image)}
                           alt={image.name}
                           className="aspect-square w-full object-cover"
+                          fallbackClassName="aspect-square w-full"
+                          iconSize={24}
                         />
                         <button
                           onClick={() => removeImage(image.id)}
@@ -1003,11 +1062,13 @@ const PromptGalleryApp: React.FC = () => {
               ) : activeImage ? (
                 <div className="flex h-full flex-col">
                   <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden bg-[#111827] p-3">
-                    <img
+                    <PromptGalleryImageView
                       src={getImageSource(activeImage)}
                       alt=""
-                      aria-hidden="true"
+                      ariaHidden
                       className="absolute inset-0 h-full w-full scale-110 object-cover opacity-35 blur-2xl"
+                      fallbackClassName="absolute inset-0 h-full w-full"
+                      hiddenOnError
                     />
                     <div className="absolute inset-0 bg-black/24" />
                     <button
@@ -1016,10 +1077,12 @@ const PromptGalleryApp: React.FC = () => {
                       className="relative z-10 flex h-full w-full items-center justify-center cursor-zoom-in"
                       aria-label="放大图片"
                     >
-                      <img
+                      <PromptGalleryImageView
                         src={getImageSource(activeImage)}
                         alt={selectedEntry?.title || dialogSummary.title}
                         className="max-h-[38vh] w-full object-contain drop-shadow-[0_24px_50px_rgba(0,0,0,0.45)] lg:max-h-[66vh]"
+                        fallbackClassName="min-h-[38vh] w-full lg:min-h-[66vh]"
+                        iconSize={44}
                       />
                       <span className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-lg bg-black/55 text-white backdrop-blur">
                         <Maximize2 size={17} />
@@ -1034,7 +1097,13 @@ const PromptGalleryApp: React.FC = () => {
                           onClick={() => setActiveImageIndex(index)}
                           className={`h-16 w-16 shrink-0 overflow-hidden rounded-lg border ${index === activeImageIndex ? 'border-[#fbbf24]' : 'border-white/20'}`}
                         >
-                          <img src={getImageThumbnail(image)} alt={image.name} className="h-full w-full object-cover" />
+                          <PromptGalleryImageView
+                            src={getImageThumbnail(image)}
+                            alt={image.name}
+                            className="h-full w-full object-cover"
+                            fallbackClassName="h-full w-full"
+                            iconSize={18}
+                          />
                         </button>
                       ))}
                     </div>

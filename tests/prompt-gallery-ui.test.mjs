@@ -85,9 +85,11 @@ runTest('prompt gallery page fetches list and detail separately', () => {
 });
 
 runTest('prompt gallery list cards stay on thumbnails and details use full images', () => {
-  assert.match(componentSource, /src=\{item\.coverImage\}/);
-  assert.match(componentSource, /src=\{getImageSource\(activeImage\)\}/);
-  assert.match(componentSource, /src=\{getImageThumbnail\(image\)\}/);
+  assert.match(componentSource, /<PromptGalleryImageView[\s\S]*src=\{item\.coverImage\}/);
+  assert.match(componentSource, /<PromptGalleryImageView[\s\S]*src=\{getImageSource\(activeImage\)\}/);
+  assert.match(componentSource, /<PromptGalleryImageView[\s\S]*src=\{getImageThumbnail\(image\)\}/);
+  assert.match(componentSource, /onError=\{\(\) => setFailed\(true\)\}/);
+  assert.match(componentSource, /图片文件暂不可用/);
 });
 
 runTest('prompt gallery exposes model filters from the list API', () => {
@@ -137,7 +139,8 @@ runTest('prompt detail dialog keeps the image compact and sticky on narrow scree
 });
 
 runTest('prompt detail image uses a soft preview backdrop instead of plain black space', () => {
-  assert.match(componentSource, /aria-hidden="true"/);
+  assert.match(componentSource, /aria-hidden=\{ariaHidden\}/);
+  assert.match(componentSource, /ariaHidden/);
   assert.match(componentSource, /blur-2xl/);
   assert.match(componentSource, /scale-110/);
   assert.match(componentSource, /object-cover/);

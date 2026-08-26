@@ -75,3 +75,11 @@ runTest('prompt gallery uses PT prefixed licenses in the shared license API', ()
   assert.match(verifyLicenseSource, /cleanCode\.startsWith\('PT'\)/);
   assert.match(verifyLicenseSource, /else if \([\s\S]*startsWith\('PT'\)[\s\S]*cleanCode = cleanCode\.substring\(2\)/);
 });
+
+runTest('license blob cleanup protects prompt gallery uploads', () => {
+  const verifyLicenseSource = fs.readFileSync('api/verify-license.ts', 'utf8');
+  assert.match(verifyLicenseSource, /isPromptGalleryBlob/);
+  assert.match(verifyLicenseSource, /pathname\.includes\('\/prompt-gallery\/'\)/);
+  assert.match(verifyLicenseSource, /if \(isPromptGalleryBlob\(url\)\) return false/);
+  assert.match(verifyLicenseSource, /\.filter\(blob => isLegacyAvatarBlob\(blob\.url\)\)/);
+});

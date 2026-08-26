@@ -71,6 +71,26 @@ export interface CompressedMetadata {
 
 // === 辅助工具 ===
 
+const isPromptGalleryBlob = (url: string): boolean => {
+  try {
+    return new URL(url).pathname.includes('/prompt-gallery/');
+  } catch {
+    return url.includes('/prompt-gallery/');
+  }
+};
+
+const isLegacyAvatarBlob = (url: string): boolean => {
+  if (isPromptGalleryBlob(url)) return false;
+
+  try {
+    const pathname = new URL(url).pathname.toLowerCase();
+    return pathname.includes('/avatars/') || pathname.endsWith('/avatar.webp') || pathname.endsWith('avatar.webp');
+  } catch {
+    const normalized = url.toLowerCase();
+    return normalized.includes('/avatars/') || normalized.endsWith('/avatar.webp') || normalized.endsWith('avatar.webp');
+  }
+};
+
 // 获取设备概况
 function getDeviceType(ua: string): string {
   if (/iPhone/i.test(ua)) return 'iPhone';
@@ -383,8 +403,8 @@ export default async function handler(
         });
       }
 
-      // 4. 找出不在 usedAvatars 中的文件 (且仅清理头像目录下的文件)
       const orphans = blobs
+        .filter(blob => isLegacyAvatarBlob(blob.url))
         .filter(blob => !usedAvatars.has(blob.url))
         .map(blob => blob.url);
 

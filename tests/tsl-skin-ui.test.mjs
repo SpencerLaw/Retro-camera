@@ -50,12 +50,12 @@ function runTest(name, fn) {
   }
 }
 
-runTest('tsl skin route and homepage entry are wired', () => {
+runTest('tsl skin route stays wired while homepage entry is hidden', () => {
   assert.match(appSource, /React\.lazy\(\(\) => import\('\.\/components\/TslSkinApp'\)\)/);
   assert.match(appSource, /<React\.Suspense/);
   assert.match(appSource, /<Route path="\/tsl-skin" element=\{<TslSkinRoute \/>\} \/>/);
-  assert.match(homeSource, /to="\/tsl-skin"/);
-  assert.match(homeSource, /特斯拉皮肤/);
+  assert.doesNotMatch(homeSource, /to="\/tsl-skin"/);
+  assert.doesNotMatch(homeSource, /特斯拉皮肤/);
 });
 
 runTest('tsl skin page mounts the model-aware Konva editor', () => {
@@ -432,7 +432,7 @@ runTest('tsl skin page keeps the download workflow uncluttered', () => {
   assert.doesNotMatch(componentSource, /价格说明|免费资源站|单张下载|五张打包|自定义设计 30 元|原创商品样张/);
   assert.doesNotMatch(componentSource, /DOWNLOAD_PRICE_TIERS|EXTERNAL_WRAP_SOURCES|SKIN_CATALOG_PRODUCTS|getCatalogProductsForTemplate/);
   assert.doesNotMatch(componentSource, /授权码|激活码|待接入支付|后端支付|定制套餐|CUSTOM_WRAP_PACKAGES|calculateCustomOrderQuote/);
-  assert.match(homeSource, /特斯拉皮肤/);
+  assert.doesNotMatch(homeSource, /特斯拉皮肤/);
 });
 
 runTest('tsl skin page separates download and design workflows', () => {

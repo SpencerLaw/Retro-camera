@@ -12,6 +12,12 @@ dist
 dist-ssr
 *.local
 .codex-tmp/
+.omo/
+.playwright-cli/
+.playwright-mcp/
+output/
+outputs/
+tmp/
 
 # Environment variables
 .env

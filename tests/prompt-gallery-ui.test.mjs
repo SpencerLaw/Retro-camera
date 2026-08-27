@@ -16,11 +16,11 @@ function runTest(name, fn) {
   }
 }
 
-runTest('prompt gallery route and homepage entry are wired', () => {
+runTest('prompt gallery route stays wired while homepage entry is hidden', () => {
   assert.match(appSource, /import PromptGalleryApp from '\.\/components\/PromptGalleryApp'/);
   assert.match(appSource, /<Route path="\/prompts" element=\{<PromptGalleryApp \/>\} \/>/);
-  assert.match(homeSource, /to="\/prompts"/);
-  assert.match(homeSource, /提示词图库/);
+  assert.doesNotMatch(homeSource, /to="\/prompts"/);
+  assert.doesNotMatch(homeSource, /提示词图库/);
 });
 
 runTest('prompt gallery page has admin upload controls and image compression', () => {

@@ -162,6 +162,22 @@ export default async function handler(request: VercelRequest, response: VercelRe
       return response.status(401).json({ success: false, message: '管理员密码不正确' });
     }
 
+    if (action === 'clear_all') {
+      const entryKeys = await kv.keys('prompt-gallery:entry:*');
+      if (entryKeys.length > 0) {
+        await Promise.all(entryKeys.map(key => kv.del(key)));
+      }
+      await kv.del(PROMPT_GALLERY_INDEX_KEY);
+      return response.status(200).json({
+        success: true,
+        data: {
+          clearedEntries: entryKeys.length,
+          list: [],
+          storageMode: getPromptGalleryStorageMode(),
+        },
+      });
+    }
+
     if (action === 'create' || action === 'update') {
       const index = await readIndex();
       const entryId = String(data?.id || '').trim();

@@ -51,9 +51,16 @@ runTest('prompt gallery api exposes list detail create update and delete actions
   assert.match(apiSource, /action === 'create'/);
   assert.match(apiSource, /action === 'update'/);
   assert.match(apiSource, /action === 'delete'/);
+  assert.match(apiSource, /action === 'clear_all'/);
   assert.match(apiSource, /paginatePromptGallerySummaries/);
   assert.match(apiSource, /filterPromptGallerySummaries/);
   assert.match(apiSource, /summarizePromptGalleryEntry/);
+});
+
+runTest('prompt gallery clear all only targets gallery records', () => {
+  assert.match(apiSource, /kv\.keys\('prompt-gallery:entry:\*'\)/);
+  assert.match(apiSource, /kv\.del\(PROMPT_GALLERY_INDEX_KEY\)/);
+  assert.doesNotMatch(apiSource, /kv\.keys\('license:\*'\)[\s\S]*action === 'clear_all'/);
 });
 
 runTest('prompt gallery api normalizes detail responses before returning legacy records', () => {

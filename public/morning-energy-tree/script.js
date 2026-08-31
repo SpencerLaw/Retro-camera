@@ -153,8 +153,10 @@ const SOIL_FLOW_COLORS = ['#59f0ff', '#5de2c8', '#9be15d', '#d8ff66'];
 const STARBUD_PALETTE = {
     sky: {
         deep: '#04296e',
-        mid: '#07539a',
-        bright: '#147da3',
+        upper: '#063b82',
+        mid: '#0a5d99',
+        lower: '#167da6',
+        bright: '#1d93b4',
         horizon: '#5bc9c3',
         mist: ['#d9fff1', '#d8ef8b', '#8ce3d0', '#8ec3e0'],
         star: '#ffffff',
@@ -7645,51 +7647,6 @@ function drawPhotosynthesisSky(now) {
     });
 }
 
-function drawStarbudEnergyGlyph(now, renderMode) {
-    if (canvas.height < 520 || canvas.width < 520 || renderMode.ultraLowPower) return;
-    const centerX = canvas.width * 0.5;
-    const centerY = Math.max(48, canvas.height * 0.06);
-    const pulse = prefersReducedMotion() ? 1 : 1 + Math.sin(now / 1700) * 0.035;
-    const glyphScale = Math.min(canvas.width, canvas.height) / 720;
-
-    ctx.save();
-    ctx.translate(centerX, centerY);
-    ctx.scale(pulse * glyphScale, pulse * glyphScale);
-    ctx.globalCompositeOperation = 'screen';
-    ctx.strokeStyle = STARBUD_PALETTE.sky.glyph;
-    ctx.shadowColor = STARBUD_PALETTE.sky.mist[0];
-    ctx.shadowBlur = renderMode.lowPower ? 5 : 12;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.lineWidth = renderMode.lowPower ? 2.8 : 3.8;
-
-    ctx.beginPath();
-    ctx.arc(0, 0, 34, 0, Math.PI * 2);
-    ctx.moveTo(-8, 14);
-    ctx.quadraticCurveTo(-7, -5, -24, -10);
-    ctx.quadraticCurveTo(-20, 8, -8, 14);
-    ctx.moveTo(8, 14);
-    ctx.quadraticCurveTo(7, -5, 24, -10);
-    ctx.quadraticCurveTo(20, 8, 8, 14);
-    ctx.moveTo(0, 20);
-    ctx.quadraticCurveTo(0, 5, 0, -2);
-    ctx.stroke();
-
-    ctx.globalAlpha = 0.42;
-    ctx.lineWidth = 2.2;
-    ctx.beginPath();
-    ctx.moveTo(-36, -5);
-    ctx.bezierCurveTo(-84, -34, -126, 18, -188, -18);
-    ctx.moveTo(36, -5);
-    ctx.bezierCurveTo(84, -34, 126, 18, 188, -18);
-    ctx.moveTo(-32, 12);
-    ctx.bezierCurveTo(-86, 38, -118, 5, -158, 24);
-    ctx.moveTo(32, 12);
-    ctx.bezierCurveTo(86, 38, 118, 5, 158, 24);
-    ctx.stroke();
-    ctx.restore();
-}
-
 function getStarbudHillTopY() {
     return canvas.height - Math.max(132, Math.min(228, canvas.height * 0.24));
 }
@@ -7699,10 +7656,9 @@ function getStarbudTreeGroundY() {
     return Math.min(canvas.height - 46, hillTopY + Math.max(52, (canvas.height - hillTopY) * 0.36));
 }
 
-function drawStarbudMistBand(now, renderMode, index, color, alpha, widthScale = 1) {
-    const drift = prefersReducedMotion() ? 0 : Math.sin(now / (3900 + index * 410) + index * 1.7) * (8 + index * 1.8);
+function drawStarbudMistBand(renderMode, index, color, alpha, widthScale = 1) {
     const seed = 71.4 + index * 8.37;
-    const baseY = canvas.height * (0.16 + seededUnit(seed) * 0.48) + drift;
+    const baseY = canvas.height * (0.16 + seededUnit(seed) * 0.48);
     const rise = canvas.height * (0.04 + seededUnit(seed + 1.9) * 0.09);
     const slope = (seededUnit(seed + 3.1) - 0.42) * canvas.height * 0.3;
     const strokeCount = renderMode.ultraLowPower ? 1 : renderMode.lowPower ? 2 : 3;
@@ -7762,17 +7718,26 @@ function drawStarbudWatercolorGrain(renderMode) {
     ctx.restore();
 }
 
-function drawStarbudForestSky(now, renderMode) {
+function drawStarbudForestSky(renderMode) {
     const skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
     skyGradient.addColorStop(0, STARBUD_PALETTE.sky.deep);
-    skyGradient.addColorStop(0.46, STARBUD_PALETTE.sky.mid);
-    skyGradient.addColorStop(0.78, STARBUD_PALETTE.sky.bright);
+    skyGradient.addColorStop(0.18, STARBUD_PALETTE.sky.upper);
+    skyGradient.addColorStop(0.42, STARBUD_PALETTE.sky.mid);
+    skyGradient.addColorStop(0.64, STARBUD_PALETTE.sky.lower);
+    skyGradient.addColorStop(0.84, STARBUD_PALETTE.sky.bright);
     skyGradient.addColorStop(1, STARBUD_PALETTE.sky.horizon);
     ctx.fillStyle = skyGradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.save();
     ctx.globalCompositeOperation = 'screen';
+    const skyBlend = ctx.createLinearGradient(0, canvas.height * 0.18, 0, canvas.height * 0.62);
+    skyBlend.addColorStop(0, 'rgba(255, 255, 255, 0)');
+    skyBlend.addColorStop(0.5, 'rgba(132, 221, 226, 0.07)');
+    skyBlend.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    ctx.fillStyle = skyBlend;
+    ctx.fillRect(0, canvas.height * 0.18, canvas.width, canvas.height * 0.44);
+
     const aurora = ctx.createRadialGradient(
         canvas.width * 0.72,
         canvas.height * 0.18,
@@ -7785,7 +7750,7 @@ function drawStarbudForestSky(now, renderMode) {
     aurora.addColorStop(0.34, STARBUD_PALETTE.sky.auroraMint);
     aurora.addColorStop(1, STARBUD_PALETTE.sky.transparent);
     ctx.fillStyle = aurora;
-    ctx.fillRect(0, 0, canvas.width, canvas.height * 0.84);
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     const leftBloom = ctx.createRadialGradient(
         canvas.width * 0.08,
@@ -7799,7 +7764,7 @@ function drawStarbudForestSky(now, renderMode) {
     leftBloom.addColorStop(0.52, STARBUD_PALETTE.sky.bloomMint);
     leftBloom.addColorStop(1, STARBUD_PALETTE.sky.transparent);
     ctx.fillStyle = leftBloom;
-    ctx.fillRect(0, canvas.height * 0.2, canvas.width * 0.72, canvas.height * 0.62);
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     drawStarbudWatercolorGrain(renderMode);
 
@@ -7808,10 +7773,8 @@ function drawStarbudForestSky(now, renderMode) {
         const x = seededUnit(i * 7.31 + 1.2) * canvas.width;
         const y = seededUnit(i * 11.17 + 3.4) * canvas.height * 0.7;
         const size = 0.42 + Math.pow(seededUnit(i * 3.71 + 5.8), 2.1) * (renderMode.lowPower ? 1.6 : 2.8);
-        const twinkle = prefersReducedMotion()
-            ? 0.62
-            : 0.34 + ((Math.sin(now / (560 + (i % 7) * 90) + i * 1.7) + 1) * 0.29);
-        ctx.globalAlpha = twinkle;
+        const starAlpha = 0.38 + seededUnit(i * 5.97 + 12.4) * 0.34;
+        ctx.globalAlpha = starAlpha;
         ctx.fillStyle = i % 7 === 0
             ? STARBUD_PALETTE.sky.starLime
             : i % 5 === 0
@@ -7821,7 +7784,7 @@ function drawStarbudForestSky(now, renderMode) {
         ctx.arc(x, y, size, 0, Math.PI * 2);
         ctx.fill();
         if (!renderMode.lowPower && i % 17 === 0) {
-            ctx.globalAlpha = twinkle * 0.58;
+            ctx.globalAlpha = starAlpha * 0.58;
             ctx.fillRect(x - size * 4.2, y - 0.45, size * 8.4, 0.9);
             ctx.fillRect(x - 0.45, y - size * 4.2, 0.9, size * 8.4);
         }
@@ -7832,7 +7795,6 @@ function drawStarbudForestSky(now, renderMode) {
     const mistColors = STARBUD_PALETTE.sky.mist;
     for (let i = 0; i < mistCount; i++) {
         drawStarbudMistBand(
-            now,
             renderMode,
             i,
             mistColors[i % mistColors.length],
@@ -7841,7 +7803,6 @@ function drawStarbudForestSky(now, renderMode) {
         );
     }
 
-    drawStarbudEnergyGlyph(now, renderMode);
 }
 
 function drawPhotosynthesisHill() {
@@ -7951,7 +7912,7 @@ function renderSceneFrame(now = Date.now()) {
     const lifecycleStage = getTreeDisplayLifecycleStage(visualEnergy);
     maybeAnnounceFinalTree(lifecycleStage);
 
-    if (isForestOrbMode) drawStarbudForestSky(now, renderMode);
+    if (isForestOrbMode) drawStarbudForestSky(renderMode);
     else drawPhotosynthesisSky(now);
 
     if (isForestOrbMode) drawStarbudForestHill(renderMode);
@@ -7982,7 +7943,7 @@ function renderSceneFrame(now = Date.now()) {
 
     drawEnergyFlow(treeSize);
     drawRewardEffects(treeSize);
-    drawMeadowCritters(renderMode);
+    if (!isForestOrbMode) drawMeadowCritters(renderMode);
 
     const superSparkleChance = renderMode.ultraLowPower ? 0.06 : renderMode.lowPower ? 0.12 : 0.22;
     if (STATE.isSuperMode && Math.random() < superSparkleChance) {

@@ -438,7 +438,7 @@
     "licensePlaceholder": "ZD-xxxx-xxxx",
     "verifyBtn": "Open Energy Tree",
     "authError": "Invalid Code: Must start with \"ZD\"",
-    "energyLabel": "🌳 Energy Tree Growth",
+    "energyLabel": "Energy Tree Growth",
     "remainingTime": "Time Left",
     "durationLabel": "Duration",
     "minSuffix": "min",

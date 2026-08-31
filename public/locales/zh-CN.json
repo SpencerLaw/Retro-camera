@@ -454,7 +454,7 @@
     "licensePlaceholder": "ZD-xxxx-xxxx",
     "verifyBtn": "开启能量树",
     "authError": "无效的授权码：必须以 \"ZD\" 开头",
-    "energyLabel": "🌳 能量树成长进度",
+    "energyLabel": "能量树成长进度",
     "remainingTime": "剩余时间",
     "durationLabel": "早读时长",
     "minSuffix": "分钟",

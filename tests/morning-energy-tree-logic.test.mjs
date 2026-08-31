@@ -281,6 +281,16 @@ runTest('starbud energy rises from the roots into the live crown', () => {
   assert.match(source, /starbudHeight \* \(0\.52 \+ starbudTimeline \* 0\.16\)/);
 });
 
+runTest('starbud sky uses stable full-canvas ambience without a hard horizontal seam', () => {
+  const source = fs.readFileSync('public/morning-energy-tree/script.js', 'utf8');
+
+  assert.doesNotMatch(source, /drawStarbudForestSky\(now/);
+  assert.doesNotMatch(source, /Math\.sin\(now \/ \(560/);
+  assert.doesNotMatch(source, /drawStarbudEnergyGlyph/);
+  assert.doesNotMatch(source, /fillRect\(0,\s*canvas\.height \* 0\.2/);
+  assert.match(source, /skyGradient\.addColorStop\(0\.64,\s*STARBUD_PALETTE\.sky\.lower\)/);
+});
+
 runTest('starbud quiet reading earns fewer and lighter energy balls than loud reading', () => {
   const { api } = loadMorningTree();
 
@@ -816,7 +826,7 @@ runTest('live reward panel writes out watering and fertilizer trigger rules', ()
   assert.match(panelHtml, /90s/);
   assert.doesNotMatch(panelHtml, /过响/);
   assert.doesNotMatch(panelHtml, /overLoud/);
-  assert.equal(zh.morningTree.energyLabel, '🌳 能量树成长进度');
+  assert.equal(zh.morningTree.energyLabel, '能量树成长进度');
   assert.match(zh.morningTree.rewards.liveSub, /不需要老师手动点/);
   assert.match(zh.morningTree.rewards.waterRule, /30 秒/);
   assert.match(zh.morningTree.rewards.waterRule, /不设上限/);

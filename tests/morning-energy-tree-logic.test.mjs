@@ -291,6 +291,57 @@ runTest('starbud sky uses stable full-canvas ambience without a hard horizontal 
   assert.match(source, /skyGradient\.addColorStop\(0\.64,\s*STARBUD_PALETTE\.sky\.lower\)/);
 });
 
+runTest('starbud static scene does not change with render quality shifts', () => {
+  const source = fs.readFileSync('public/morning-energy-tree/script.js', 'utf8');
+  const start = source.indexOf('function renderSceneFrame');
+  const end = source.indexOf('function loop');
+  const renderSource = source.slice(start, end);
+
+  assert.match(source, /const STARBUD_STATIC_RENDER_MODE = Object\.freeze/);
+  assert.match(renderSource, /drawStarbudForestSky\(STARBUD_STATIC_RENDER_MODE\)/);
+  assert.match(renderSource, /drawStarbudForestHill\(STARBUD_STATIC_RENDER_MODE\)/);
+  assert.match(renderSource, /drawStarbudForestTree\([^;]+STARBUD_STATIC_RENDER_MODE\)/s);
+});
+
+runTest('starbud canopy ambient details stay fixed between frames', () => {
+  const source = fs.readFileSync('public/morning-energy-tree/script.js', 'utf8');
+  const start = source.indexOf('function drawStarbudLeafFan');
+  const end = source.indexOf('function shouldDrawMeadowAura');
+  const starbudTreeSource = source.slice(start, end);
+
+  assert.ok(start > 0);
+  assert.ok(end > start);
+  assert.doesNotMatch(starbudTreeSource, /STATE\.frameNow|Date\.now|audibleSway/);
+  assert.doesNotMatch(starbudTreeSource, /Math\.sin\(frameTime/);
+  assert.match(starbudTreeSource, /const pulse = 0\.62 \+ seededUnit/);
+});
+
+runTest('starbud super mode does not scatter sparkles across the star sky', () => {
+  const source = fs.readFileSync('public/morning-energy-tree/script.js', 'utf8');
+  const start = source.indexOf('function renderSceneFrame');
+  const end = source.indexOf('function loop');
+  const renderSource = source.slice(start, end);
+
+  assert.ok(start > 0);
+  assert.ok(end > start);
+  assert.doesNotMatch(renderSource, /\n\s*if \(STATE\.isSuperMode && Math\.random\(\) < superSparkleChance/);
+  assert.match(renderSource, /!isForestOrbMode && STATE\.isSuperMode/);
+});
+
+runTest('starbud energy flow avoids volume-reactive background glow', () => {
+  const source = fs.readFileSync('public/morning-energy-tree/script.js', 'utf8');
+  const start = source.indexOf('function drawEnergyFlow');
+  const end = source.indexOf('function initCanvas');
+  const flowSource = source.slice(start, end);
+
+  assert.ok(start > 0);
+  assert.ok(end > start);
+  assert.match(flowSource, /if \(isForestOrbMode\) spawnGroundEnergyOrbs/);
+  assert.match(flowSource, /if \(hasFlow && !isForestOrbMode\)/);
+  assert.doesNotMatch(flowSource, /isForestOrbMode\s*\?\s*clamp\(0\.12 \+ activation/);
+  assert.doesNotMatch(flowSource, /isForestOrbMode\s*\?\s*STARBUD_PALETTE\.energy\.(?:rootGlow|soilGlow)/);
+});
+
 runTest('starbud quiet reading earns fewer and lighter energy balls than loud reading', () => {
   const { api } = loadMorningTree();
 

@@ -270,6 +270,11 @@ const RENDER_QUALITY_SCALE = {
     low: 0.62,
     ultra: 0.44
 };
+const STARBUD_STATIC_RENDER_MODE = Object.freeze({
+    quality: 'balanced',
+    lowPower: false,
+    ultraLowPower: false
+});
 const RENDER_FRAME_THRESHOLDS_MS = {
     high: 19,
     balanced: 25,
@@ -6252,6 +6257,18 @@ function mixHexColor(sourceColor, targetColor, ratio) {
     return `rgb(${r}, ${g}, ${b})`;
 }
 
+function resetCanvasFrameState() {
+    if (!ctx) return;
+    ctx.setTransform?.(1, 0, 0, 1, 0, 0);
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.filter = 'none';
+    ctx.shadowBlur = 0;
+    ctx.shadowColor = 'rgba(0, 0, 0, 0)';
+    ctx.lineDashOffset = 0;
+    ctx.setLineDash?.([]);
+}
+
 function getFinalTreeDisplayColor(color, visualState) {
     if (!visualState?.active) return color;
     const dimRatio = 1 - visualState.brightness;
@@ -6956,7 +6973,7 @@ function createStarbudBranchTopology(trunk, spread, treeHeight, sway) {
     return branches;
 }
 
-function drawStarbudLeafFan(branch, branchIndex, timeline, finalMorph, treeHeight, renderMode, frameTime, layer) {
+function drawStarbudLeafFan(branch, branchIndex, timeline, finalMorph, treeHeight, renderMode, layer) {
     const fanBirth = branch.birth + branch.duration * 0.74 + (branchIndex % 4) * 0.008;
     const branchGate = getStarbudTimelineProgress(Number(branch.progress) || 0, 0.7, 0.3);
     const fanProgress = Math.min(branchGate, getStarbudTimelineProgress(timeline, fanBirth, 0.2));
@@ -6969,9 +6986,7 @@ function drawStarbudLeafFan(branch, branchIndex, timeline, finalMorph, treeHeigh
         ? STARBUD_PALETTE.canopy.fanBack
         : STARBUD_PALETTE.canopy.fanFront;
     const outward = branch.e.x === 0 ? 0 : Math.sign(branch.e.x);
-    const wind = prefersReducedMotion() || renderMode.ultraLowPower
-        ? 0
-        : Math.sin(frameTime * 0.68 + branchIndex * 0.83) * 0.025;
+    const wind = 0;
 
     for (let i = 0; i < leafCount; i++) {
         if ((i % 2 === 0) !== (layer === 'back')) continue;
@@ -7006,7 +7021,7 @@ function drawStarbudLeafFan(branch, branchIndex, timeline, finalMorph, treeHeigh
     }
 }
 
-function drawStarbudLeafField(spread, treeHeight, growth, finalMorph, renderMode, frameTime, layer) {
+function drawStarbudLeafField(spread, treeHeight, growth, finalMorph, renderMode, layer) {
     if (growth <= 0.035) return;
     const quality = renderMode?.quality || STATE.renderQuality || 'high';
     const baseCount = layer === 'back' ? 154 : 264;
@@ -7016,9 +7031,7 @@ function drawStarbudLeafField(spread, treeHeight, growth, finalMorph, renderMode
     const palette = layer === 'back'
         ? STARBUD_PALETTE.canopy.fieldBack
         : STARBUD_PALETTE.canopy.fieldFront;
-    const baseSway = prefersReducedMotion() || renderMode.ultraLowPower
-        ? 0
-        : Math.sin(frameTime * 0.54 + (layer === 'front' ? 0.7 : 0)) * 0.026;
+    const baseSway = 0;
 
     for (let i = 0; i < count; i++) {
         const seed = (layer === 'front' ? 319.7 : 113.9) + i * 3.731;
@@ -7043,14 +7056,14 @@ function drawStarbudLeafField(spread, treeHeight, growth, finalMorph, renderMode
         const colorIndex = Math.min(palette.length - 1, Math.floor(palettePosition * palette.length));
         const vein = layer === 'front' && !renderMode.lowPower && palettePosition > 0.76 && seededUnit(seed + 12.4) > 0.48;
         const alpha = (layer === 'back' ? 0.44 : 0.7) + seededUnit(seed + 13.2) * (layer === 'back' ? 0.2 : 0.23);
-        const leafSway = baseSway * (0.6 + t * 0.7) + (prefersReducedMotion() ? 0 : Math.sin(frameTime * 0.72 + seed) * 0.012);
+        const leafSway = baseSway * (0.6 + t * 0.7);
         const bend = (seededUnit(seed + 14.7) - 0.5) * (0.18 + finalMorph * 0.12);
 
         drawStarbudLeafBlade(x, y, length, width, angle + leafSway, palette[colorIndex], alpha * localGrowth, vein, bend);
     }
 }
 
-function drawStarbudCanopyLights(spread, treeHeight, timeline, renderMode, frameTime) {
+function drawStarbudCanopyLights(spread, treeHeight, timeline, renderMode) {
     const lightReveal = getStarbudTimelineProgress(timeline, 0.78, 0.2);
     if (lightReveal <= 0.02 || renderMode.ultraLowPower) return;
     const fullCount = renderMode.lowPower ? 7 : renderMode.quality === 'balanced' ? 13 : 20;
@@ -7063,7 +7076,7 @@ function drawStarbudCanopyLights(spread, treeHeight, timeline, renderMode, frame
         const halfWidth = getStarbudCanopyHalfWidth(t, spread);
         const x = (seededUnit(seed + 1.8) * 2 - 1) * halfWidth * 0.82;
         const y = -treeHeight * (0.97 - t * 0.78);
-        const pulse = prefersReducedMotion() ? 0.72 : 0.52 + (Math.sin(frameTime * 1.15 + seed) + 1) * 0.16;
+        const pulse = 0.62 + seededUnit(seed + 7.4) * 0.12;
         const size = 1.2 + seededUnit(seed + 2.9) * 2.4;
         ctx.globalAlpha = pulse * lightReveal;
         ctx.fillStyle = i % 4 === 0 ? STARBUD_PALETTE.canopy.lightGold : STARBUD_PALETTE.canopy.light;
@@ -7075,7 +7088,6 @@ function drawStarbudCanopyLights(spread, treeHeight, timeline, renderMode, frame
 }
 
 function drawStarbudForestTree(startX, startY, treeSize, stage, renderMode = { lowPower: false, ultraLowPower: false }) {
-    const frameTime = (STATE.frameNow || Date.now()) / 1000;
     const finalMorph = stage?.key === 'final' ? getFinalTreeMorphProgress(stage) : 0;
     const growthTimeline = getStarbudGrowthTimeline(stage);
     const trunkProgress = getStarbudTimelineProgress(growthTimeline, 0, 0.31);
@@ -7090,10 +7102,7 @@ function drawStarbudForestTree(startX, startY, treeSize, stage, renderMode = { l
         Math.max(treeSize * (0.8 + growthTimeline * 0.27), treeHeight * (0.36 + growthTimeline * 0.18))
     );
     const trunkBaseWidth = Math.max(7, Math.min(58, treeHeight * (0.038 + growthTimeline * 0.042)));
-    const audibleSway = STATE.isListening ? Math.max(0, STATE.currentDB - 52) / 90 : 0;
-    const sway = prefersReducedMotion()
-        ? 0
-        : Math.sin(frameTime * 0.64) * Math.min(7, 0.7 + audibleSway * 5.2) * (0.42 + growthTimeline * 0.58);
+    const sway = 0;
     const branchColor = {
         dark: STARBUD_PALETTE.trunk.dark,
         mid: STARBUD_PALETTE.trunk.mid,
@@ -7135,10 +7144,10 @@ function drawStarbudForestTree(startX, startY, treeSize, stage, renderMode = { l
         drawStarbudCanopyWash(spread, treeHeight, canopyWashReveal, finalMorph, renderMode, 0.92);
     }
     branchStates.forEach((branch, index) => {
-        drawStarbudLeafFan(branch, index, growthTimeline, finalMorph, treeHeight, renderMode, frameTime, 'back');
+        drawStarbudLeafFan(branch, index, growthTimeline, finalMorph, treeHeight, renderMode, 'back');
     });
     if (leafFieldReveal > 0.02) {
-        drawStarbudLeafField(spread, treeHeight, leafFieldReveal, finalMorph, renderMode, frameTime, 'back');
+        drawStarbudLeafField(spread, treeHeight, leafFieldReveal, finalMorph, renderMode, 'back');
     }
 
     if (finalMorph > 0.02 && !renderMode.lowPower) {
@@ -7172,11 +7181,11 @@ function drawStarbudForestTree(startX, startY, treeSize, stage, renderMode = { l
     }
 
     branchStates.forEach((branch, index) => {
-        drawStarbudLeafFan(branch, index, growthTimeline, finalMorph, treeHeight, renderMode, frameTime, 'front');
+        drawStarbudLeafFan(branch, index, growthTimeline, finalMorph, treeHeight, renderMode, 'front');
     });
     if (leafFieldReveal > 0.02) {
-        drawStarbudLeafField(spread, treeHeight, leafFieldReveal, finalMorph, renderMode, frameTime, 'front');
-        drawStarbudCanopyLights(spread, treeHeight, growthTimeline, renderMode, frameTime);
+        drawStarbudLeafField(spread, treeHeight, leafFieldReveal, finalMorph, renderMode, 'front');
+        drawStarbudCanopyLights(spread, treeHeight, growthTimeline, renderMode);
     }
 
     if (stage?.key === 'final' && !renderMode.lowPower) {
@@ -7438,17 +7447,13 @@ function drawEnergyFlow(treeSize) {
         else spawnSkyEnergy(treeSize, anchors);
     }
 
-    if (hasFlow) {
-        const flowAlpha = isForestOrbMode
-            ? clamp(0.12 + activation * 0.76, 0.12, 0.92)
-            : Math.min(0.9, activationMeta.glow);
+    if (hasFlow && !isForestOrbMode) {
+        const flowAlpha = Math.min(0.9, activationMeta.glow);
         const auraScale = renderMode.ultraLowPower ? 0.64 : renderMode.lowPower ? 0.86 : 1.08;
-        const canopyColor = isForestOrbMode ? STARBUD_PALETTE.energy.lime : '#8cf7d9';
-        const rootColor = isForestOrbMode ? STARBUD_PALETTE.energy.cyan : '#d8ff66';
-        drawEnergyAura(anchors.canopy.x, anchors.canopy.y, (14 + (activation * 14)) * auraScale, canopyColor, (0.12 + flowAlpha * 0.2) * auraScale);
-        drawEnergyAura(anchors.trunkBase.x, anchors.trunkBase.y, (13 + (activation * 16)) * auraScale, rootColor, (0.1 + flowAlpha * 0.2) * auraScale);
+        drawEnergyAura(anchors.canopy.x, anchors.canopy.y, (14 + (activation * 14)) * auraScale, '#8cf7d9', (0.12 + flowAlpha * 0.2) * auraScale);
+        drawEnergyAura(anchors.trunkBase.x, anchors.trunkBase.y, (13 + (activation * 16)) * auraScale, '#d8ff66', (0.1 + flowAlpha * 0.2) * auraScale);
 
-        if (!renderMode.ultraLowPower && !isForestOrbMode) {
+        if (!renderMode.ultraLowPower) {
             drawEnergyAura(anchors.soilLeft.x, anchors.soilLeft.y, (8 + (activation * 6)) * auraScale, '#59f0ff', (0.08 + flowAlpha * 0.12) * auraScale);
             drawEnergyAura(anchors.soilRight.x, anchors.soilRight.y, (8 + (activation * 6)) * auraScale, '#d8ff66', (0.08 + flowAlpha * 0.12) * auraScale);
         }
@@ -7458,8 +7463,8 @@ function drawEnergyFlow(treeSize) {
             ctx.globalCompositeOperation = 'screen';
             ctx.globalAlpha = Math.max(0.18, flowAlpha * 0.38);
             const soilGlow = ctx.createRadialGradient(anchors.trunkBase.x, anchors.trunkBase.y + 10, 0, anchors.trunkBase.x, anchors.trunkBase.y + 10, 130);
-            soilGlow.addColorStop(0, isForestOrbMode ? STARBUD_PALETTE.energy.rootGlow : 'rgba(216, 255, 102, 0.55)');
-            soilGlow.addColorStop(0.4, isForestOrbMode ? STARBUD_PALETTE.energy.soilGlow : 'rgba(89, 240, 255, 0.18)');
+            soilGlow.addColorStop(0, 'rgba(216, 255, 102, 0.55)');
+            soilGlow.addColorStop(0.4, 'rgba(89, 240, 255, 0.18)');
             soilGlow.addColorStop(1, STARBUD_PALETTE.sky.transparent);
             ctx.fillStyle = soilGlow;
             ctx.beginPath();
@@ -7902,6 +7907,7 @@ function drawStarbudForestHill(renderMode) {
 
 function renderSceneFrame(now = Date.now()) {
     STATE.frameNow = now;
+    resetCanvasFrameState();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     const visualEnergy = getTreeDisplayEnergy();
@@ -7912,10 +7918,10 @@ function renderSceneFrame(now = Date.now()) {
     const lifecycleStage = getTreeDisplayLifecycleStage(visualEnergy);
     maybeAnnounceFinalTree(lifecycleStage);
 
-    if (isForestOrbMode) drawStarbudForestSky(renderMode);
+    if (isForestOrbMode) drawStarbudForestSky(STARBUD_STATIC_RENDER_MODE);
     else drawPhotosynthesisSky(now);
 
-    if (isForestOrbMode) drawStarbudForestHill(renderMode);
+    if (isForestOrbMode) drawStarbudForestHill(STARBUD_STATIC_RENDER_MODE);
     else drawPhotosynthesisHill();
 
     if (!isForestOrbMode) drawMeadowPlants(renderMode);
@@ -7931,7 +7937,7 @@ function renderSceneFrame(now = Date.now()) {
             );
         }
         if (growthEnergy >= 24) {
-            drawStarbudForestTree(canvas.width / 2, getStarbudTreeGroundY(), treeSize, lifecycleStage, renderMode);
+            drawStarbudForestTree(canvas.width / 2, getStarbudTreeGroundY(), treeSize, lifecycleStage, STARBUD_STATIC_RENDER_MODE);
         }
     } else if (lifecycleStage.index >= 2 && treeSize > 60) {
             drawBloomingEnergyTree(canvas.width / 2, canvas.height - 20, treeSize, lifecycleStage, renderMode);
@@ -7946,7 +7952,7 @@ function renderSceneFrame(now = Date.now()) {
     if (!isForestOrbMode) drawMeadowCritters(renderMode);
 
     const superSparkleChance = renderMode.ultraLowPower ? 0.06 : renderMode.lowPower ? 0.12 : 0.22;
-    if (STATE.isSuperMode && Math.random() < superSparkleChance) {
+    if (!isForestOrbMode && STATE.isSuperMode && Math.random() < superSparkleChance) {
         spawnSparkle(Math.random() * canvas.width, Math.random() * canvas.height);
     }
 

@@ -8,6 +8,193 @@
     --text-color: #fff;
     --primary-btn: #f1c40f;
     --danger: #e74c3c;
+    --forest-sky-deep: #0646a4;
+    --forest-sky-bright: #149dcc;
+    --forest-mist: #d7fff2;
+    --forest-hill-light: #b8ee58;
+    --forest-hill-mid: #64c85b;
+    --forest-leaf-deep: #147847;
+    --forest-leaf-mid: #47b84f;
+    --forest-leaf-light: #d4f45b;
+    --forest-energy-cyan: #8efff0;
+    --forest-energy-lime: #d8ff66;
+    --forest-energy-gold: #ffe982;
+    --forest-energy-core: #f3ffad;
+    --forest-energy-shell: rgba(216, 255, 102, 0.48);
+    --forest-energy-label: #23763e;
+    --forest-star-white: #fff;
+    --forest-selection-hover-border: rgba(216, 255, 102, 0.58);
+    --forest-selection-active-border: rgba(142, 255, 240, 0.82);
+    --forest-selection-active-cyan: rgba(142, 255, 240, 0.15);
+    --forest-selection-active-lime: rgba(216, 255, 102, 0.08);
+    --forest-selection-shadow: rgba(4, 214, 204, 0.14);
+    --forest-selection-inset: rgba(255, 255, 255, 0.08);
+    --forest-preview-border: rgba(255, 255, 255, 0.18);
+    --forest-preview-glare: rgba(255, 255, 255, 0.32);
+    --forest-check-border: rgba(255, 255, 255, 0.32);
+    --forest-check-surface: rgba(255, 255, 255, 0.08);
+    --forest-check-inset: rgba(9, 35, 48, 0.72);
+    --forest-check-inset-active: rgba(9, 35, 48, 0.82);
+    --forest-check-glow: rgba(142, 255, 240, 0.56);
+    --forest-stage-border: rgba(142, 255, 240, 0.34);
+    --forest-stage-glow: rgba(216, 255, 102, 0.12);
+    --forest-stage-blue: rgba(4, 65, 101, 0.54);
+    --forest-stage-green: rgba(15, 96, 87, 0.38);
+    --forest-trunk-dark: #69412f;
+    --forest-trunk-light: #c88945;
+    --forest-selector-overlay-deep: rgba(5, 15, 30, 0.58);
+    --forest-selector-overlay-green: rgba(14, 42, 55, 0.38);
+    --forest-selector-overlay-scrim: rgba(0, 0, 0, 0.18);
+    --forest-selector-dialog-border: rgba(255, 255, 255, 0.28);
+    --forest-selector-dialog-deep: rgba(13, 33, 50, 0.88);
+    --forest-selector-dialog-green: rgba(35, 74, 84, 0.82);
+    --forest-selector-dialog-wash: rgba(255, 255, 255, 0.1);
+    --forest-selector-dialog-shadow: rgba(0, 0, 0, 0.36);
+    --forest-selector-kicker-surface: rgba(140, 247, 217, 0.14);
+    --forest-selector-kicker-border: rgba(140, 247, 217, 0.28);
+    --forest-selector-kicker-text: #d7fff6;
+    --forest-selector-text: #fff;
+    --forest-selector-text-body: rgba(245, 255, 251, 0.76);
+    --forest-selector-text-caption: rgba(245, 255, 251, 0.62);
+    --forest-selector-text-card: rgba(245, 255, 251, 0.68);
+    --forest-selector-step-border: rgba(142, 255, 240, 0.34);
+    --forest-selector-step-surface: rgba(142, 255, 240, 0.12);
+    --forest-selector-card-border: rgba(255, 255, 255, 0.18);
+    --forest-selector-card-surface: rgba(255, 255, 255, 0.07);
+    --forest-selector-dialog-padding: clamp(22px, 4vw, var(--forest-selector-space-6));
+    --forest-selector-dialog-shadow-layer: 0 28px 80px var(--forest-selector-dialog-shadow);
+    --forest-selector-selected-shadow: 0 12px 28px var(--forest-selection-shadow);
+    --forest-preview-photo-sky-top: #3d9ee8;
+    --forest-preview-photo-sky-bottom: #74daf1;
+    --forest-preview-photo-hill-light: #78cf69;
+    --forest-preview-photo-hill-deep: #50aa57;
+    --forest-preview-photo-leaf-light: #b7dc7a;
+    --forest-preview-photo-leaf-mid: #43a85b;
+    --forest-preview-photo-leaf-deep: #2f8a4b;
+    --forest-preview-sun: #fff176;
+    --forest-preview-sun-glow: rgba(255, 241, 118, 0.86);
+    --forest-preview-beam-fade: rgba(255, 241, 118, 0);
+    --forest-preview-beam: #fff9c4;
+    --forest-preview-beam-glow: #fff176;
+    --forest-selector-space-1: 4px;
+    --forest-selector-space-2: 8px;
+    --forest-selector-space-3: 12px;
+    --forest-selector-space-4: 16px;
+    --forest-selector-space-5: 24px;
+    --forest-selector-space-6: 34px;
+    --forest-selector-section-space: 22px;
+    --forest-selector-card-padding: 10px;
+    --forest-selector-dialog-width: 920px;
+    --forest-selector-dialog-gutter: 32px;
+    --forest-selector-card-height: 106px;
+    --forest-selector-preview-width: 112px;
+    --forest-selector-preview-height: 78px;
+    --forest-selector-check-size: 18px;
+    --forest-selector-step-size: 34px;
+    --forest-selector-radius-preview: 12px;
+    --forest-selector-radius-card: 16px;
+    --forest-selector-radius-dialog: 24px;
+    --forest-selector-type-step: 0.72rem;
+    --forest-selector-type-caption: 0.76rem;
+    --forest-selector-type-kicker: 0.78rem;
+    --forest-selector-type-section: 0.95rem;
+    --forest-selector-type-body: 0.98rem;
+    --forest-selector-type-card: 1rem;
+    --motion-visual-select: 180ms ease-out;
+    --forest-selector-border-width: 1px;
+    --forest-selector-inset-width: 1px;
+    --forest-selector-radius-pill: 999px;
+    --forest-selector-overlay-blur: 10px;
+    --forest-selector-kicker-height: 30px;
+    --forest-selector-title-margin-top: 14px;
+    --forest-selector-title-margin-bottom: 8px;
+    --forest-selector-title-size: clamp(1.8rem, 4vw, 2.75rem);
+    --forest-selector-title-line-height: 1.08;
+    --forest-selector-copy-max-width: 620px;
+    --forest-selector-caption-offset: 2px;
+    --forest-selector-card-lift: -2px;
+    --forest-selector-preview-sun-top: 9px;
+    --forest-selector-preview-sun-right: 10px;
+    --forest-selector-preview-sun-size: 24px;
+    --forest-selector-preview-sun-shadow: 0 0 20px var(--forest-preview-sun-glow);
+    --forest-selector-preview-tree-left: 53px;
+    --forest-selector-preview-tree-bottom: 10px;
+    --forest-selector-preview-tree-width: 7px;
+    --forest-selector-preview-tree-height: 34px;
+    --forest-selector-preview-tree-radius: 7px 7px 2px 2px;
+    --forest-selector-preview-crown-top: -24px;
+    --forest-selector-preview-crown-upper-width: 48px;
+    --forest-selector-preview-crown-upper-height: 38px;
+    --forest-selector-preview-crown-lower-top: -12px;
+    --forest-selector-preview-crown-lower-width: 62px;
+    --forest-selector-preview-crown-lower-height: 34px;
+    --forest-selector-preview-beam-top: 26px;
+    --forest-selector-preview-beam-right: 30px;
+    --forest-selector-preview-beam-width: 42px;
+    --forest-selector-preview-beam-height: 3px;
+    --forest-selector-preview-beam-shadow: 0 0 10px var(--forest-preview-beam-glow);
+    --forest-selector-preview-beam-angle: 138deg;
+    --forest-selector-preview-orb-left: 20px;
+    --forest-selector-preview-orb-bottom: 13px;
+    --forest-selector-preview-orb-size: 13px;
+    --forest-selector-preview-orb-ring: 4px;
+    --forest-selector-preview-orb-glow: 0 0 16px var(--forest-energy-cyan);
+    --forest-selector-preview-orb-label-size: 5px;
+    --forest-selector-preview-star-size: 3px;
+    --forest-selector-preview-star-shadow: 0 0 7px var(--forest-star-white);
+    --forest-selector-preview-star-one-top: 12px;
+    --forest-selector-preview-star-one-left: 13px;
+    --forest-selector-preview-star-two-top: 25px;
+    --forest-selector-preview-star-two-right: 18px;
+    --forest-selector-preview-orb-rest-y: 8px;
+    --forest-selector-preview-orb-peak-x: 20px;
+    --forest-selector-preview-orb-peak-y: -23px;
+    --forest-selector-preview-orb-settle-x: 31px;
+    --forest-selector-preview-orb-settle-y: -15px;
+    --forest-selector-preview-orb-opacity-rest: 0.55;
+    --forest-selector-preview-orb-opacity-settle: 0.94;
+    --forest-selector-preview-orb-scale-rest-x: 0.78;
+    --forest-selector-preview-orb-scale-rest-y: 1.08;
+    --forest-selector-preview-orb-scale-peak-x: 1.08;
+    --forest-selector-preview-orb-scale-peak-y: 0.92;
+    --forest-selector-preview-orb-scale-settle-x: 0.94;
+    --forest-selector-preview-orb-scale-settle-y: 1.04;
+    --forest-selector-copy-gap: 6px;
+    --forest-selector-copy-line-height: 1.48;
+    --forest-selector-check-inset-size: 4px;
+    --forest-selector-check-shadow: 0 0 14px var(--forest-check-glow);
+    --forest-selector-reading-card-height: 138px;
+    --forest-selector-reading-grid-gap: 14px;
+    --forest-selector-reading-card-radius: 18px;
+    --forest-selector-reading-card-border: rgba(255, 255, 255, 0.2);
+    --forest-selector-reading-card-surface: rgba(255, 255, 255, 0.08);
+    --forest-selector-reading-card-hover-surface: rgba(255, 255, 255, 0.13);
+    --forest-selector-reading-card-hover-border: rgba(255, 224, 130, 0.54);
+    --forest-selector-reading-card-shadow: 0 18px 38px rgba(0, 0, 0, 0.24);
+    --forest-selector-reading-card-padding: 18px;
+    --forest-selector-reading-card-gap: 10px;
+    --forest-selector-reading-card-badge-height: 28px;
+    --forest-selector-reading-card-badge-padding: 10px;
+    --forest-selector-reading-card-badge-surface: rgba(255, 224, 130, 0.14);
+    --forest-selector-reading-card-badge-text: #fff4c2;
+    --forest-selector-reading-card-title-size: 1.2rem;
+    --forest-selector-reading-card-body-size: 0.82rem;
+    --forest-selector-reading-card-body-line-height: 1.52;
+    --forest-selector-reading-card-body-text: rgba(245, 255, 251, 0.72);
+    --forest-selector-reading-class-start: rgba(76, 175, 80, 0.2);
+    --forest-selector-reading-class-end: rgba(125, 249, 255, 0.08);
+    --forest-selector-reading-match-start: rgba(255, 155, 214, 0.2);
+    --forest-selector-reading-match-end: rgba(255, 224, 130, 0.1);
+    --forest-selector-toolbar-gap: 10px;
+    --forest-selector-toolbar-offset: 10px;
+    --forest-selector-toolbar-control-height: 34px;
+    --forest-selector-toolbar-border: rgba(255, 255, 255, 0.26);
+    --forest-selector-toolbar-surface: rgba(5, 18, 36, 0.34);
+    --forest-selector-toolbar-padding: 12px;
+    --forest-selector-toolbar-type: 0.78rem;
+    --forest-selector-toolbar-blur: 12px;
+    --forest-selector-switch-surface: rgba(255, 224, 130, 0.14);
+    --forest-selector-switch-text: #fff6c7;
 
     /* Responsive Sizing Tokens */
     --db-size: clamp(140px, 20vh, 220px);
@@ -191,7 +378,7 @@ body {
     border-radius: 20px;
     border: 1px solid rgba(255, 255, 255, 0.2);
     text-align: center;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(var(--forest-selector-overlay-blur));
     box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
     width: 90%;
     max-width: 400px;
@@ -301,118 +488,388 @@ canvas {
     z-index: 9997;
     display: grid;
     place-items: center;
-    padding: 24px;
+    padding: var(--forest-selector-space-5);
     pointer-events: auto;
     background:
-        linear-gradient(135deg, rgba(5, 15, 30, 0.58), rgba(14, 42, 55, 0.38)),
-        rgba(0, 0, 0, 0.18);
+        linear-gradient(135deg, var(--forest-selector-overlay-deep), var(--forest-selector-overlay-green)),
+        var(--forest-selector-overlay-scrim);
     backdrop-filter: blur(10px);
 }
 
 .mode-dialog {
-    width: min(760px, calc(100vw - 32px));
-    border-radius: 24px;
-    padding: clamp(22px, 4vw, 34px);
-    border: 1px solid rgba(255, 255, 255, 0.28);
+    box-sizing: border-box;
+    width: min(var(--forest-selector-dialog-width), calc(100vw - var(--forest-selector-dialog-gutter)));
+    max-height: 92dvh;
+    border-radius: var(--forest-selector-radius-dialog);
+    padding: var(--forest-selector-dialog-padding);
+    border: var(--forest-selector-border-width) solid var(--forest-selector-dialog-border);
     background:
-        linear-gradient(135deg, rgba(13, 33, 50, 0.88), rgba(35, 74, 84, 0.82)),
-        rgba(255, 255, 255, 0.1);
-    color: #fff;
-    box-shadow: 0 28px 80px rgba(0, 0, 0, 0.36);
+        linear-gradient(135deg, var(--forest-selector-dialog-deep), var(--forest-selector-dialog-green)),
+        var(--forest-selector-dialog-wash);
+    color: var(--forest-selector-text);
+    box-shadow: var(--forest-selector-dialog-shadow-layer);
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
 }
 
 .mode-kicker {
     display: inline-flex;
-    min-height: 30px;
+    min-height: var(--forest-selector-kicker-height);
     align-items: center;
-    padding: 0 12px;
-    border-radius: 999px;
-    background: rgba(140, 247, 217, 0.14);
-    border: 1px solid rgba(140, 247, 217, 0.28);
-    color: #d7fff6;
-    font-size: 0.78rem;
+    padding: 0 var(--forest-selector-space-3);
+    border-radius: var(--forest-selector-radius-pill);
+    background: var(--forest-selector-kicker-surface);
+    border: var(--forest-selector-border-width) solid var(--forest-selector-kicker-border);
+    color: var(--forest-selector-kicker-text);
+    font-size: var(--forest-selector-type-kicker);
     font-weight: 900;
 }
 
 .mode-dialog h1 {
-    margin: 14px 0 8px;
-    font-size: clamp(2rem, 5vw, 3.2rem);
-    line-height: 1.05;
+    margin: var(--forest-selector-title-margin-top) 0 var(--forest-selector-title-margin-bottom);
+    font-size: var(--forest-selector-title-size);
+    line-height: var(--forest-selector-title-line-height);
 }
 
 .mode-dialog p {
-    max-width: 620px;
+    max-width: var(--forest-selector-copy-max-width);
     margin: 0;
-    color: rgba(245, 255, 251, 0.76);
-    font-size: 0.98rem;
+    color: var(--forest-selector-text-body);
+    font-size: var(--forest-selector-type-body);
     line-height: 1.65;
+}
+
+.mode-section {
+    margin-top: var(--forest-selector-section-space);
+}
+
+.mode-section-head {
+    display: flex;
+    align-items: center;
+    gap: var(--forest-selector-space-3);
+    margin-bottom: var(--forest-selector-space-3);
+}
+
+.mode-section-head>div {
+    min-width: 0;
+}
+
+.mode-section-head strong,
+.mode-section-head small {
+    display: block;
+}
+
+.mode-section-head strong {
+    color: var(--forest-selector-text);
+    font-size: var(--forest-selector-type-section);
+    font-weight: 950;
+}
+
+.mode-section-head small {
+    margin-top: var(--forest-selector-caption-offset);
+    color: var(--forest-selector-text-caption);
+    font-size: var(--forest-selector-type-caption);
+    line-height: 1.45;
+}
+
+.mode-step {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--forest-selector-step-size);
+    height: var(--forest-selector-step-size);
+    border-radius: 50%;
+    border: var(--forest-selector-border-width) solid var(--forest-selector-step-border);
+    background: var(--forest-selector-step-surface);
+    color: var(--forest-energy-cyan);
+    font-size: var(--forest-selector-type-step);
+    font-weight: 950;
+}
+
+.growth-visual-picker {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--forest-selector-space-3);
+}
+
+.growth-visual-card {
+    position: relative;
+    min-width: 0;
+    min-height: var(--forest-selector-card-height);
+    display: grid;
+    grid-template-columns: var(--forest-selector-preview-width) minmax(0, 1fr) var(--forest-selector-section-space);
+    align-items: center;
+    gap: var(--forest-selector-space-3);
+    padding: var(--forest-selector-card-padding);
+    border: var(--forest-selector-border-width) solid var(--forest-selector-card-border);
+    border-radius: var(--forest-selector-radius-card);
+    background: var(--forest-selector-card-surface);
+    color: var(--forest-selector-text);
+    text-align: left;
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform var(--motion-visual-select), border-color var(--motion-visual-select), background var(--motion-visual-select), box-shadow var(--motion-visual-select);
+}
+
+.growth-visual-card:hover,
+.growth-visual-card:focus-visible {
+    transform: translateY(var(--forest-selector-card-lift));
+    border-color: var(--forest-selection-hover-border);
+    outline: none;
+}
+
+.growth-visual-card.selected,
+.growth-visual-card[aria-checked="true"] {
+    border-color: var(--forest-selection-active-border);
+    background: linear-gradient(135deg, var(--forest-selection-active-cyan), var(--forest-selection-active-lime));
+    box-shadow: var(--forest-selector-selected-shadow), inset 0 0 0 var(--forest-selector-inset-width) var(--forest-selection-inset);
+}
+
+.growth-visual-preview {
+    position: relative;
+    width: var(--forest-selector-preview-width);
+    height: var(--forest-selector-preview-height);
+    display: block;
+    overflow: hidden;
+    border-radius: var(--forest-selector-radius-preview);
+    box-shadow: inset 0 0 0 var(--forest-selector-inset-width) var(--forest-preview-border);
+}
+
+.photosynthesis-preview {
+    background: linear-gradient(180deg, var(--forest-preview-photo-sky-top) 0%, var(--forest-preview-photo-sky-bottom) 66%, var(--forest-preview-photo-hill-light) 67%, var(--forest-preview-photo-hill-deep) 100%);
+}
+
+.forest-orb-preview {
+    background:
+        radial-gradient(circle at 70% 18%, var(--forest-preview-glare), transparent 22%),
+        linear-gradient(180deg, var(--forest-sky-deep) 0%, var(--forest-sky-bright) 63%, var(--forest-hill-light) 64%, var(--forest-hill-mid) 100%);
+}
+
+.growth-visual-preview i {
+    position: absolute;
+    display: block;
+    font-style: normal;
+}
+
+.preview-sun {
+    top: var(--forest-selector-preview-sun-top);
+    right: var(--forest-selector-preview-sun-right);
+    width: var(--forest-selector-preview-sun-size);
+    height: var(--forest-selector-preview-sun-size);
+    border-radius: 50%;
+    background: var(--forest-preview-sun);
+    box-shadow: var(--forest-selector-preview-sun-shadow);
+}
+
+.preview-tree {
+    left: var(--forest-selector-preview-tree-left);
+    bottom: var(--forest-selector-preview-tree-bottom);
+    width: var(--forest-selector-preview-tree-width);
+    height: var(--forest-selector-preview-tree-height);
+    border-radius: var(--forest-selector-preview-tree-radius);
+    background: linear-gradient(90deg, var(--forest-trunk-dark), var(--forest-trunk-light));
+}
+
+.preview-tree::before,
+.preview-tree::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    border-radius: 50% 50% 42% 42%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, var(--forest-leaf-light), var(--forest-leaf-mid) 52%, var(--forest-leaf-deep));
+}
+
+.preview-tree::before {
+    top: var(--forest-selector-preview-crown-top);
+    width: var(--forest-selector-preview-crown-upper-width);
+    height: var(--forest-selector-preview-crown-upper-height);
+}
+
+.preview-tree::after {
+    top: var(--forest-selector-preview-crown-lower-top);
+    width: var(--forest-selector-preview-crown-lower-width);
+    height: var(--forest-selector-preview-crown-lower-height);
+}
+
+.photosynthesis-preview .preview-tree::before,
+.photosynthesis-preview .preview-tree::after {
+    background: linear-gradient(135deg, var(--forest-preview-photo-leaf-light), var(--forest-preview-photo-leaf-mid) 60%, var(--forest-preview-photo-leaf-deep));
+}
+
+.preview-energy-beam {
+    top: var(--forest-selector-preview-beam-top);
+    right: var(--forest-selector-preview-beam-right);
+    width: var(--forest-selector-preview-beam-width);
+    height: var(--forest-selector-preview-beam-height);
+    border-radius: var(--forest-selector-radius-pill);
+    background: linear-gradient(90deg, var(--forest-preview-beam-fade), var(--forest-preview-beam));
+    box-shadow: var(--forest-selector-preview-beam-shadow);
+    transform: rotate(var(--forest-selector-preview-beam-angle));
+    transform-origin: right center;
+}
+
+.preview-energy-orb {
+    left: var(--forest-selector-preview-orb-left);
+    bottom: var(--forest-selector-preview-orb-bottom);
+    width: var(--forest-selector-preview-orb-size);
+    height: var(--forest-selector-preview-orb-size);
+    border-radius: 50%;
+    background: var(--forest-energy-core);
+    box-shadow: 0 0 0 var(--forest-selector-preview-orb-ring) var(--forest-energy-shell), var(--forest-selector-preview-orb-glow);
+    animation: visualOrbPreview 1.7s ease-in-out infinite;
+}
+
+.preview-energy-orb::after {
+    content: '5g';
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: var(--forest-energy-label);
+    font-size: var(--forest-selector-preview-orb-label-size);
+    font-weight: 950;
+}
+
+.preview-star {
+    width: var(--forest-selector-preview-star-size);
+    height: var(--forest-selector-preview-star-size);
+    border-radius: 50%;
+    background: var(--forest-star-white);
+    box-shadow: var(--forest-selector-preview-star-shadow);
+}
+
+.star-one {
+    top: var(--forest-selector-preview-star-one-top);
+    left: var(--forest-selector-preview-star-one-left);
+}
+
+.star-two {
+    top: var(--forest-selector-preview-star-two-top);
+    right: var(--forest-selector-preview-star-two-right);
+}
+
+@keyframes visualOrbPreview {
+    0%,
+    100% {
+        opacity: var(--forest-selector-preview-orb-opacity-rest);
+        transform: translate3d(0, var(--forest-selector-preview-orb-rest-y), 0) scale(var(--forest-selector-preview-orb-scale-rest-x), var(--forest-selector-preview-orb-scale-rest-y));
+    }
+
+    42% {
+        opacity: 1;
+        transform: translate3d(var(--forest-selector-preview-orb-peak-x), var(--forest-selector-preview-orb-peak-y), 0) scale(var(--forest-selector-preview-orb-scale-peak-x), var(--forest-selector-preview-orb-scale-peak-y));
+    }
+
+    68% {
+        opacity: var(--forest-selector-preview-orb-opacity-settle);
+        transform: translate3d(var(--forest-selector-preview-orb-settle-x), var(--forest-selector-preview-orb-settle-y), 0) scale(var(--forest-selector-preview-orb-scale-settle-x), var(--forest-selector-preview-orb-scale-settle-y));
+    }
+}
+
+.growth-visual-copy {
+    min-width: 0;
+}
+
+.growth-visual-copy strong,
+.growth-visual-copy small {
+    display: block;
+}
+
+.growth-visual-copy strong {
+    font-size: var(--forest-selector-type-card);
+    font-weight: 950;
+}
+
+.growth-visual-copy small {
+    margin-top: var(--forest-selector-copy-gap);
+    color: var(--forest-selector-text-card);
+    font-size: var(--forest-selector-type-caption);
+    line-height: var(--forest-selector-copy-line-height);
+}
+
+.growth-visual-check {
+    width: var(--forest-selector-check-size);
+    height: var(--forest-selector-check-size);
+    border-radius: 50%;
+    border: var(--forest-selector-border-width) solid var(--forest-check-border);
+    box-shadow: inset 0 0 0 var(--forest-selector-check-inset-size) var(--forest-check-inset);
+    background: var(--forest-check-surface);
+}
+
+.growth-visual-card[aria-checked="true"] .growth-visual-check {
+    border-color: var(--forest-energy-cyan);
+    background: var(--forest-energy-lime);
+    box-shadow: inset 0 0 0 var(--forest-selector-check-inset-size) var(--forest-check-inset-active), var(--forest-selector-check-shadow);
 }
 
 .mode-card-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
-    margin-top: 22px;
+    gap: var(--forest-selector-reading-grid-gap);
+    margin-top: 0;
 }
 
 .mode-card {
-    min-height: 172px;
-    border-radius: 18px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.08);
-    color: #fff;
-    padding: 18px;
+    min-height: var(--forest-selector-reading-card-height);
+    border-radius: var(--forest-selector-reading-card-radius);
+    border: var(--forest-selector-border-width) solid var(--forest-selector-reading-card-border);
+    background: var(--forest-selector-reading-card-surface);
+    color: var(--forest-selector-text);
+    padding: var(--forest-selector-reading-card-padding);
     text-align: left;
     cursor: pointer;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 10px;
-    transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+    gap: var(--forest-selector-reading-card-gap);
+    transition: transform var(--motion-visual-select), border-color var(--motion-visual-select), background var(--motion-visual-select), box-shadow var(--motion-visual-select);
 }
 
 .mode-card:hover,
 .mode-card:focus-visible {
-    transform: translateY(-2px);
-    border-color: rgba(255, 224, 130, 0.54);
-    background: rgba(255, 255, 255, 0.13);
-    box-shadow: 0 18px 38px rgba(0, 0, 0, 0.24);
+    transform: translateY(var(--forest-selector-card-lift));
+    border-color: var(--forest-selector-reading-card-hover-border);
+    background: var(--forest-selector-reading-card-hover-surface);
+    box-shadow: var(--forest-selector-reading-card-shadow);
     outline: none;
 }
 
 .mode-card span {
-    min-height: 28px;
+    min-height: var(--forest-selector-reading-card-badge-height);
     display: inline-flex;
     align-items: center;
-    padding: 0 10px;
-    border-radius: 999px;
-    background: rgba(255, 224, 130, 0.14);
-    color: #fff4c2;
-    font-size: 0.72rem;
+    padding: 0 var(--forest-selector-reading-card-badge-padding);
+    border-radius: var(--forest-selector-radius-pill);
+    background: var(--forest-selector-reading-card-badge-surface);
+    color: var(--forest-selector-reading-card-badge-text);
+    font-size: var(--forest-selector-type-step);
     font-weight: 900;
 }
 
 .mode-card strong {
-    font-size: 1.2rem;
+    font-size: var(--forest-selector-reading-card-title-size);
     font-weight: 950;
 }
 
 .mode-card small {
-    color: rgba(245, 255, 251, 0.72);
-    font-size: 0.82rem;
-    line-height: 1.52;
+    color: var(--forest-selector-reading-card-body-text);
+    font-size: var(--forest-selector-reading-card-body-size);
+    line-height: var(--forest-selector-reading-card-body-line-height);
 }
 
 .mode-card.class-mode {
     background:
-        linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(125, 249, 255, 0.08)),
-        rgba(255, 255, 255, 0.08);
+        linear-gradient(135deg, var(--forest-selector-reading-class-start), var(--forest-selector-reading-class-end)),
+        var(--forest-selector-reading-card-surface);
 }
 
 .mode-card.competition-mode {
     background:
-        linear-gradient(135deg, rgba(255, 155, 214, 0.2), rgba(255, 224, 130, 0.1)),
-        rgba(255, 255, 255, 0.08);
+        linear-gradient(135deg, var(--forest-selector-reading-match-start), var(--forest-selector-reading-match-end)),
+        var(--forest-selector-reading-card-surface);
 }
 
 .mode-selection-active .ui-layer {
@@ -425,27 +882,42 @@ canvas {
     align-items: center;
     justify-content: center;
     flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 10px;
+    gap: var(--forest-selector-toolbar-gap);
+    margin-bottom: var(--forest-selector-toolbar-offset);
 }
 
 .current-mode-badge,
 .mode-switch-btn {
-    min-height: 34px;
-    border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.26);
-    background: rgba(5, 18, 36, 0.34);
-    color: #fff;
-    padding: 0 12px;
-    font-size: 0.78rem;
+    min-height: var(--forest-selector-toolbar-control-height);
+    border-radius: var(--forest-selector-radius-pill);
+    border: var(--forest-selector-border-width) solid var(--forest-selector-toolbar-border);
+    background: var(--forest-selector-toolbar-surface);
+    color: var(--forest-selector-text);
+    padding: 0 var(--forest-selector-toolbar-padding);
+    font-size: var(--forest-selector-toolbar-type);
     font-weight: 900;
-    backdrop-filter: blur(12px);
+    backdrop-filter: blur(var(--forest-selector-toolbar-blur));
+}
+
+.mode-picker.visual-selection-locked .visual-mode-section {
+    display: none;
+}
+
+.mode-picker.visual-selection-locked .reading-mode-section {
+    margin-top: var(--forest-selector-reading-card-padding);
 }
 
 .mode-switch-btn {
     cursor: pointer;
-    background: rgba(255, 224, 130, 0.14);
-    color: #fff6c7;
+    background: var(--forest-selector-switch-surface);
+    color: var(--forest-selector-switch-text);
+}
+
+body[data-growth-visual-mode="forest-orb"] .progress-stage {
+    border-color: var(--forest-stage-border);
+    background:
+        radial-gradient(circle at 18% 10%, var(--forest-stage-glow), transparent 34%),
+        linear-gradient(135deg, var(--forest-stage-blue), var(--forest-stage-green));
 }
 
 .competition-panel {
@@ -1102,7 +1574,7 @@ canvas {
     left: 20px;
     bottom: 24px;
     z-index: 9998;
-    width: min(262px, calc(100vw - 40px));
+    width: min(300px, calc(100vw - 40px));
     display: flex;
     flex-direction: column;
     align-items: stretch;
@@ -3289,6 +3761,42 @@ input[type="range"] {
     .start-reading-btn {
         min-height: 52px;
         margin-top: 2px;
+    }
+}
+
+@media (max-height: 700px) {
+    .mode-dialog {
+        padding-block: 14px;
+    }
+
+    .mode-kicker {
+        min-height: 26px;
+    }
+
+    .mode-section-head {
+        margin-bottom: 7px;
+    }
+
+    .growth-visual-card {
+        min-height: 82px;
+    }
+
+    .mode-card {
+        min-height: 96px;
+        gap: 7px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .growth-visual-card,
+    .preview-energy-orb {
+        animation: none;
+        transition-duration: 0.01ms;
+    }
+
+    .growth-visual-card:hover,
+    .growth-visual-card:focus-visible {
+        transform: none;
     }
 }
 

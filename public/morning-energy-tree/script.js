@@ -16,6 +16,7 @@ const REPORT_STORAGE_KEY = 'morning_tree_weekly_reports_v1';
 const TASK_STORAGE_KEY = 'morning_tree_weekly_tasks_v1';
 const FOREST_STORAGE_KEY = 'morning_tree_daily_forest_v1';
 const COMPETITION_STORAGE_KEY = 'morning_tree_competition_config_v1';
+const GROWTH_VISUAL_STORAGE_KEY = 'morning_tree_growth_visual_v1';
 const MAX_STORED_REPORTS = 100;
 const MAX_STORED_FOREST_DAYS = 180;
 const MAX_TASK_SLOTS = 6;
@@ -54,6 +55,24 @@ const APP_MODES = {
     CLASS: 'class',
     COMPETITION: 'competition'
 };
+const GROWTH_VISUAL_MODES = {
+    PHOTOSYNTHESIS: 'photosynthesis',
+    FOREST_ORB: 'forest-orb'
+};
+
+function normalizeGrowthVisualMode(mode) {
+    return mode === GROWTH_VISUAL_MODES.FOREST_ORB
+        ? GROWTH_VISUAL_MODES.FOREST_ORB
+        : GROWTH_VISUAL_MODES.PHOTOSYNTHESIS;
+}
+
+function loadGrowthVisualMode() {
+    try {
+        return normalizeGrowthVisualMode(localStorage.getItem(GROWTH_VISUAL_STORAGE_KEY));
+    } catch (error) {
+        return GROWTH_VISUAL_MODES.PHOTOSYNTHESIS;
+    }
+}
 
 function hasReadingModeSelected(mode = STATE.activeMode) {
     return mode === APP_MODES.CLASS || mode === APP_MODES.COMPETITION;
@@ -100,12 +119,14 @@ const STATE = {
     reportPeakEnergy: 0,
     rewardState: null,
     activeMode: null,
+    growthVisualMode: loadGrowthVisualMode(),
     competitionConfig: null,
     competitionSession: null,
     competitionLastResult: null,
     activeCompetitionGroupId: null,
     lastCompletedCompetitionGroupId: null,
     competitionRoundActive: false,
+    visualSelectionLocked: false,
     reportActiveDay: null,
     reportActiveSession: 0,
     forestActiveDateKey: null,
@@ -129,6 +150,100 @@ const GOLDEN_COLORS = ['#ffd700', '#ffecb3', '#fff9c4', '#fff59d'];
 const ENERGY_SKY_COLORS = ['#fff176', '#ffe082', '#fff59d', '#ffecb3'];
 const ENERGY_TECH_COLORS = ['#7df9ff', '#8cf7d9', '#d2ff72', '#f7ff9c'];
 const SOIL_FLOW_COLORS = ['#59f0ff', '#5de2c8', '#9be15d', '#d8ff66'];
+const STARBUD_PALETTE = {
+    sky: {
+        deep: '#04296e',
+        mid: '#07539a',
+        bright: '#147da3',
+        horizon: '#5bc9c3',
+        mist: ['#d9fff1', '#d8ef8b', '#8ce3d0', '#8ec3e0'],
+        star: '#ffffff',
+        starLime: '#eff56c',
+        starMint: '#c8fff0',
+        glyph: 'rgba(228, 255, 244, 0.74)',
+        auroraLime: 'rgba(221, 242, 122, 0.3)',
+        auroraMint: 'rgba(176, 250, 231, 0.2)',
+        bloomLime: 'rgba(205, 244, 149, 0.22)',
+        bloomMint: 'rgba(119, 231, 210, 0.13)',
+        transparent: 'rgba(255, 255, 255, 0)'
+    },
+    hill: {
+        haze: 'rgba(116, 238, 206, 0.28)',
+        light: '#b3df72',
+        highlight: '#d9ed91',
+        mid: '#58bd72',
+        deep: '#238b70',
+        strokeMint: '#7effe2',
+        strokeGold: '#fff6a0',
+        strokeLime: '#e8ff8c',
+        watercolorGlow: 'rgba(255, 246, 160, 0.26)',
+        watercolorMint: 'rgba(126, 255, 226, 0.14)',
+        transparent: 'rgba(255, 255, 255, 0)'
+    },
+    trunk: {
+        dark: '#633d2b',
+        mid: '#8f5733',
+        light: '#bc7a43',
+        highlight: '#d89a55',
+        shadow: '#1f715f'
+    },
+    canopy: {
+        wash: ['#0b6659', '#167f63', '#3bab70', '#70c275'],
+        washLight: ['#d8ed91', '#a9de83', '#68c77a'],
+        fanBack: ['#07544b', '#0b7053', '#16845e', '#2c9d68'],
+        fanFront: ['#16915f', '#36af6a', '#63c878', '#92da7c', '#b8e680', '#d7ef94'],
+        fieldBack: ['#07544b', '#0c6e55', '#147e5e', '#299a68'],
+        fieldFront: ['#138d60', '#32ab6a', '#5bc778', '#88d77d', '#b0e483', '#d7ef94'],
+        vein: '#f5f3a0',
+        light: '#efffa2',
+        lightGold: '#ffe982',
+        groundShadow: '#2b8150'
+    },
+    energy: {
+        orbs: ['#a8ff3e', '#c5ff49', '#8eff51', '#d8ff66'],
+        cyan: '#8efff0',
+        lime: '#d8ff66',
+        gold: '#ffe982',
+        core: '#f3ffad',
+        shellEdge: '#55c93f',
+        shellBorder: 'rgba(235, 255, 246, 0.9)',
+        shellHighlight: 'rgba(255, 255, 255, 0.76)',
+        shellGlint: 'rgba(255, 255, 255, 0.92)',
+        label: '#23763e',
+        echo: '#f1ff9f',
+        transferDot: '#ffffff',
+        rootGlow: 'rgba(142, 255, 240, 0.58)',
+        soilGlow: 'rgba(216, 255, 102, 0.2)'
+    }
+};
+const FOREST_ORB_COLORS = STARBUD_PALETTE.energy.orbs;
+const FOREST_SKY_COLORS = [STARBUD_PALETTE.sky.mid, STARBUD_PALETTE.sky.bright, STARBUD_PALETTE.sky.horizon];
+const FOREST_LEAF_COLORS = [
+    STARBUD_PALETTE.canopy.fanBack[0],
+    STARBUD_PALETTE.canopy.fanBack[2],
+    STARBUD_PALETTE.canopy.fanFront[1],
+    STARBUD_PALETTE.canopy.fanFront[3],
+    STARBUD_PALETTE.canopy.fanFront[5]
+];
+const STARBUD_BRANCH_BLUEPRINTS = [
+    { id: 'left-low', parent: 'trunk', attach: 0.3, control: { x: -0.2, y: -0.34 }, end: { x: -0.62, y: -0.47 }, birth: 0.14, duration: 0.23, sw: 0.52, ew: 0.11 },
+    { id: 'right-low', parent: 'trunk', attach: 0.37, control: { x: 0.22, y: -0.39 }, end: { x: 0.64, y: -0.49 }, birth: 0.17, duration: 0.23, sw: 0.5, ew: 0.105 },
+    { id: 'left-mid', parent: 'trunk', attach: 0.49, control: { x: -0.22, y: -0.53 }, end: { x: -0.5, y: -0.67 }, birth: 0.21, duration: 0.22, sw: 0.4, ew: 0.085 },
+    { id: 'right-mid', parent: 'trunk', attach: 0.56, control: { x: 0.2, y: -0.59 }, end: { x: 0.52, y: -0.7 }, birth: 0.24, duration: 0.22, sw: 0.38, ew: 0.08 },
+    { id: 'left-high', parent: 'trunk', attach: 0.67, control: { x: -0.14, y: -0.73 }, end: { x: -0.34, y: -0.86 }, birth: 0.28, duration: 0.21, sw: 0.31, ew: 0.065 },
+    { id: 'right-high', parent: 'trunk', attach: 0.72, control: { x: 0.13, y: -0.78 }, end: { x: 0.35, y: -0.88 }, birth: 0.31, duration: 0.2, sw: 0.29, ew: 0.06 },
+    { id: 'crown', parent: 'trunk', attach: 0.81, control: { x: -0.05, y: -0.94 }, end: { x: 0.01, y: -1 }, birth: 0.34, duration: 0.2, sw: 0.25, ew: 0.055 },
+    { id: 'left-wide', parent: 'left-low', attach: 0.62, control: { x: -0.58, y: -0.52 }, end: { x: -0.86, y: -0.55 }, birth: 0.38, duration: 0.18, sw: 0.2, ew: 0.045 },
+    { id: 'left-drop', parent: 'left-low', attach: 0.74, control: { x: -0.58, y: -0.43 }, end: { x: -0.76, y: -0.36 }, birth: 0.42, duration: 0.17, sw: 0.17, ew: 0.042 },
+    { id: 'right-wide', parent: 'right-low', attach: 0.62, control: { x: 0.59, y: -0.54 }, end: { x: 0.86, y: -0.57 }, birth: 0.4, duration: 0.18, sw: 0.2, ew: 0.045 },
+    { id: 'right-drop', parent: 'right-low', attach: 0.74, control: { x: 0.59, y: -0.44 }, end: { x: 0.77, y: -0.38 }, birth: 0.44, duration: 0.17, sw: 0.17, ew: 0.042 },
+    { id: 'left-upper', parent: 'left-mid', attach: 0.64, control: { x: -0.54, y: -0.72 }, end: { x: -0.7, y: -0.81 }, birth: 0.46, duration: 0.18, sw: 0.16, ew: 0.04 },
+    { id: 'left-inner', parent: 'left-mid', attach: 0.72, control: { x: -0.38, y: -0.64 }, end: { x: -0.52, y: -0.57 }, birth: 0.49, duration: 0.17, sw: 0.15, ew: 0.038 },
+    { id: 'right-upper', parent: 'right-mid', attach: 0.64, control: { x: 0.55, y: -0.75 }, end: { x: 0.72, y: -0.82 }, birth: 0.48, duration: 0.18, sw: 0.16, ew: 0.04 },
+    { id: 'right-inner', parent: 'right-mid', attach: 0.72, control: { x: 0.4, y: -0.65 }, end: { x: 0.54, y: -0.59 }, birth: 0.51, duration: 0.17, sw: 0.15, ew: 0.038 },
+    { id: 'left-crown', parent: 'left-high', attach: 0.72, control: { x: -0.36, y: -0.91 }, end: { x: -0.48, y: -0.97 }, birth: 0.55, duration: 0.16, sw: 0.14, ew: 0.035 },
+    { id: 'right-crown', parent: 'right-high', attach: 0.72, control: { x: 0.37, y: -0.92 }, end: { x: 0.49, y: -0.97 }, birth: 0.57, duration: 0.16, sw: 0.14, ew: 0.035 }
+];
 const REWARD_WATER_COLORS = ['#8deeff', '#5bd6ff', '#c9f8ff', '#7df9ff'];
 const REWARD_FERTILIZER_COLORS = ['#fff176', '#d8ff66', '#9be15d', '#ffcc80'];
 const BLOOM_TREE_LEAF_COLORS = ['#2f8a4b', '#43a85b', '#61bd68', '#86cc72', '#b7dc7a'];
@@ -174,6 +289,13 @@ const SENSITIVITY_MAX = 85;
 const SENSITIVITY_DEFAULT = 50;
 const FRAME_DELTA_FALLBACK_SECONDS = 1 / 60;
 const MAX_FRAME_DELTA_SECONDS = 0.35;
+const REDUCED_MOTION_QUERY = typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+    ? window.matchMedia('(prefers-reduced-motion: reduce)')
+    : null;
+
+function prefersReducedMotion() {
+    return Boolean(REDUCED_MOTION_QUERY?.matches);
+}
 
 function clampEnergy(value) {
     if (!Number.isFinite(value)) return 0;
@@ -407,7 +529,10 @@ const appContainer = $('app-container');
 const canvas = $('tree-canvas');
 const ctx = canvas.getContext('2d');
 const modePicker = $('mode-picker');
+const modePickerTitle = $('mode-picker-title');
+const modePickerSub = $('mode-picker-sub');
 const modeChoiceButtons = document.querySelectorAll('[data-mode-choice]');
+const growthVisualChoiceButtons = document.querySelectorAll('[data-growth-visual-choice]');
 const currentModeBadge = $('current-mode-badge');
 const modeSwitchBtn = $('mode-switch-btn');
 const energyFill = $('energy-fill');
@@ -1492,15 +1617,6 @@ function clamp(value, min, max) {
     return Math.min(max, Math.max(min, value));
 }
 
-function escapeHtml(value) {
-    return String(value ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-}
-
 function formatTaskStripDateTime(dateLike = new Date()) {
     const date = new Date(dateLike);
     const year = date.getFullYear();
@@ -2511,7 +2627,7 @@ function renderCompetitionSummary(source = getCurrentCompetitionSource()) {
 
 function renderCompetitionPanel() {
     if (!competitionPanel || !competitionList) return;
-    const showCompetitionPanel = hasReadingModeSelected();
+    const showCompetitionPanel = STATE.activeMode === APP_MODES.COMPETITION;
     competitionPanel.classList.toggle('hidden', !showCompetitionPanel);
 
     if (!showCompetitionPanel) {
@@ -2596,10 +2712,56 @@ function renderCompetitionPanel() {
     renderCompetitionSummary(source);
 }
 
+function updateGrowthVisualUI() {
+    const activeVisualMode = normalizeGrowthVisualMode(STATE.growthVisualMode);
+
+    growthVisualChoiceButtons.forEach(button => {
+        const selected = button.getAttribute('data-growth-visual-choice') === activeVisualMode;
+        button.classList.toggle('selected', selected);
+        button.setAttribute('aria-checked', selected ? 'true' : 'false');
+    });
+
+    if (document.body?.dataset) {
+        document.body.dataset.growthVisualMode = activeVisualMode;
+    }
+}
+
+function setGrowthVisualMode(mode, options = {}) {
+    if (STATE.visualSelectionLocked && !options.allowLockedChange) return;
+    const nextMode = normalizeGrowthVisualMode(mode);
+    const changed = STATE.growthVisualMode !== nextMode;
+    STATE.growthVisualMode = nextMode;
+
+    try {
+        localStorage.setItem(GROWTH_VISUAL_STORAGE_KEY, nextMode);
+    } catch (error) {
+        console.debug('[Growth Visual] preference was not persisted', error);
+    }
+
+    if (changed) {
+        energyParticles.length = 0;
+        trunkTransfers.length = 0;
+        soilTransfers.length = 0;
+    }
+
+    updateGrowthVisualUI();
+    if (changed && !STATE.isListening && canvas?.width && canvas?.height) {
+        renderSceneFrame(Date.now());
+    }
+
+    if (changed && options.announce) {
+        const visualLabel = nextMode === GROWTH_VISUAL_MODES.FOREST_ORB
+            ? (t('morningTree.mode.forestOrbTitle') || '星芽奇境')
+            : (t('morningTree.mode.photosynthesisTitle') || '晨光森语');
+        showToast(visualLabel);
+    }
+}
+
 function selectAppMode(mode) {
     const nextMode = mode === APP_MODES.COMPETITION ? APP_MODES.COMPETITION : APP_MODES.CLASS;
     if (STATE.isListening) stopMic();
     STATE.activeMode = nextMode;
+    STATE.visualSelectionLocked = true;
     STATE.competitionConfig = normalizeCompetitionConfig(STATE.competitionConfig || loadCompetitionConfig());
     if (hasReadingModeSelected(nextMode) && !STATE.activeCompetitionGroupId) {
         STATE.activeCompetitionGroupId = getActiveCompetitionGroups(STATE.competitionConfig)[0]?.id || null;
@@ -2615,7 +2777,18 @@ function showModePicker() {
     if (STATE.isListening) stopMic();
     STATE.activeMode = null;
     modePicker?.classList.remove('hidden');
+    modePicker?.classList.toggle('visual-selection-locked', STATE.visualSelectionLocked);
     appContainer?.classList.add('mode-selection-active');
+    if (modePickerTitle) {
+        modePickerTitle.textContent = STATE.visualSelectionLocked
+            ? (t('morningTree.mode.switchReadingTitle') || '切换今天的早读方式')
+            : (t('morningTree.mode.title') || '选择今天的早读体验');
+    }
+    if (modePickerSub) {
+        modePickerSub.textContent = STATE.visualSelectionLocked
+            ? (t('morningTree.mode.switchReadingSub') || '成长视觉已在入口确认，本次只切换全班早读或小组竞赛。')
+            : (t('morningTree.mode.sub') || '先选择能量树的成长方式，再选择全班早读或小组竞赛。');
+    }
     updateModeUI();
     renderCompetitionPanel();
 }
@@ -2645,6 +2818,7 @@ function updateModeUI() {
     if (document.body?.dataset) {
         document.body.dataset.morningTreeMode = STATE.activeMode || 'none';
     }
+    updateGrowthVisualUI();
 }
 
 function announceCompetitionResult(competition) {
@@ -2680,6 +2854,10 @@ function initCompetitionUI() {
 
     modeChoiceButtons.forEach(button => {
         button.onclick = () => selectAppMode(button.getAttribute('data-mode-choice'));
+    });
+
+    growthVisualChoiceButtons.forEach(button => {
+        button.onclick = () => setGrowthVisualMode(button.getAttribute('data-growth-visual-choice'));
     });
 
     if (modeSwitchBtn) {
@@ -3244,7 +3422,7 @@ async function verifyLicense() {
     // 🚨 前端预检
     if (!input.startsWith(LICENSE_PREFIX) || input.length < 6) {
         errorMsg.style.display = 'block';
-        errorMsg.textContent = "❌ 授权码无效：授权码必须以 'ZD' 开头且长度不少于 6 位";
+        errorMsg.textContent = '授权码无效，请检查 ZD 开头的六码格式';
         gatekeeper.querySelector('.auth-card').animate([
             { transform: 'translateX(0)' },
             { transform: 'translateX(-10px)' },
@@ -3281,6 +3459,7 @@ function showApp() {
         resizeCanvas();
         initTimer();
         initEnvironment();
+        renderSceneFrame(Date.now());
         updateTaskStrip();
         showModePicker();
     }, 500);
@@ -4244,8 +4423,25 @@ class Sparkle {
 }
 
 function getEnergyAnchors(treeSize) {
-    const trunkBaseY = canvas.height - 26;
-    const canopyY = canvas.height - 40 - (treeSize * 0.7);
+    const isForestOrbMode = STATE.growthVisualMode === GROWTH_VISUAL_MODES.FOREST_ORB;
+    const trunkBaseY = isForestOrbMode
+        ? getStarbudTreeGroundY()
+        : canvas.height - 26;
+    const starbudStage = isForestOrbMode
+        ? getTreeDisplayLifecycleStage(getTreeDisplayEnergy())
+        : null;
+    const starbudTimeline = starbudStage
+        ? getStarbudGrowthTimeline(starbudStage)
+        : 0;
+    const starbudHeight = isForestOrbMode
+        ? Math.min(
+            canvas.height * (0.62 + starbudTimeline * 0.15),
+            Math.max(150, treeSize * (2.45 + starbudTimeline * 1.36))
+        )
+        : 0;
+    const canopyY = isForestOrbMode
+        ? trunkBaseY - (starbudHeight * (0.52 + starbudTimeline * 0.16))
+        : canvas.height - 40 - (treeSize * 0.7);
     const rootReach = 70 + (treeSize * 0.18);
 
     return {
@@ -4283,6 +4479,7 @@ function drawEnergyAura(x, y, radius, color, alpha = 0.2) {
     const safeAlpha = Number.isFinite(alpha) ? Math.max(0, alpha) : 0.2;
     const quality = STATE.renderQuality || 'high';
     if (quality === 'ultra' && radius < 8 && safeAlpha < 0.08) return;
+    if ((quality === 'low' || quality === 'ultra') && radius > 40 && safeAlpha < 0.22) return;
 
     ctx.save();
     ctx.globalCompositeOperation = 'screen';
@@ -4443,6 +4640,276 @@ class SkyEnergy {
     }
 }
 
+function getForestOrbAudioMeta(currentDB = STATE.currentDB) {
+    const profile = getSensitivityProfile(STATE.sensitivity);
+    const safeDb = Number.isFinite(currentDB) ? currentDB : 30;
+    const audibleFloor = profile.readingThreshold - 24;
+    const loudness = clamp((safeDb - audibleFloor) / 60, 0, 1);
+    const holdRatio = clamp(STATE.readingHoldSeconds / Math.max(0.4, profile.minimumReadingSeconds + 0.8), 0, 1);
+
+    if (safeDb < audibleFloor || loudness <= 0) {
+        return { loudness: 0, orbCount: 0, weightG: 0, spawnChance: 0 };
+    }
+
+    return {
+        loudness,
+        orbCount: Math.max(1, Math.min(5, 1 + Math.floor(loudness * 4.6))),
+        weightG: Math.max(2, Math.min(50, 2 + Math.round(Math.pow(loudness, 1.42) * 48))),
+        spawnChance: clamp((0.035 + loudness * 0.22) * (0.78 + holdRatio * 0.22), 0.035, 0.28)
+    };
+}
+
+class GroundEnergyOrb {
+    constructor(sourceX, anchors, audioMeta, index = 0) {
+        const weightVariation = (Math.random() - 0.5) * (4 + audioMeta.loudness * 12);
+        this.weightG = Math.max(2, Math.min(50, Math.round(audioMeta.weightG + weightVariation)));
+        this.mass = clamp((this.weightG - 2) / 48, 0, 1);
+        this.radius = 10 + Math.sqrt(this.weightG) * 1.65;
+        this.start = {
+            x: sourceX,
+            y: canvas.height + this.radius + 8 + Math.random() * 18
+        };
+        const side = sourceX < anchors.trunkBase.x ? -1 : 1;
+        this.hover = {
+            x: sourceX + side * (10 + Math.random() * 22) + ((index % 2) * side * 8),
+            y: anchors.trunkBase.y - (46 + this.radius * 1.05 + Math.random() * (48 - this.mass * 18))
+        };
+        this.rootTarget = {
+            x: anchors.trunkBase.x + side * (5 + Math.random() * 13),
+            y: anchors.trunkBase.y + 3
+        };
+        this.absorbControl = {
+            x: (this.hover.x + this.rootTarget.x) / 2 + side * (34 + Math.random() * 28),
+            y: Math.min(this.hover.y, this.rootTarget.y) - (22 + (1 - this.mass) * 28)
+        };
+        this.canopyTarget = {
+            x: anchors.canopy.x + ((Math.random() - 0.5) * 46),
+            y: anchors.canopy.y + ((Math.random() - 0.5) * 28)
+        };
+        this.color = FOREST_ORB_COLORS[Math.floor(Math.random() * FOREST_ORB_COLORS.length)];
+        this.progress = 0;
+        this.speed = prefersReducedMotion()
+            ? 0.026
+            : 0.0108 - (this.mass * 0.0026) + (Math.random() * 0.0018);
+        this.phase = Math.random() * Math.PI * 2;
+        this.history = [];
+        this.x = this.start.x;
+        this.y = this.start.y;
+        this.scaleX = 1;
+        this.scaleY = 1;
+        this.life = 1;
+    }
+
+    update() {
+        this.progress += this.speed;
+        this.phase += 0.1;
+        const emergenceEnd = prefersReducedMotion() ? 0.34 : 0.52;
+
+        if (this.progress < emergenceEnd) {
+            const t = clamp(this.progress / emergenceEnd, 0, 1);
+            const eased = easeInOutSine(t);
+            const jumpHeight = prefersReducedMotion() ? 0 : 82 - (this.mass * 38);
+            this.x = this.start.x + ((this.hover.x - this.start.x) * eased);
+            this.y = this.start.y + ((this.hover.y - this.start.y) * eased) - (Math.sin(Math.PI * t) * jumpHeight);
+            const launchStretch = prefersReducedMotion() ? 0 : Math.sin(Math.PI * Math.min(1, t * 1.25)) * 0.16;
+            this.scaleX = 1 - launchStretch + (this.mass * 0.04);
+            this.scaleY = 1 + launchStretch - (this.mass * 0.03);
+        } else {
+            const t = clamp((this.progress - emergenceEnd) / Math.max(0.01, 1 - emergenceEnd), 0, 1);
+            const eased = easeInOutSine(t * t);
+            const point = pointOnQuadratic(this.hover, this.absorbControl, this.rootTarget, eased);
+            const wobble = prefersReducedMotion() ? 0 : Math.sin(this.phase) * (8 - this.mass * 4) * (1 - t);
+            this.x = point.x + wobble;
+            this.y = point.y;
+            this.life = Math.max(0.08, 1 - Math.pow(t, 2.4));
+            this.scaleX = 1 - t * 0.42;
+            this.scaleY = 1 + t * 0.18;
+        }
+
+        this.history.push({ x: this.x, y: this.y });
+        const historyLimit = STATE.renderQuality === 'ultra' ? 3 : STATE.renderQuality === 'low' ? 5 : 8;
+        if (this.history.length > historyLimit) this.history.shift();
+
+        if (this.progress >= 1) {
+            const transferLimit = getFxLimit('trunkTransfers');
+            spawnSparkle(this.rootTarget.x, this.rootTarget.y, STARBUD_PALETTE.energy.lime);
+            pushLimitedEffect(
+                trunkTransfers,
+                new RootRiseTransfer(this.rootTarget, this.canopyTarget, this.weightG, this.color),
+                transferLimit
+            );
+            return false;
+        }
+
+        return true;
+    }
+
+    draw() {
+        const quality = STATE.renderQuality || 'high';
+        const drawRadius = this.radius * Math.max(0.34, this.life) * (0.96 + Math.sin(this.phase * 0.8) * 0.025);
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        drawParticleTrail(this.history, STARBUD_PALETTE.energy.cyan, Math.max(1.2, drawRadius * 0.18), this.life * 0.34);
+        drawEnergyAura(this.x, this.y, drawRadius * (quality === 'ultra' ? 0.74 : 1.05), STARBUD_PALETTE.energy.cyan, this.life * (quality === 'ultra' ? 0.12 : 0.2));
+        ctx.restore();
+
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.scale(this.scaleX, this.scaleY);
+        ctx.globalAlpha = Math.max(0.12, this.life);
+
+        if (quality === 'ultra') {
+            const shell = ctx.createRadialGradient(-drawRadius * 0.3, -drawRadius * 0.36, 0, 0, 0, drawRadius);
+            shell.addColorStop(0, STARBUD_PALETTE.energy.core);
+            shell.addColorStop(0.48, this.color);
+            shell.addColorStop(1, STARBUD_PALETTE.energy.shellEdge);
+            ctx.fillStyle = shell;
+        } else {
+            const shell = ctx.createRadialGradient(-drawRadius * 0.34, -drawRadius * 0.42, drawRadius * 0.05, 0, 0, drawRadius);
+            shell.addColorStop(0, STARBUD_PALETTE.energy.core);
+            shell.addColorStop(0.22, STARBUD_PALETTE.energy.lime);
+            shell.addColorStop(0.7, this.color);
+            shell.addColorStop(1, STARBUD_PALETTE.energy.shellEdge);
+            ctx.fillStyle = shell;
+        }
+
+        ctx.beginPath();
+        ctx.arc(0, 0, drawRadius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = STARBUD_PALETTE.energy.shellBorder;
+        ctx.lineWidth = Math.max(1.2, drawRadius * 0.09);
+        ctx.stroke();
+
+        ctx.strokeStyle = STARBUD_PALETTE.energy.shellHighlight;
+        ctx.lineWidth = Math.max(1.2, drawRadius * (quality === 'ultra' ? 0.08 : 0.11));
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.arc(-drawRadius * 0.05, -drawRadius * 0.04, drawRadius * 0.67, Math.PI * 1.05, Math.PI * 1.52);
+        ctx.stroke();
+        if (quality !== 'ultra') {
+            ctx.fillStyle = STARBUD_PALETTE.energy.shellGlint;
+            ctx.beginPath();
+            ctx.arc(-drawRadius * 0.35, -drawRadius * 0.48, Math.max(1.2, drawRadius * 0.1), 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        if (drawRadius >= 10 && this.life > 0.32) {
+            ctx.fillStyle = STARBUD_PALETTE.energy.label;
+            ctx.font = `900 ${Math.max(8, Math.round(drawRadius * 0.62))}px "Segoe UI", sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(`${this.weightG}g`, 0, 1);
+        }
+        ctx.restore();
+    }
+}
+
+class RootRiseTransfer {
+    constructor(start, end, weightG, color) {
+        this.start = { x: start.x, y: start.y };
+        this.end = { x: end.x, y: end.y };
+        this.weightG = weightG;
+        this.mass = clamp((weightG - 2) / 48, 0, 1);
+        this.color = color;
+        this.control = {
+            x: (start.x + end.x) / 2 + ((Math.random() - 0.5) * 30),
+            y: start.y + ((end.y - start.y) * 0.48)
+        };
+        this.t = 0;
+        this.speed = 0.016 + ((1 - this.mass) * 0.008);
+        this.history = [];
+    }
+
+    update() {
+        this.t += this.speed;
+        if (this.t >= 1) {
+            pushLimitedEffect(
+                trunkTransfers,
+                new CanopyEnergyEcho(this.end, this.weightG, this.color),
+                getFxLimit('trunkTransfers')
+            );
+            return false;
+        }
+        return true;
+    }
+
+    draw() {
+        const eased = easeInOutSine(clamp(this.t, 0, 1));
+        const head = pointOnQuadratic(this.start, this.control, this.end, eased);
+        this.history.push(head);
+        if (this.history.length > (STATE.renderQuality === 'ultra' ? 4 : 8)) this.history.shift();
+
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        ctx.globalAlpha = 0.2 + this.mass * 0.2;
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = 2.2 + this.mass * 2.8;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(this.start.x, this.start.y);
+        ctx.quadraticCurveTo(this.control.x, this.control.y, head.x, head.y);
+        ctx.stroke();
+        drawParticleTrail(this.history, this.color, 2 + this.mass * 2.2, 0.72);
+        drawEnergyAura(head.x, head.y, 5 + this.mass * 6, STARBUD_PALETTE.energy.lime, 0.2 + this.mass * 0.14);
+        ctx.fillStyle = STARBUD_PALETTE.energy.transferDot;
+        ctx.globalAlpha = 0.82;
+        ctx.beginPath();
+        ctx.arc(head.x, head.y, 1.3 + this.mass * 1.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+}
+
+class CanopyEnergyEcho {
+    constructor(center, weightG, color) {
+        this.center = { x: center.x, y: center.y };
+        this.weightG = weightG;
+        this.mass = clamp((weightG - 2) / 48, 0, 1);
+        this.color = color;
+        this.life = 1;
+        this.seed = Math.random() * 100;
+    }
+
+    update() {
+        this.life -= prefersReducedMotion() ? 0.08 : 0.045;
+        return this.life > 0;
+    }
+
+    draw() {
+        const spread = 1 - this.life;
+        const radius = 12 + spread * (36 + this.mass * 34);
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        ctx.globalAlpha = this.life * (0.36 + this.mass * 0.22);
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = 1.2 + this.mass * 1.6;
+        ctx.beginPath();
+        ctx.ellipse(this.center.x, this.center.y, radius * 1.3, radius * 0.72, 0, 0, Math.PI * 2);
+        ctx.stroke();
+
+        if (STATE.renderQuality !== 'ultra') {
+            const rayCount = STATE.renderQuality === 'low' ? 4 : 7;
+            for (let i = 0; i < rayCount; i++) {
+                const angle = seededUnit(this.seed + i * 2.17) * Math.PI * 2;
+                const distance = radius * (0.4 + seededUnit(this.seed + i * 3.1) * 0.55);
+                ctx.fillStyle = i % 2 ? STARBUD_PALETTE.energy.lime : STARBUD_PALETTE.energy.cyan;
+                ctx.beginPath();
+                ctx.ellipse(
+                    this.center.x + Math.cos(angle) * distance,
+                    this.center.y + Math.sin(angle) * distance * 0.55,
+                    1.2 + this.mass * 1.2,
+                    3.2 + this.mass * 2.4,
+                    angle,
+                    0,
+                    Math.PI * 2
+                );
+                ctx.fill();
+            }
+        }
+        ctx.restore();
+    }
+}
+
 class TrunkTransfer {
     constructor(startX, startY, endX, endY, strength, color) {
         this.start = { x: startX, y: startY };
@@ -4462,7 +4929,7 @@ class TrunkTransfer {
     update() {
         this.t += this.speed;
         if (this.t >= 1) {
-            spawnSparkle(this.end.x, this.end.y, '#d8ff66');
+            spawnSparkle(this.end.x, this.end.y, STARBUD_PALETTE.energy.lime);
             const soilLimit = getFxLimit('soilTransfers');
             const remainingSlots = soilLimit - soilTransfers.length;
             if (remainingSlots >= 2) {
@@ -5627,7 +6094,7 @@ function drawSeedRoots(rootGrowth) {
     ctx.restore();
 }
 
-function drawSeedAndSprout(startX, startY, stage) {
+function drawSeedAndSprout(startX, startY, stage, opacity = 1) {
     const energy = clampEnergy(STATE.energy);
     const stageProgress = clamp(Number(stage?.progress) || 0, 0, 1);
     const rootGrowth = clamp(energy / 16, 0, 1);
@@ -5638,6 +6105,7 @@ function drawSeedAndSprout(startX, startY, stage) {
 
     ctx.save();
     ctx.translate(startX, startY);
+    ctx.globalAlpha = clamp(opacity, 0, 1);
 
     ctx.save();
     ctx.scale(soilPulse, 1);
@@ -5844,6 +6312,66 @@ function drawTaperedBranch(start, control, end, startWidth, endWidth, colors = {
     ctx.quadraticCurveTo(control.x - startWidth * 0.18, control.y, highlightEnd.x - endWidth * 0.12, highlightEnd.y);
     ctx.stroke();
     ctx.restore();
+}
+
+function getStarbudTimelineProgress(timeline, birth, duration) {
+    const rawProgress = clamp((timeline - birth) / Math.max(0.01, duration), 0, 1);
+    return rawProgress * rawProgress * (3 - (2 * rawProgress));
+}
+
+function getPartialQuadratic(start, control, end, progress) {
+    const t = clamp(progress, 0, 1);
+    const startControl = {
+        x: start.x + ((control.x - start.x) * t),
+        y: start.y + ((control.y - start.y) * t)
+    };
+    const controlEnd = {
+        x: control.x + ((end.x - control.x) * t),
+        y: control.y + ((end.y - control.y) * t)
+    };
+
+    return {
+        control: startControl,
+        end: {
+            x: startControl.x + ((controlEnd.x - startControl.x) * t),
+            y: startControl.y + ((controlEnd.y - startControl.y) * t)
+        }
+    };
+}
+
+function drawGrowingTaperedBranch(branch, progress, startWidth, endWidth, colors) {
+    if (progress <= 0.002) return null;
+    const partial = getPartialQuadratic(branch.s, branch.c, branch.e, progress);
+    const visibleCurveWidth = startWidth + ((endWidth - startWidth) * progress);
+    const ageThickness = 0.34 + (progress * 0.66);
+
+    drawTaperedBranch(
+        branch.s,
+        partial.control,
+        partial.end,
+        Math.max(1.2, startWidth * ageThickness),
+        Math.max(0.72, visibleCurveWidth * (0.2 + progress * 0.8)),
+        colors
+    );
+    return partial.end;
+}
+
+function getStarbudStageEnergy(stage) {
+    const stageIndex = Math.max(0, Math.min(TREE_LIFECYCLE_STAGES.length - 1, Number(stage?.index) || 0));
+    if (stage?.key === 'final') {
+        return VISUAL_FINAL_STAGE_START
+            + (clamp(Number(stage?.finalReveal) || 0, 0, 1) * (100 - VISUAL_FINAL_STAGE_START));
+    }
+
+    const currentStage = TREE_LIFECYCLE_STAGES[stageIndex];
+    const nextStage = TREE_LIFECYCLE_STAGES[stageIndex + 1];
+    const rangeEnd = nextStage?.minEnergy ?? 100;
+    return currentStage.minEnergy
+        + (clamp(Number(stage?.progress) || 0, 0, 1) * (rangeEnd - currentStage.minEnergy));
+}
+
+function getStarbudGrowthTimeline(stage) {
+    return clamp((getStarbudStageEnergy(stage) - 24) / 76, 0, 1);
 }
 
 function getVisibleBranchCount(stageIndex, stageProgress, branchTotal, isFinalTree) {
@@ -6239,6 +6767,425 @@ function drawBloomingEnergyTree(startX, startY, treeSize, stage, renderMode = { 
     ctx.restore();
 }
 
+function traceStarbudCanopySilhouette(spread, treeHeight, fullness = 1) {
+    const s = spread * fullness;
+    const h = treeHeight * (0.78 + fullness * 0.22);
+    ctx.beginPath();
+    ctx.moveTo(0, -h);
+    ctx.bezierCurveTo(s * 0.24, -h * 1.02, s * 0.58, -h * 0.94, s * 0.7, -h * 0.78);
+    ctx.bezierCurveTo(s * 0.93, -h * 0.76, s * 1.02, -h * 0.58, s * 0.95, -h * 0.45);
+    ctx.bezierCurveTo(s * 1.04, -h * 0.31, s * 0.82, -h * 0.16, s * 0.52, -h * 0.17);
+    ctx.bezierCurveTo(s * 0.31, -h * 0.1, s * 0.12, -h * 0.13, 0, -h * 0.12);
+    ctx.bezierCurveTo(-s * 0.13, -h * 0.13, -s * 0.32, -h * 0.1, -s * 0.53, -h * 0.17);
+    ctx.bezierCurveTo(-s * 0.83, -h * 0.16, -s * 1.04, -h * 0.31, -s * 0.95, -h * 0.45);
+    ctx.bezierCurveTo(-s * 1.02, -h * 0.58, -s * 0.93, -h * 0.76, -s * 0.7, -h * 0.78);
+    ctx.bezierCurveTo(-s * 0.58, -h * 0.94, -s * 0.24, -h * 1.02, 0, -h);
+    ctx.closePath();
+}
+
+function getStarbudCanopyHalfWidth(normalizedY, spread) {
+    const t = clamp(normalizedY, 0, 1);
+    if (t < 0.17) return spread * (0.14 + (t / 0.17) * 0.38);
+    if (t < 0.55) return spread * (0.52 + ((t - 0.17) / 0.38) * 0.45);
+    if (t < 0.82) return spread * (0.97 - ((t - 0.55) / 0.27) * 0.08);
+    return spread * (0.89 - ((t - 0.82) / 0.18) * 0.16);
+}
+
+function drawStarbudWatercolorDab(x, y, radius, color, alpha, seed) {
+    const dabCount = 3;
+    for (let dabIndex = 0; dabIndex < dabCount; dabIndex++) {
+        const dabSeed = seed + dabIndex * 13.7;
+        const offset = radius * (0.16 + seededUnit(dabSeed + 1.8) * 0.16);
+        const angle = seededUnit(dabSeed + 2.6) * Math.PI * 2;
+        const xOffset = Math.cos(angle) * offset;
+        const yOffset = Math.sin(angle) * offset * 0.68;
+        const width = radius * (0.82 + seededUnit(dabSeed + 3.9) * 0.48);
+        const height = radius * (0.58 + seededUnit(dabSeed + 5.1) * 0.36);
+
+        ctx.globalAlpha = alpha * (0.54 + seededUnit(dabSeed + 6.4) * 0.42);
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.ellipse(
+            x + xOffset,
+            y + yOffset,
+            width,
+            height,
+            seededUnit(dabSeed + 7.8) - 0.5,
+            0,
+            Math.PI * 2
+        );
+        ctx.fill();
+    }
+}
+
+function drawStarbudCanopyWash(spread, treeHeight, growth, finalMorph, renderMode, strength = 1) {
+    if (growth <= 0.02) return;
+    const easedGrowth = growth * growth * (3 - (2 * growth));
+    const fullness = 0.7 + easedGrowth * 0.3;
+    const quality = renderMode?.quality || STATE.renderQuality || 'high';
+    const wash = ctx.createRadialGradient(
+        -spread * 0.2,
+        -treeHeight * 0.7,
+        treeHeight * 0.04,
+        0,
+        -treeHeight * 0.55,
+        Math.max(spread, treeHeight * 0.58)
+    );
+    wash.addColorStop(0, finalMorph > 0.35 ? STARBUD_PALETTE.canopy.washLight[1] : STARBUD_PALETTE.canopy.wash[1]);
+    wash.addColorStop(0.34, STARBUD_PALETTE.canopy.wash[1]);
+    wash.addColorStop(0.7, STARBUD_PALETTE.canopy.wash[2]);
+    wash.addColorStop(1, STARBUD_PALETTE.canopy.wash[3]);
+
+    ctx.save();
+    ctx.translate(0, -treeHeight * 0.02 * (1 - easedGrowth));
+    ctx.scale(0.54 + easedGrowth * 0.46, 0.56 + easedGrowth * 0.44);
+    const washAlpha = renderMode.ultraLowPower ? 0.08 : renderMode.lowPower ? 0.095 : quality === 'balanced' ? 0.11 : 0.13;
+    ctx.globalAlpha = (0.025 + easedGrowth * washAlpha) * easedGrowth * strength;
+    ctx.fillStyle = wash;
+    traceStarbudCanopySilhouette(spread, treeHeight, fullness);
+    ctx.fill();
+
+    traceStarbudCanopySilhouette(spread, treeHeight, fullness);
+    ctx.clip();
+    const washCount = renderMode.ultraLowPower ? 12 : renderMode.lowPower ? 18 : quality === 'balanced' ? 26 : 32;
+    ctx.filter = `blur(${renderMode.ultraLowPower ? 0 : renderMode.lowPower ? 6 : quality === 'balanced' ? 8 : 11}px)`;
+    for (let i = 0; i < washCount; i++) {
+        const seed = 74.3 + i * 5.91;
+        const t = 0.1 + seededUnit(seed) * 0.78;
+        const halfWidth = getStarbudCanopyHalfWidth(t, spread * fullness);
+        const x = (seededUnit(seed + 1.7) * 2 - 1) * halfWidth * 0.82;
+        const y = -treeHeight * (0.98 - t * 0.78);
+        const radius = treeHeight * (0.045 + seededUnit(seed + 2.9) * 0.068);
+        const color = i % 3 === 0
+            ? STARBUD_PALETTE.canopy.washLight[i % STARBUD_PALETTE.canopy.washLight.length]
+            : STARBUD_PALETTE.canopy.wash[i % STARBUD_PALETTE.canopy.wash.length];
+        const alpha = (0.042 + seededUnit(seed + 4.1) * 0.056) * easedGrowth * strength;
+        drawStarbudWatercolorDab(x, y, radius, color, alpha, seed);
+    }
+
+    ctx.filter = 'none';
+    if (!renderMode.ultraLowPower) {
+        const brushCount = renderMode.lowPower ? 14 : quality === 'balanced' ? 20 : 28;
+        ctx.globalCompositeOperation = 'screen';
+        ctx.lineCap = 'round';
+        for (let i = 0; i < brushCount; i++) {
+            const seed = 503.6 + i * 7.17;
+            const t = 0.12 + seededUnit(seed) * 0.73;
+            const halfWidth = getStarbudCanopyHalfWidth(t, spread * fullness);
+            const x = (seededUnit(seed + 1.2) * 2 - 1) * halfWidth * 0.78;
+            const y = -treeHeight * (0.98 - t * 0.78);
+            const brushWidth = treeHeight * (0.045 + seededUnit(seed + 2.4) * 0.042);
+            const drift = (seededUnit(seed + 3.3) - 0.5) * brushWidth;
+            ctx.globalAlpha = (0.035 + seededUnit(seed + 4.4) * 0.05) * easedGrowth * strength;
+            ctx.strokeStyle = i % 3 === 0 ? STARBUD_PALETTE.canopy.lightGold : STARBUD_PALETTE.canopy.light;
+            ctx.lineWidth = Math.max(1.2, treeHeight * (0.004 + seededUnit(seed + 5.5) * 0.005));
+            ctx.beginPath();
+            ctx.moveTo(x - brushWidth * 0.58, y + drift * 0.16);
+            ctx.quadraticCurveTo(x, y - drift, x + brushWidth * 0.62, y + drift * 0.22);
+            ctx.stroke();
+        }
+    }
+    ctx.restore();
+}
+
+function drawStarbudLeafBlade(x, y, length, width, angle, color, alpha, vein = false, bend = 0) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(angle);
+    ctx.fillStyle = color;
+    ctx.globalAlpha = alpha;
+    ctx.beginPath();
+    ctx.moveTo(0, length * 0.44);
+    ctx.bezierCurveTo(
+        width * 0.92 + bend * length * 0.2,
+        length * 0.2,
+        width * 0.76 + bend * length * 0.72,
+        -length * 0.24,
+        bend * length + width * 0.16,
+        -length * 0.5
+    );
+    ctx.quadraticCurveTo(bend * length, -length * 0.57, bend * length - width * 0.16, -length * 0.5);
+    ctx.bezierCurveTo(
+        -width * 0.68 + bend * length * 0.7,
+        -length * 0.2,
+        -width * 0.88 + bend * length * 0.2,
+        length * 0.22,
+        0,
+        length * 0.44
+    );
+    ctx.fill();
+
+    if (vein) {
+        ctx.globalAlpha = alpha * 0.42;
+        ctx.strokeStyle = STARBUD_PALETTE.canopy.vein;
+        ctx.lineWidth = Math.max(0.55, width * 0.13);
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(0, length * 0.28);
+        ctx.quadraticCurveTo(bend * length * 0.42, -length * 0.06, bend * length * 0.78, -length * 0.42);
+        ctx.stroke();
+    }
+    ctx.restore();
+}
+
+function createStarbudBranchTopology(trunk, spread, treeHeight, sway) {
+    const branchesById = new Map([['trunk', trunk]]);
+    const branches = [];
+
+    STARBUD_BRANCH_BLUEPRINTS.forEach(blueprint => {
+        const parent = branchesById.get(blueprint.parent) || trunk;
+        const start = pointOnQuadratic(parent.s, parent.c, parent.e, blueprint.attach);
+        const branch = {
+            ...blueprint,
+            s: start,
+            c: {
+                x: blueprint.control.x * spread + sway * (0.08 + blueprint.attach * 0.08),
+                y: blueprint.control.y * treeHeight
+            },
+            e: {
+                x: blueprint.end.x * spread + sway * (0.12 + blueprint.attach * 0.12),
+                y: blueprint.end.y * treeHeight
+            }
+        };
+        branches.push(branch);
+        branchesById.set(branch.id, branch);
+    });
+
+    return branches;
+}
+
+function drawStarbudLeafFan(branch, branchIndex, timeline, finalMorph, treeHeight, renderMode, frameTime, layer) {
+    const fanBirth = branch.birth + branch.duration * 0.74 + (branchIndex % 4) * 0.008;
+    const branchGate = getStarbudTimelineProgress(Number(branch.progress) || 0, 0.7, 0.3);
+    const fanProgress = Math.min(branchGate, getStarbudTimelineProgress(timeline, fanBirth, 0.2));
+    if (fanProgress <= 0.015) return;
+
+    const quality = renderMode?.quality || STATE.renderQuality || 'high';
+    const baseCount = quality === 'ultra' ? 14 : quality === 'low' ? 16 : quality === 'balanced' ? 18 : 21;
+    const leafCount = baseCount + Math.round(finalMorph * (quality === 'ultra' ? 6 : quality === 'low' ? 7 : quality === 'balanced' ? 8 : 10));
+    const palette = layer === 'back'
+        ? STARBUD_PALETTE.canopy.fanBack
+        : STARBUD_PALETTE.canopy.fanFront;
+    const outward = branch.e.x === 0 ? 0 : Math.sign(branch.e.x);
+    const wind = prefersReducedMotion() || renderMode.ultraLowPower
+        ? 0
+        : Math.sin(frameTime * 0.68 + branchIndex * 0.83) * 0.025;
+
+    for (let i = 0; i < leafCount; i++) {
+        if ((i % 2 === 0) !== (layer === 'back')) continue;
+        const seed = 903.7 + branchIndex * 31.17 + i * 4.73;
+        const leafBirth = (i / Math.max(1, leafCount - 1)) * 0.48;
+        const localGrowth = getStarbudTimelineProgress(fanProgress, leafBirth, 0.5);
+        if (localGrowth <= 0.015) continue;
+
+        const fanAngle = (seededUnit(seed + 1.3) - 0.5) * 1.22 + outward * 0.18;
+        const anchorT = clamp(
+            (Number(branch.progress) || 0) - seededUnit(seed + 2.2) * 0.36 * localGrowth,
+            0.48,
+            Number(branch.progress) || 0
+        );
+        const leafAnchor = pointOnQuadratic(branch.s, branch.c, branch.e, anchorT);
+        const reach = treeHeight * (0.01 + seededUnit(seed + 2.7) * 0.046) * localGrowth;
+        const x = leafAnchor.x + Math.sin(fanAngle) * reach;
+        const y = leafAnchor.y - Math.cos(fanAngle) * reach * 0.82;
+        const finalLength = 1 + finalMorph * (layer === 'front' ? 0.34 : 0.24);
+        const length = treeHeight
+            * (0.041 + seededUnit(seed + 4.2) * (layer === 'front' ? 0.04 : 0.033))
+            * (0.18 + localGrowth * 0.82)
+            * finalLength;
+        const width = Math.max(2.2, length * (0.23 + seededUnit(seed + 5.6) * 0.08));
+        const colorIndex = Math.min(palette.length - 1, Math.floor(seededUnit(seed + 6.9) * palette.length));
+        const angle = fanAngle * 0.48 + outward * 0.1 + wind * (0.6 + seededUnit(seed + 7.8));
+        const alpha = (layer === 'back' ? 0.54 : 0.78) * localGrowth;
+        const vein = layer === 'front' && !renderMode.lowPower && seededUnit(seed + 8.4) > 0.72;
+        const bend = (seededUnit(seed + 9.8) - 0.5) * (0.16 + finalMorph * 0.1);
+
+        drawStarbudLeafBlade(x, y, length, width, angle, palette[colorIndex], alpha, vein, bend);
+    }
+}
+
+function drawStarbudLeafField(spread, treeHeight, growth, finalMorph, renderMode, frameTime, layer) {
+    if (growth <= 0.035) return;
+    const quality = renderMode?.quality || STATE.renderQuality || 'high';
+    const baseCount = layer === 'back' ? 154 : 264;
+    const finalDensity = finalMorph * (layer === 'back' ? 62 : 108);
+    const count = Math.round(baseCount + finalDensity);
+    const interiorStride = quality === 'ultra' ? 2 : quality === 'low' ? 2 : 1;
+    const palette = layer === 'back'
+        ? STARBUD_PALETTE.canopy.fieldBack
+        : STARBUD_PALETTE.canopy.fieldFront;
+    const baseSway = prefersReducedMotion() || renderMode.ultraLowPower
+        ? 0
+        : Math.sin(frameTime * 0.54 + (layer === 'front' ? 0.7 : 0)) * 0.026;
+
+    for (let i = 0; i < count; i++) {
+        const seed = (layer === 'front' ? 319.7 : 113.9) + i * 3.731;
+        const birth = seededUnit(seed + 10.7) * 0.84;
+        const localGrowth = clamp((growth - birth) * 6.2, 0, 1);
+        if (localGrowth <= 0.02) continue;
+
+        const t = 0.035 + Math.pow(seededUnit(seed + 1.4), 0.82) * 0.91;
+        const halfWidth = getStarbudCanopyHalfWidth(t, spread * (0.76 + growth * 0.24));
+        const horizontal = seededUnit(seed + 2.8) * 2 - 1;
+        const x = horizontal * halfWidth * (0.25 + seededUnit(seed + 4.1) * 0.75);
+        const crownLift = finalMorph * treeHeight * (0.015 + (1 - t) * 0.025);
+        const y = -treeHeight * (0.99 - t * 0.78) - crownLift + (seededUnit(seed + 5.4) - 0.5) * treeHeight * 0.04;
+        const edgeRatio = Math.abs(x) / Math.max(1, halfWidth);
+        const silhouetteLeaf = edgeRatio > 0.69 || t < 0.2 || t > 0.82;
+        if (!silhouetteLeaf && interiorStride > 1 && i % interiorStride !== 0) continue;
+        const finalLength = 1 + finalMorph * (0.24 + (1 - t) * 0.18);
+        const length = treeHeight * (0.025 + seededUnit(seed + 6.8) * (layer === 'front' ? 0.046 : 0.04)) * (0.9 + (1 - edgeRatio) * 0.1) * localGrowth * finalLength;
+        const width = Math.max(2.3, length * (0.25 + seededUnit(seed + 7.9) * 0.08));
+        const angle = horizontal * (0.2 + edgeRatio * 0.2) + (seededUnit(seed + 8.7) - 0.5) * 0.24 + baseSway;
+        const palettePosition = seededUnit(seed + 9.6);
+        const colorIndex = Math.min(palette.length - 1, Math.floor(palettePosition * palette.length));
+        const vein = layer === 'front' && !renderMode.lowPower && palettePosition > 0.76 && seededUnit(seed + 12.4) > 0.48;
+        const alpha = (layer === 'back' ? 0.44 : 0.7) + seededUnit(seed + 13.2) * (layer === 'back' ? 0.2 : 0.23);
+        const leafSway = baseSway * (0.6 + t * 0.7) + (prefersReducedMotion() ? 0 : Math.sin(frameTime * 0.72 + seed) * 0.012);
+        const bend = (seededUnit(seed + 14.7) - 0.5) * (0.18 + finalMorph * 0.12);
+
+        drawStarbudLeafBlade(x, y, length, width, angle + leafSway, palette[colorIndex], alpha * localGrowth, vein, bend);
+    }
+}
+
+function drawStarbudCanopyLights(spread, treeHeight, timeline, renderMode, frameTime) {
+    const lightReveal = getStarbudTimelineProgress(timeline, 0.78, 0.2);
+    if (lightReveal <= 0.02 || renderMode.ultraLowPower) return;
+    const fullCount = renderMode.lowPower ? 7 : renderMode.quality === 'balanced' ? 13 : 20;
+    const count = Math.max(2, Math.ceil(fullCount * lightReveal));
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    for (let i = 0; i < count; i++) {
+        const seed = 611.5 + i * 4.23;
+        const t = 0.14 + seededUnit(seed) * 0.7;
+        const halfWidth = getStarbudCanopyHalfWidth(t, spread);
+        const x = (seededUnit(seed + 1.8) * 2 - 1) * halfWidth * 0.82;
+        const y = -treeHeight * (0.97 - t * 0.78);
+        const pulse = prefersReducedMotion() ? 0.72 : 0.52 + (Math.sin(frameTime * 1.15 + seed) + 1) * 0.16;
+        const size = 1.2 + seededUnit(seed + 2.9) * 2.4;
+        ctx.globalAlpha = pulse * lightReveal;
+        ctx.fillStyle = i % 4 === 0 ? STARBUD_PALETTE.canopy.lightGold : STARBUD_PALETTE.canopy.light;
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    ctx.restore();
+}
+
+function drawStarbudForestTree(startX, startY, treeSize, stage, renderMode = { lowPower: false, ultraLowPower: false }) {
+    const frameTime = (STATE.frameNow || Date.now()) / 1000;
+    const finalMorph = stage?.key === 'final' ? getFinalTreeMorphProgress(stage) : 0;
+    const growthTimeline = getStarbudGrowthTimeline(stage);
+    const trunkProgress = getStarbudTimelineProgress(growthTimeline, 0, 0.31);
+    const leafFieldReveal = getStarbudTimelineProgress(growthTimeline, 0.46, 0.48);
+    const canopyWashReveal = getStarbudTimelineProgress(growthTimeline, 0.66, 0.32);
+    const treeHeight = Math.min(
+        canvas.height * (0.62 + growthTimeline * 0.15),
+        Math.max(150, treeSize * (2.45 + growthTimeline * 1.36))
+    );
+    const spread = Math.min(
+        canvas.width * (0.2 + growthTimeline * 0.12),
+        Math.max(treeSize * (0.8 + growthTimeline * 0.27), treeHeight * (0.36 + growthTimeline * 0.18))
+    );
+    const trunkBaseWidth = Math.max(7, Math.min(58, treeHeight * (0.038 + growthTimeline * 0.042)));
+    const audibleSway = STATE.isListening ? Math.max(0, STATE.currentDB - 52) / 90 : 0;
+    const sway = prefersReducedMotion()
+        ? 0
+        : Math.sin(frameTime * 0.64) * Math.min(7, 0.7 + audibleSway * 5.2) * (0.42 + growthTimeline * 0.58);
+    const branchColor = {
+        dark: STARBUD_PALETTE.trunk.dark,
+        mid: STARBUD_PALETTE.trunk.mid,
+        light: STARBUD_PALETTE.trunk.highlight
+    };
+    const trunk = {
+        s: { x: 0, y: 3 },
+        c: { x: spread * 0.055 + sway * 0.08, y: -treeHeight * 0.46 },
+        e: { x: sway * 0.18 - spread * 0.02, y: -treeHeight * 0.9 }
+    };
+    const branches = createStarbudBranchTopology(trunk, spread, treeHeight, sway);
+    const branchStatesById = new Map([['trunk', { progress: trunkProgress }]]);
+    const branchStates = branches.map(branch => {
+        const parentState = branchStatesById.get(branch.parent) || { progress: trunkProgress };
+        const parentThreshold = Math.min(0.94, branch.attach + (branch.parent === 'trunk' ? 0.16 : 0.14));
+        const parentGate = getStarbudTimelineProgress(parentState.progress, parentThreshold, 0.16);
+        const ownProgress = getStarbudTimelineProgress(growthTimeline, branch.birth, branch.duration);
+        const progress = Math.min(parentGate, ownProgress);
+        const visibleEnd = progress > 0 ? getQuadraticPoint(branch.s, branch.c, branch.e, progress) : branch.s;
+        const state = { ...branch, progress, visibleEnd };
+        branchStatesById.set(branch.id, state);
+        return state;
+    });
+
+    ctx.save();
+    ctx.translate(startX, startY);
+
+    ctx.save();
+    ctx.globalAlpha = 0.06 + growthTimeline * 0.13;
+    ctx.fillStyle = STARBUD_PALETTE.canopy.groundShadow;
+    ctx.beginPath();
+    ctx.ellipse(0, 9, spread * (0.2 + growthTimeline * 0.28), treeSize * (0.07 + growthTimeline * 0.05), 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    drawSurfaceRoots(spread, trunkBaseWidth, branchColor, 2 + growthTimeline * 2.4, 0);
+
+    if (canopyWashReveal > 0.02) {
+        drawStarbudCanopyWash(spread, treeHeight, canopyWashReveal, finalMorph, renderMode, 0.92);
+    }
+    branchStates.forEach((branch, index) => {
+        drawStarbudLeafFan(branch, index, growthTimeline, finalMorph, treeHeight, renderMode, frameTime, 'back');
+    });
+    if (leafFieldReveal > 0.02) {
+        drawStarbudLeafField(spread, treeHeight, leafFieldReveal, finalMorph, renderMode, frameTime, 'back');
+    }
+
+    if (finalMorph > 0.02 && !renderMode.lowPower) {
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        drawEnergyAura(0, -treeHeight * 0.72, spread * 0.24, STARBUD_PALETTE.energy.lime, 0.04 + finalMorph * 0.07);
+        drawEnergyAura(-spread * 0.08, -treeHeight * 0.98, spread * 0.14, STARBUD_PALETTE.energy.cyan, finalMorph * 0.08);
+        ctx.restore();
+    }
+
+    drawGrowingTaperedBranch(
+        trunk,
+        trunkProgress,
+        trunkBaseWidth,
+        Math.max(4.2, trunkBaseWidth * 0.3),
+        branchColor
+    );
+    branchStates.forEach((branch, index) => {
+        const widthScale = index > 6 ? 0.78 : 1;
+        drawGrowingTaperedBranch(
+            branch,
+            branch.progress,
+            Math.max(2.2, trunkBaseWidth * branch.sw * widthScale),
+            Math.max(0.9, trunkBaseWidth * branch.ew * widthScale),
+            branchColor
+        );
+    });
+
+    if (canopyWashReveal > 0.38) {
+        drawStarbudCanopyWash(spread, treeHeight, canopyWashReveal, finalMorph, renderMode, 0.72);
+    }
+
+    branchStates.forEach((branch, index) => {
+        drawStarbudLeafFan(branch, index, growthTimeline, finalMorph, treeHeight, renderMode, frameTime, 'front');
+    });
+    if (leafFieldReveal > 0.02) {
+        drawStarbudLeafField(spread, treeHeight, leafFieldReveal, finalMorph, renderMode, frameTime, 'front');
+        drawStarbudCanopyLights(spread, treeHeight, growthTimeline, renderMode, frameTime);
+    }
+
+    if (stage?.key === 'final' && !renderMode.lowPower) {
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        drawEnergyAura(-spread * 0.08, -treeHeight * 0.72, spread * 0.24, STARBUD_PALETTE.energy.echo, 0.035 + finalMorph * 0.055);
+        ctx.restore();
+    }
+    ctx.restore();
+}
+
 function shouldDrawMeadowAura(renderMode, plant, index) {
     const pulse = Number(plant?.pulse) || 0;
     if (!renderMode?.lowPower) return true;
@@ -6434,23 +7381,72 @@ function spawnSkyEnergy(treeSize, anchors) {
     }
 }
 
+function spawnGroundEnergyOrbs(treeSize, anchors) {
+    if (!STATE.isListening) return;
+    const audioMeta = getForestOrbAudioMeta();
+    if (audioMeta.orbCount <= 0) return;
+
+    const renderMode = getRenderMode(treeSize);
+    const particleLimit = getFxLimit('energyParticles', treeSize);
+    if (!particleLimit || energyParticles.length >= particleLimit) return;
+
+    const backlogRatio = energyParticles.length / particleLimit;
+    const qualityFactor = renderMode.ultraLowPower
+        ? 0.42
+        : renderMode.lowPower
+            ? 0.66
+            : renderMode.quality === 'balanced'
+                ? 0.86
+                : 1;
+    const spawnChance = audioMeta.spawnChance * qualityFactor * (1 - backlogRatio * 0.56);
+    if (Math.random() > spawnChance) return;
+
+    const availableSlots = Math.max(0, particleLimit - energyParticles.length);
+    let spawnCount = Math.min(audioMeta.orbCount, availableSlots);
+    if (renderMode.ultraLowPower) spawnCount = Math.min(1, spawnCount);
+    else if (renderMode.lowPower) spawnCount = Math.min(2, spawnCount);
+    else if (renderMode.quality === 'balanced') spawnCount = Math.min(3, spawnCount);
+
+    const rootReach = Math.max(72, treeSize * 0.42);
+    for (let i = 0; i < spawnCount; i++) {
+        const spreadRatio = spawnCount === 1 ? (Math.random() - 0.5) : (i / Math.max(1, spawnCount - 1)) - 0.5;
+        const sourceX = anchors.trunkBase.x
+            + (spreadRatio * rootReach * 1.72)
+            + ((Math.random() - 0.5) * 32);
+        pushLimitedEffect(
+            energyParticles,
+            new GroundEnergyOrb(sourceX, anchors, audioMeta, i),
+            particleLimit
+        );
+    }
+}
+
 function drawEnergyFlow(treeSize) {
-    const activationMeta = getAudioActivation(STATE.currentDB, getSensitivityProfile(STATE.sensitivity), STATE.readingHoldSeconds);
-    const activation = activationMeta.intensity;
     const anchors = getEnergyAnchors(treeSize);
     const renderMode = getRenderMode(treeSize);
+    const isForestOrbMode = STATE.growthVisualMode === GROWTH_VISUAL_MODES.FOREST_ORB;
+    const activationMeta = isForestOrbMode
+        ? getForestOrbAudioMeta()
+        : getAudioActivation(STATE.currentDB, getSensitivityProfile(STATE.sensitivity), STATE.readingHoldSeconds);
+    const activation = isForestOrbMode ? activationMeta.loudness : activationMeta.intensity;
     const hasFlow = activation > 0.04 || energyParticles.length || trunkTransfers.length || soilTransfers.length;
-    if (activation > 0.05 && (!renderMode.ultraLowPower || Math.random() < 0.72)) {
-        spawnSkyEnergy(treeSize, anchors);
+    const spawnThreshold = isForestOrbMode ? 0.005 : 0.05;
+    if (activation > spawnThreshold && (!renderMode.ultraLowPower || Math.random() < 0.72)) {
+        if (isForestOrbMode) spawnGroundEnergyOrbs(treeSize, anchors);
+        else spawnSkyEnergy(treeSize, anchors);
     }
 
     if (hasFlow) {
-        const flowAlpha = Math.min(0.9, activationMeta.glow);
+        const flowAlpha = isForestOrbMode
+            ? clamp(0.12 + activation * 0.76, 0.12, 0.92)
+            : Math.min(0.9, activationMeta.glow);
         const auraScale = renderMode.ultraLowPower ? 0.64 : renderMode.lowPower ? 0.86 : 1.08;
-        drawEnergyAura(anchors.canopy.x, anchors.canopy.y, (14 + (activation * 14)) * auraScale, '#8cf7d9', (0.12 + flowAlpha * 0.2) * auraScale);
-        drawEnergyAura(anchors.trunkBase.x, anchors.trunkBase.y, (13 + (activation * 16)) * auraScale, '#d8ff66', (0.1 + flowAlpha * 0.2) * auraScale);
+        const canopyColor = isForestOrbMode ? STARBUD_PALETTE.energy.lime : '#8cf7d9';
+        const rootColor = isForestOrbMode ? STARBUD_PALETTE.energy.cyan : '#d8ff66';
+        drawEnergyAura(anchors.canopy.x, anchors.canopy.y, (14 + (activation * 14)) * auraScale, canopyColor, (0.12 + flowAlpha * 0.2) * auraScale);
+        drawEnergyAura(anchors.trunkBase.x, anchors.trunkBase.y, (13 + (activation * 16)) * auraScale, rootColor, (0.1 + flowAlpha * 0.2) * auraScale);
 
-        if (!renderMode.ultraLowPower) {
+        if (!renderMode.ultraLowPower && !isForestOrbMode) {
             drawEnergyAura(anchors.soilLeft.x, anchors.soilLeft.y, (8 + (activation * 6)) * auraScale, '#59f0ff', (0.08 + flowAlpha * 0.12) * auraScale);
             drawEnergyAura(anchors.soilRight.x, anchors.soilRight.y, (8 + (activation * 6)) * auraScale, '#d8ff66', (0.08 + flowAlpha * 0.12) * auraScale);
         }
@@ -6460,9 +7456,9 @@ function drawEnergyFlow(treeSize) {
             ctx.globalCompositeOperation = 'screen';
             ctx.globalAlpha = Math.max(0.18, flowAlpha * 0.38);
             const soilGlow = ctx.createRadialGradient(anchors.trunkBase.x, anchors.trunkBase.y + 10, 0, anchors.trunkBase.x, anchors.trunkBase.y + 10, 130);
-            soilGlow.addColorStop(0, 'rgba(216, 255, 102, 0.55)');
-            soilGlow.addColorStop(0.4, 'rgba(89, 240, 255, 0.18)');
-            soilGlow.addColorStop(1, 'rgba(255,255,255,0)');
+            soilGlow.addColorStop(0, isForestOrbMode ? STARBUD_PALETTE.energy.rootGlow : 'rgba(216, 255, 102, 0.55)');
+            soilGlow.addColorStop(0.4, isForestOrbMode ? STARBUD_PALETTE.energy.soilGlow : 'rgba(89, 240, 255, 0.18)');
+            soilGlow.addColorStop(1, STARBUD_PALETTE.sky.transparent);
             ctx.fillStyle = soilGlow;
             ctx.beginPath();
             ctx.ellipse(anchors.trunkBase.x, anchors.trunkBase.y + 10, 130, 34, 0, 0, Math.PI * 2);
@@ -6506,6 +7502,7 @@ function resizeCanvas() {
     canvas.height = window.innerHeight;
     if (meadowPlants.length) initMeadowPlants();
     if (meadowCritters.length) initMeadowCritters();
+    if (!STATE.isListening) renderSceneFrame(Date.now());
 }
 
 function initEnvironment() {
@@ -6613,19 +7610,7 @@ function drawEnhancedTree(startX, startY, len, angle, branchWidth, depth, render
     ctx.restore();
 }
 
-function loop() {
-    const now = Date.now();
-    const rawDeltaSeconds = STATE.lastFrameAt
-        ? normalizeDeltaSeconds((now - STATE.lastFrameAt) / 1000)
-        : FRAME_DELTA_FALLBACK_SECONDS;
-    const deltaSeconds = Math.min(rawDeltaSeconds, MAX_FRAME_DELTA_SECONDS);
-    STATE.lastFrameAt = now;
-    STATE.frameNow = now;
-    updateRenderPerformance(rawDeltaSeconds);
-    updateState(deltaSeconds);
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+function drawPhotosynthesisSky(now) {
     const skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
     skyGradient.addColorStop(0, '#4facfe');
     skyGradient.addColorStop(1, '#00f2fe');
@@ -6636,19 +7621,15 @@ function loop() {
     ctx.save();
     ctx.translate(canvas.width - 100, 100);
     ctx.scale(sunScale, sunScale);
-
-    // Sun Rays
-    ctx.beginPath();
     const sunGrad = ctx.createRadialGradient(0, 0, 20, 0, 0, 150);
     sunGrad.addColorStop(0, 'rgba(255, 235, 59, 0.8)');
     sunGrad.addColorStop(1, 'rgba(255, 235, 59, 0)');
     ctx.fillStyle = sunGrad;
+    ctx.beginPath();
     ctx.arc(0, 0, 150, 0, Math.PI * 2);
     ctx.fill();
-
-    // Core
-    ctx.beginPath();
     ctx.fillStyle = '#fff176';
+    ctx.beginPath();
     ctx.arc(0, 0, 40, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
@@ -6662,24 +7643,337 @@ function loop() {
         bird.update();
         bird.draw();
     });
+}
 
-    const visualEnergy = getTreeDisplayEnergy();
-    const treeSize = getTreeRenderSize(visualEnergy, { width: canvas.width, height: canvas.height });
-    const renderMode = getRenderMode(treeSize);
-    trimVisualEffectQueues(treeSize);
-    const lifecycleStage = getTreeDisplayLifecycleStage(visualEnergy);
-    maybeAnnounceFinalTree(lifecycleStage);
+function drawStarbudEnergyGlyph(now, renderMode) {
+    if (canvas.height < 520 || canvas.width < 520 || renderMode.ultraLowPower) return;
+    const centerX = canvas.width * 0.5;
+    const centerY = Math.max(48, canvas.height * 0.06);
+    const pulse = prefersReducedMotion() ? 1 : 1 + Math.sin(now / 1700) * 0.035;
+    const glyphScale = Math.min(canvas.width, canvas.height) / 720;
 
+    ctx.save();
+    ctx.translate(centerX, centerY);
+    ctx.scale(pulse * glyphScale, pulse * glyphScale);
+    ctx.globalCompositeOperation = 'screen';
+    ctx.strokeStyle = STARBUD_PALETTE.sky.glyph;
+    ctx.shadowColor = STARBUD_PALETTE.sky.mist[0];
+    ctx.shadowBlur = renderMode.lowPower ? 5 : 12;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.lineWidth = renderMode.lowPower ? 2.8 : 3.8;
+
+    ctx.beginPath();
+    ctx.arc(0, 0, 34, 0, Math.PI * 2);
+    ctx.moveTo(-8, 14);
+    ctx.quadraticCurveTo(-7, -5, -24, -10);
+    ctx.quadraticCurveTo(-20, 8, -8, 14);
+    ctx.moveTo(8, 14);
+    ctx.quadraticCurveTo(7, -5, 24, -10);
+    ctx.quadraticCurveTo(20, 8, 8, 14);
+    ctx.moveTo(0, 20);
+    ctx.quadraticCurveTo(0, 5, 0, -2);
+    ctx.stroke();
+
+    ctx.globalAlpha = 0.42;
+    ctx.lineWidth = 2.2;
+    ctx.beginPath();
+    ctx.moveTo(-36, -5);
+    ctx.bezierCurveTo(-84, -34, -126, 18, -188, -18);
+    ctx.moveTo(36, -5);
+    ctx.bezierCurveTo(84, -34, 126, 18, 188, -18);
+    ctx.moveTo(-32, 12);
+    ctx.bezierCurveTo(-86, 38, -118, 5, -158, 24);
+    ctx.moveTo(32, 12);
+    ctx.bezierCurveTo(86, 38, 118, 5, 158, 24);
+    ctx.stroke();
+    ctx.restore();
+}
+
+function getStarbudHillTopY() {
+    return canvas.height - Math.max(132, Math.min(228, canvas.height * 0.24));
+}
+
+function getStarbudTreeGroundY() {
+    const hillTopY = getStarbudHillTopY();
+    return Math.min(canvas.height - 46, hillTopY + Math.max(52, (canvas.height - hillTopY) * 0.36));
+}
+
+function drawStarbudMistBand(now, renderMode, index, color, alpha, widthScale = 1) {
+    const drift = prefersReducedMotion() ? 0 : Math.sin(now / (3900 + index * 410) + index * 1.7) * (8 + index * 1.8);
+    const seed = 71.4 + index * 8.37;
+    const baseY = canvas.height * (0.16 + seededUnit(seed) * 0.48) + drift;
+    const rise = canvas.height * (0.04 + seededUnit(seed + 1.9) * 0.09);
+    const slope = (seededUnit(seed + 3.1) - 0.42) * canvas.height * 0.3;
+    const strokeCount = renderMode.ultraLowPower ? 1 : renderMode.lowPower ? 2 : 3;
+
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    ctx.strokeStyle = color;
+    ctx.lineCap = 'round';
+    ctx.filter = `blur(${renderMode.ultraLowPower ? 10 : renderMode.lowPower ? 13 : 17}px)`;
+    for (let i = 0; i < strokeCount; i++) {
+        const offset = (i - (strokeCount - 1) / 2) * canvas.height * 0.025;
+        const laneSeed = seed + i * 3.71;
+        ctx.globalAlpha = alpha * (0.2 + seededUnit(laneSeed + 5.1) * 0.24);
+        ctx.lineWidth = Math.max(10, canvas.height * (0.025 + seededUnit(laneSeed + 4.8) * 0.028) * widthScale);
+        ctx.beginPath();
+        ctx.moveTo(-canvas.width * 0.1, baseY - slope * 0.5 + offset);
+        ctx.bezierCurveTo(
+            canvas.width * 0.18,
+            baseY - rise + slope * -0.2 + offset,
+            canvas.width * 0.38,
+            baseY + rise + offset,
+            canvas.width * 0.6,
+            baseY - rise * 0.35 + slope * 0.16 + offset
+        );
+        ctx.bezierCurveTo(
+            canvas.width * 0.77,
+            baseY - rise + slope * 0.28 + offset,
+            canvas.width * 0.93,
+            baseY + rise * 0.7 + slope * 0.42 + offset,
+            canvas.width * 1.1,
+            baseY + slope * 0.5 + offset
+        );
+        ctx.stroke();
+    }
+    ctx.restore();
+}
+
+function drawStarbudWatercolorGrain(renderMode) {
+    const grainCount = renderMode.ultraLowPower ? 48 : renderMode.lowPower ? 88 : renderMode.quality === 'balanced' ? 136 : 210;
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    ctx.lineCap = 'round';
+    for (let i = 0; i < grainCount; i++) {
+        const seed = 401.7 + i * 4.17;
+        const x = seededUnit(seed) * canvas.width;
+        const y = seededUnit(seed + 1.9) * canvas.height * 0.78;
+        const length = 2 + seededUnit(seed + 3.2) * (renderMode.lowPower ? 6 : 11);
+        const angle = -0.55 + seededUnit(seed + 4.8) * 1.1;
+        ctx.globalAlpha = 0.025 + seededUnit(seed + 6.1) * 0.055;
+        ctx.strokeStyle = i % 5 === 0 ? STARBUD_PALETTE.sky.starLime : STARBUD_PALETTE.sky.starMint;
+        ctx.lineWidth = 0.55 + seededUnit(seed + 7.7) * 1.1;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + Math.cos(angle) * length, y + Math.sin(angle) * length);
+        ctx.stroke();
+    }
+    ctx.restore();
+}
+
+function drawStarbudForestSky(now, renderMode) {
+    const skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    skyGradient.addColorStop(0, STARBUD_PALETTE.sky.deep);
+    skyGradient.addColorStop(0.46, STARBUD_PALETTE.sky.mid);
+    skyGradient.addColorStop(0.78, STARBUD_PALETTE.sky.bright);
+    skyGradient.addColorStop(1, STARBUD_PALETTE.sky.horizon);
+    ctx.fillStyle = skyGradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    const aurora = ctx.createRadialGradient(
+        canvas.width * 0.72,
+        canvas.height * 0.18,
+        0,
+        canvas.width * 0.72,
+        canvas.height * 0.18,
+        Math.max(canvas.width, canvas.height) * 0.62
+    );
+    aurora.addColorStop(0, STARBUD_PALETTE.sky.auroraLime);
+    aurora.addColorStop(0.34, STARBUD_PALETTE.sky.auroraMint);
+    aurora.addColorStop(1, STARBUD_PALETTE.sky.transparent);
+    ctx.fillStyle = aurora;
+    ctx.fillRect(0, 0, canvas.width, canvas.height * 0.84);
+
+    const leftBloom = ctx.createRadialGradient(
+        canvas.width * 0.08,
+        canvas.height * 0.55,
+        0,
+        canvas.width * 0.08,
+        canvas.height * 0.55,
+        Math.max(canvas.width, canvas.height) * 0.42
+    );
+    leftBloom.addColorStop(0, STARBUD_PALETTE.sky.bloomLime);
+    leftBloom.addColorStop(0.52, STARBUD_PALETTE.sky.bloomMint);
+    leftBloom.addColorStop(1, STARBUD_PALETTE.sky.transparent);
+    ctx.fillStyle = leftBloom;
+    ctx.fillRect(0, canvas.height * 0.2, canvas.width * 0.72, canvas.height * 0.62);
+
+    drawStarbudWatercolorGrain(renderMode);
+
+    const starCount = renderMode.ultraLowPower ? 42 : renderMode.lowPower ? 72 : renderMode.quality === 'balanced' ? 112 : 168;
+    for (let i = 0; i < starCount; i++) {
+        const x = seededUnit(i * 7.31 + 1.2) * canvas.width;
+        const y = seededUnit(i * 11.17 + 3.4) * canvas.height * 0.7;
+        const size = 0.42 + Math.pow(seededUnit(i * 3.71 + 5.8), 2.1) * (renderMode.lowPower ? 1.6 : 2.8);
+        const twinkle = prefersReducedMotion()
+            ? 0.62
+            : 0.34 + ((Math.sin(now / (560 + (i % 7) * 90) + i * 1.7) + 1) * 0.29);
+        ctx.globalAlpha = twinkle;
+        ctx.fillStyle = i % 7 === 0
+            ? STARBUD_PALETTE.sky.starLime
+            : i % 5 === 0
+                ? STARBUD_PALETTE.sky.starMint
+                : STARBUD_PALETTE.sky.star;
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fill();
+        if (!renderMode.lowPower && i % 17 === 0) {
+            ctx.globalAlpha = twinkle * 0.58;
+            ctx.fillRect(x - size * 4.2, y - 0.45, size * 8.4, 0.9);
+            ctx.fillRect(x - 0.45, y - size * 4.2, 0.9, size * 8.4);
+        }
+    }
+    ctx.restore();
+
+    const mistCount = renderMode.ultraLowPower ? 2 : renderMode.lowPower ? 3 : renderMode.quality === 'balanced' ? 5 : 7;
+    const mistColors = STARBUD_PALETTE.sky.mist;
+    for (let i = 0; i < mistCount; i++) {
+        drawStarbudMistBand(
+            now,
+            renderMode,
+            i,
+            mistColors[i % mistColors.length],
+            (renderMode.lowPower ? 0.045 : 0.052) + seededUnit(i * 2.9 + 8.1) * 0.055,
+            i % 3 === 0 ? 1.35 : 0.85
+        );
+    }
+
+    drawStarbudEnergyGlyph(now, renderMode);
+}
+
+function drawPhotosynthesisHill() {
     ctx.beginPath();
     ctx.moveTo(0, canvas.height);
     ctx.quadraticCurveTo(canvas.width / 2, canvas.height - 80, canvas.width, canvas.height);
     ctx.fillStyle = '#66bb6a';
     ctx.fill();
+}
 
-    drawMeadowPlants(renderMode);
+function drawStarbudForestHill(renderMode) {
+    const hillTopY = getStarbudHillTopY();
 
-    if (lifecycleStage.index >= 2 && treeSize > 60) {
-        drawBloomingEnergyTree(canvas.width / 2, canvas.height - 20, treeSize, lifecycleStage, renderMode);
+    ctx.fillStyle = STARBUD_PALETTE.hill.haze;
+    ctx.beginPath();
+    ctx.moveTo(0, canvas.height);
+    ctx.quadraticCurveTo(canvas.width * 0.26, hillTopY - canvas.height * 0.035, canvas.width * 0.54, hillTopY + canvas.height * 0.045);
+    ctx.quadraticCurveTo(canvas.width * 0.8, hillTopY + canvas.height * 0.1, canvas.width, hillTopY + canvas.height * 0.035);
+    ctx.lineTo(canvas.width, canvas.height);
+    ctx.closePath();
+    ctx.fill();
+
+    const hill = ctx.createLinearGradient(0, hillTopY, 0, canvas.height);
+    hill.addColorStop(0, STARBUD_PALETTE.hill.highlight);
+    hill.addColorStop(0.28, STARBUD_PALETTE.hill.light);
+    hill.addColorStop(0.66, STARBUD_PALETTE.hill.mid);
+    hill.addColorStop(1, STARBUD_PALETTE.hill.deep);
+    ctx.fillStyle = hill;
+    ctx.beginPath();
+    ctx.moveTo(0, canvas.height);
+    ctx.quadraticCurveTo(canvas.width * 0.47, hillTopY - canvas.height * 0.018, canvas.width, hillTopY + canvas.height * 0.13);
+    ctx.lineTo(canvas.width, canvas.height);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(0, canvas.height);
+    ctx.quadraticCurveTo(canvas.width * 0.47, hillTopY - canvas.height * 0.018, canvas.width, hillTopY + canvas.height * 0.13);
+    ctx.lineTo(canvas.width, canvas.height);
+    ctx.closePath();
+    ctx.clip();
+
+    const hillGlow = ctx.createRadialGradient(
+        canvas.width * 0.5,
+        hillTopY + canvas.height * 0.07,
+        0,
+        canvas.width * 0.5,
+        hillTopY + canvas.height * 0.07,
+        Math.max(canvas.width, canvas.height) * 0.48
+    );
+    hillGlow.addColorStop(0, STARBUD_PALETTE.hill.watercolorGlow);
+    hillGlow.addColorStop(0.62, STARBUD_PALETTE.hill.watercolorMint);
+    hillGlow.addColorStop(1, STARBUD_PALETTE.hill.transparent);
+    ctx.fillStyle = hillGlow;
+    ctx.fillRect(0, hillTopY - 20, canvas.width, canvas.height - hillTopY + 20);
+
+    const hillDabs = renderMode.ultraLowPower ? 6 : renderMode.lowPower ? 10 : 18;
+    ctx.globalCompositeOperation = 'screen';
+    ctx.filter = `blur(${renderMode.lowPower ? 9 : 13}px)`;
+    for (let i = 0; i < hillDabs; i++) {
+        const seed = 811.3 + i * 5.27;
+        const x = seededUnit(seed) * canvas.width;
+        const y = hillTopY + 26 + seededUnit(seed + 1.7) * Math.max(30, canvas.height - hillTopY - 42);
+        const radius = 18 + seededUnit(seed + 3.1) * 58;
+        ctx.globalAlpha = 0.025 + seededUnit(seed + 4.6) * 0.04;
+        ctx.fillStyle = i % 3 === 0 ? STARBUD_PALETTE.hill.strokeGold : STARBUD_PALETTE.hill.strokeMint;
+        ctx.beginPath();
+        ctx.ellipse(x, y, radius * (1.2 + seededUnit(seed + 5.9)), radius * 0.3, seededUnit(seed + 7.2) - 0.5, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    ctx.restore();
+
+    if (!renderMode.ultraLowPower) {
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        ctx.lineCap = 'round';
+        const lineCount = renderMode.lowPower ? 12 : 25;
+        for (let i = 0; i < lineCount; i++) {
+            const x = seededUnit(i * 4.13 + 2.7) * canvas.width;
+            const y = hillTopY + 20 + seededUnit(i * 6.41 + 3.9) * Math.max(18, canvas.height - hillTopY - 28);
+            ctx.globalAlpha = 0.055 + seededUnit(i * 3.8 + 9.4) * 0.11;
+            ctx.strokeStyle = i % 4 === 0
+                ? STARBUD_PALETTE.hill.strokeMint
+                : i % 3 === 0
+                    ? STARBUD_PALETTE.hill.strokeGold
+                    : STARBUD_PALETTE.hill.strokeLime;
+            ctx.lineWidth = 2 + seededUnit(i * 2.1 + 1.4) * (renderMode.lowPower ? 5 : 9);
+            ctx.beginPath();
+            ctx.moveTo(x - 24, y + 8);
+            ctx.quadraticCurveTo(x + 6, y - 20, x + 48, y - 7);
+            ctx.stroke();
+        }
+        ctx.restore();
+    }
+}
+
+function renderSceneFrame(now = Date.now()) {
+    STATE.frameNow = now;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const visualEnergy = getTreeDisplayEnergy();
+    const treeSize = getTreeRenderSize(visualEnergy, { width: canvas.width, height: canvas.height });
+    const renderMode = getRenderMode(treeSize);
+    const isForestOrbMode = STATE.growthVisualMode === GROWTH_VISUAL_MODES.FOREST_ORB;
+    trimVisualEffectQueues(treeSize);
+    const lifecycleStage = getTreeDisplayLifecycleStage(visualEnergy);
+    maybeAnnounceFinalTree(lifecycleStage);
+
+    if (isForestOrbMode) drawStarbudForestSky(now, renderMode);
+    else drawPhotosynthesisSky(now);
+
+    if (isForestOrbMode) drawStarbudForestHill(renderMode);
+    else drawPhotosynthesisHill();
+
+    if (!isForestOrbMode) drawMeadowPlants(renderMode);
+
+    if (isForestOrbMode) {
+        const growthEnergy = getStarbudStageEnergy(lifecycleStage);
+        if (growthEnergy < 36) {
+            drawSeedAndSprout(
+                canvas.width / 2,
+                getStarbudTreeGroundY(),
+                lifecycleStage,
+                clamp((36 - growthEnergy) / 12, 0, 1)
+            );
+        }
+        if (growthEnergy >= 24) {
+            drawStarbudForestTree(canvas.width / 2, getStarbudTreeGroundY(), treeSize, lifecycleStage, renderMode);
+        }
+    } else if (lifecycleStage.index >= 2 && treeSize > 60) {
+            drawBloomingEnergyTree(canvas.width / 2, canvas.height - 20, treeSize, lifecycleStage, renderMode);
     } else {
         const startX = canvas.width / 2;
         const startY = canvas.height - 30;
@@ -6702,6 +7996,18 @@ function loop() {
             sparkles[i].draw();
         }
     }
+}
+
+function loop() {
+    const now = Date.now();
+    const rawDeltaSeconds = STATE.lastFrameAt
+        ? normalizeDeltaSeconds((now - STATE.lastFrameAt) / 1000)
+        : FRAME_DELTA_FALLBACK_SECONDS;
+    const deltaSeconds = Math.min(rawDeltaSeconds, MAX_FRAME_DELTA_SECONDS);
+    STATE.lastFrameAt = now;
+    updateRenderPerformance(rawDeltaSeconds);
+    updateState(deltaSeconds);
+    renderSceneFrame(now);
 
     if (STATE.isListening) {
         requestAnimationFrame(loop);

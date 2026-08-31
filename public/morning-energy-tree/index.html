@@ -47,20 +47,69 @@
         <div id="mode-picker" class="mode-picker" role="dialog" aria-modal="true" aria-labelledby="mode-picker-title">
             <div class="mode-dialog">
                 <div class="mode-kicker" data-i18n="morningTree.mode.kicker">早读开始前</div>
-                <h1 id="mode-picker-title" data-i18n="morningTree.mode.title">选择今天的早读模式</h1>
-                <p data-i18n="morningTree.mode.sub">全班早读用于整体能量树，小组竞赛用于 3-5 个小组轮流 PK 最高分贝。</p>
-                <div class="mode-card-grid">
-                    <button class="mode-card class-mode" type="button" data-mode-choice="class">
-                        <span data-i18n="morningTree.mode.classBadge">全班</span>
-                        <strong data-i18n="morningTree.mode.classTitle">全班早读模式</strong>
-                        <small data-i18n="morningTree.mode.classBody">全班一起朗读，同时可在左侧小组竞赛里轮流 PK 最高分贝。</small>
-                    </button>
-                    <button class="mode-card competition-mode" type="button" data-mode-choice="competition">
-                        <span data-i18n="morningTree.mode.competitionBadge">竞赛</span>
-                        <strong data-i18n="morningTree.mode.competitionTitle">小组竞赛模式</strong>
-                        <small data-i18n="morningTree.mode.competitionBody">3-5 个小组轮流挑战，记录每组本场最高分贝并生成排行榜。</small>
-                    </button>
-                </div>
+                <h1 id="mode-picker-title" data-i18n="morningTree.mode.title">选择今天的早读体验</h1>
+                <p id="mode-picker-sub" data-i18n="morningTree.mode.sub">先选择能量树的成长方式，再选择全班早读或小组竞赛。</p>
+
+                <section class="mode-section visual-mode-section" aria-labelledby="growth-visual-title">
+                    <div class="mode-section-head">
+                        <span class="mode-step">01</span>
+                        <div>
+                            <strong id="growth-visual-title" data-i18n="morningTree.mode.visualTitle">能量怎样来到大树</strong>
+                            <small data-i18n="morningTree.mode.visualSub">只改变动画与最终树形，不改变成长速度和早读规则</small>
+                        </div>
+                    </div>
+                    <div id="growth-visual-picker" class="growth-visual-picker" role="radiogroup" aria-labelledby="growth-visual-title">
+                        <button class="growth-visual-card photosynthesis-visual" type="button" role="radio"
+                            aria-checked="true" data-growth-visual-choice="photosynthesis">
+                            <span class="growth-visual-preview photosynthesis-preview" aria-hidden="true">
+                                <i class="preview-sun"></i>
+                                <i class="preview-tree"></i>
+                                <i class="preview-energy-beam"></i>
+                            </span>
+                            <span class="growth-visual-copy">
+                                <strong data-i18n="morningTree.mode.photosynthesisTitle">晨光森语</strong>
+                                <small data-i18n="morningTree.mode.photosynthesisBody">日光从天空汇入树冠，延续明亮成长体验。</small>
+                            </span>
+                            <span class="growth-visual-check" aria-hidden="true"></span>
+                        </button>
+                        <button class="growth-visual-card forest-orb-visual" type="button" role="radio"
+                            aria-checked="false" data-growth-visual-choice="forest-orb">
+                            <span class="growth-visual-preview forest-orb-preview" aria-hidden="true">
+                                <i class="preview-star star-one"></i>
+                                <i class="preview-star star-two"></i>
+                                <i class="preview-tree"></i>
+                                <i class="preview-energy-orb"></i>
+                            </span>
+                            <span class="growth-visual-copy">
+                                <strong data-i18n="morningTree.mode.forestOrbTitle">星芽奇境</strong>
+                                <small data-i18n="morningTree.mode.forestOrbBody">能量球破土弹起，由根系吸收，长成星光手绘大树。</small>
+                            </span>
+                            <span class="growth-visual-check" aria-hidden="true"></span>
+                        </button>
+                    </div>
+                </section>
+
+                <section class="mode-section reading-mode-section" aria-labelledby="reading-mode-title">
+                    <div class="mode-section-head">
+                        <span class="mode-step">02</span>
+                        <div>
+                            <strong id="reading-mode-title" data-i18n="morningTree.mode.readingTitle">今天怎样进行早读</strong>
+                            <small data-i18n="morningTree.mode.readingSub">进入后成长视觉将在本次早读中锁定</small>
+                        </div>
+                    </div>
+                    <div class="mode-card-grid">
+                        <button class="mode-card class-mode" type="button" data-mode-choice="class">
+                            <span data-i18n="morningTree.mode.classBadge">全班</span>
+                            <strong data-i18n="morningTree.mode.classTitle">全班早读模式</strong>
+                            <small data-i18n="morningTree.mode.classBody">全班共同朗读，记录朗读声音与成长进度。</small>
+                        </button>
+                        <button class="mode-card competition-mode" type="button" data-mode-choice="competition">
+                            <span data-i18n="morningTree.mode.competitionBadge">竞赛</span>
+                            <strong data-i18n="morningTree.mode.competitionTitle">小组竞赛模式</strong>
+                            <small data-i18n="morningTree.mode.competitionBody">3-5 个小组轮流挑战，记录最高分贝并生成排行榜。</small>
+                        </button>
+                    </div>
+                </section>
             </div>
         </div>
 

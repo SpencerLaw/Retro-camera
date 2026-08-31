@@ -151,6 +151,8 @@ function loadMorningTree() {
       getFinalTreeMorphProgress: typeof getFinalTreeMorphProgress === 'function' ? getFinalTreeMorphProgress : undefined,
       getTreeSizeForEnergy: typeof getTreeSizeForEnergy === 'function' ? getTreeSizeForEnergy : undefined,
       getTreeRenderSize: typeof getTreeRenderSize === 'function' ? getTreeRenderSize : undefined,
+      getEnergyAnchors: typeof getEnergyAnchors === 'function' ? getEnergyAnchors : undefined,
+      getForestOrbAudioMeta: typeof getForestOrbAudioMeta === 'function' ? getForestOrbAudioMeta : undefined,
       applySensitivityToDb: typeof applySensitivityToDb === 'function' ? applySensitivityToDb : undefined,
       clampSensitivity: typeof clampSensitivity === 'function' ? clampSensitivity : undefined,
       getSensitivityProfile: typeof getSensitivityProfile === 'function' ? getSensitivityProfile : undefined,
@@ -260,6 +262,37 @@ runTest('final energy tree holds its full form after manifesting', () => {
   assert.equal(api.STATE.energy, 100);
   assert.equal(api.STATE.hasManifested, true);
   assert.equal(elements.get('energy-fill').style.width, '100%');
+});
+
+runTest('starbud energy rises from the roots into the live crown', () => {
+  const { api } = loadMorningTree();
+  const source = fs.readFileSync('public/morning-energy-tree/script.js', 'utf8');
+
+  assert.equal(typeof api.getEnergyAnchors, 'function');
+  api.STATE.growthVisualMode = 'forest-orb';
+  api.STATE.energy = 100;
+  api.STATE.visualEnergy = 100;
+  api.STATE.hasManifested = true;
+
+  const treeSize = api.getTreeRenderSize(100, { width: 1280, height: 720 });
+  const anchors = api.getEnergyAnchors(treeSize);
+
+  assert.ok(anchors.canopy.y < anchors.trunkBase.y - 180);
+  assert.match(source, /starbudHeight \* \(0\.52 \+ starbudTimeline \* 0\.16\)/);
+});
+
+runTest('starbud quiet reading earns fewer and lighter energy balls than loud reading', () => {
+  const { api } = loadMorningTree();
+
+  assert.equal(typeof api.getForestOrbAudioMeta, 'function');
+  const quiet = api.getForestOrbAudioMeta(54);
+  const loud = api.getForestOrbAudioMeta(100);
+
+  assert.equal(quiet.orbCount, 1);
+  assert.ok(quiet.weightG <= 8);
+  assert.ok(loud.orbCount >= 4);
+  assert.ok(loud.weightG >= 35);
+  assert.ok(loud.weightG > quiet.weightG);
 });
 
 runTest('top energy bar follows displayed tree growth instead of raw full energy', () => {
@@ -919,7 +952,8 @@ runTest('meadow starts grassy then grows flowers from reading energy without cov
   assert.match(script, /protectSapling/);
   assert.match(script, /updateRenderPerformance\(rawDeltaSeconds\)/);
   assert.match(script, /trimVisualEffectQueues\(treeSize\)/);
-  assert.match(script, /drawMeadowPlants\(renderMode\);\s+if \(lifecycleStage\.index >= 2/s);
+  assert.match(script, /if \(!isForestOrbMode\) drawMeadowPlants\(renderMode\)/);
+  assert.match(script, /if \(isForestOrbMode\) \{[\s\S]*drawStarbudForestTree\([\s\S]*\} else if \(lifecycleStage\.index >= 2/);
   assert.match(script, /function shouldDrawMeadowAura/);
   assert.match(script, /RENDER_QUALITY_SCALE/);
   assert.match(script, /class Frog/);
@@ -1134,7 +1168,7 @@ runTest('competition mode waits for every group before declaring a winner', () =
   assert.equal(api.getNextPendingCompetitionGroup(session).id, 'b');
 });
 
-runTest('class reading mode keeps the group competition panel and supports group rounds', () => {
+runTest('class reading hides competition controls while competition mode supports group rounds', () => {
   const { api, elements } = loadMorningTree();
   const css = fs.readFileSync('public/morning-energy-tree/style.css', 'utf8');
 
@@ -1150,11 +1184,8 @@ runTest('class reading mode keeps the group competition panel and supports group
   api.STATE.activeCompetitionGroupId = 'a';
   api.renderCompetitionPanel();
 
-  assert.equal(elements.get('competition-panel').classList.contains('hidden'), false);
-  assert.match(elements.get('competition-list').innerHTML, /第一组/);
-  assert.match(elements.get('competition-list').innerHTML, /点击开始/);
-  assert.match(elements.get('competition-list').innerHTML, /competition-chip-action ready/);
-  assert.match(elements.get('competition-list').innerHTML, /aria-label="第一组，点击开始"/);
+  assert.equal(elements.get('competition-panel').classList.contains('hidden'), true);
+  assert.equal(elements.get('competition-list').innerHTML, '');
   assert.match(css, /\.competition-chip-action\.ready::before/);
 
   api.startReportSession({ competitionRound: false });
@@ -1162,7 +1193,7 @@ runTest('class reading mode keeps the group competition panel and supports group
   assert.equal(api.STATE.competitionSession, null);
   api.finalizeReportSession();
 
-  api.STATE.activeMode = api.APP_MODES.CLASS;
+  api.STATE.activeMode = api.APP_MODES.COMPETITION;
   api.STATE.competitionConfig = api.normalizeCompetitionConfig({
     groupCount: 3,
     groups: [
@@ -1172,7 +1203,14 @@ runTest('class reading mode keeps the group competition panel and supports group
     ],
   });
   api.STATE.activeCompetitionGroupId = 'a';
-  api.startReportSession({ competitionRound: true });
+  api.renderCompetitionPanel();
+  assert.equal(elements.get('competition-panel').classList.contains('hidden'), false);
+  assert.match(elements.get('competition-list').innerHTML, /第一组/);
+  assert.match(elements.get('competition-list').innerHTML, /点击开始/);
+  assert.match(elements.get('competition-list').innerHTML, /competition-chip-action ready/);
+  assert.match(elements.get('competition-list').innerHTML, /aria-label="第一组，点击开始"/);
+
+  api.startReportSession();
   api.STATE.sessionStartedAt = new Date(Date.now() - 12_000).toISOString();
   api.STATE.curveBuffer = [48, 76, 89, 84];
   api.STATE.energyCurveBuffer = [0, 18, 32, 45];
@@ -1184,7 +1222,7 @@ runTest('class reading mode keeps the group competition panel and supports group
   });
   api.finalizeReportSession();
 
-  assert.equal(api.STATE.activeMode, api.APP_MODES.CLASS);
+  assert.equal(api.STATE.activeMode, api.APP_MODES.COMPETITION);
   assert.equal(api.STATE.competitionLastResult.isComplete, false);
   assert.equal(api.STATE.competitionLastResult.completedCount, 1);
   assert.equal(api.STATE.competitionLastResult.winnerName, null);
